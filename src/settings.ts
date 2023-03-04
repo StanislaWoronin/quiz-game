@@ -19,5 +19,9 @@ export const settings = {
         CONNECTION_TIME_LIMIT: '10000', // msec
         CONNECTION_COUNT_LIMIT: '5',
     },
-
+    repositoryType: {
+        mongoose: 'mongo',
+        sql: 'sql',
+    },
+    currentRepository: 'sql'
 }

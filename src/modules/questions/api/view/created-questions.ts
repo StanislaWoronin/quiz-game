@@ -1,7 +1,7 @@
 export class CreatedQuestions {
     id: string
     body: string
-    correctAnswers: []
+    correctAnswers: string[]
     published: boolean
     createdAt: string
     updatedAt: string
