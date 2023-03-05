@@ -1,5 +1,5 @@
 export interface ITestingRepository {
-  deleteAll(): Promise<boolean>
+  deleteAll(): Promise<boolean>;
 }
 
-export const ITestingRepository = 'ITestingRepository'
+export const ITestingRepository = 'ITestingRepository';

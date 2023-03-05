@@ -1,4 +1,4 @@
-import { PageDto } from "./page.dto";
+import { PageDto } from './page.dto';
 
 export class ViewPage<I> {
   readonly page: number;

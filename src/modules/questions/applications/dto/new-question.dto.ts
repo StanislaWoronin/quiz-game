@@ -1,15 +1,15 @@
-import { CreateQuestionsDto } from "../../api/dto/create-questions.dto";
+import { CreateQuestionDto } from '../../api/dto/create-question.dto';
 
 export class NewQuestionDto {
   readonly body: string;
-  readonly  correctAnswers: [];
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly published: boolean;
 
-  constructor(dto: CreateQuestionsDto) {
+  constructor(dto: CreateQuestionDto) {
     this.body = dto.body;
-    this.correctAnswers = dto.correctAnswers;
     this.createdAt = new Date().toISOString();
     this.updatedAt = new Date().toISOString();
+    this.published = false;
   }
 }

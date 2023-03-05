@@ -1,30 +1,37 @@
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource, getConnection } from "typeorm";
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, getConnection } from 'typeorm';
+import { Injectable } from "@nestjs/common";
+import { entity } from "../../../../shared/entity";
 
+@Injectable()
 export class TestingRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async deleteAll(): Promise<boolean> {
-    const queryRunner = this.dataSource.createQueryRunner()
-    await queryRunner.connect()
-    await queryRunner.startTransaction()
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
     try {
-      const entities = getConnection().entityMetadatas;
+      const entities = entity;
 
-      for (const entity of entities) {
-        const repository = getConnection().getRepository(entity.name); // Get repository
-        await repository.clear(); // Clear each entity table's content
+      for (const entity of [...entities]) {
+        // const repository = this.dataSource.getRepository(entity);
+        // await repository.clear();
+        const query = `
+          DELETE FROM ${entity.name.toLowerCase()} CASCADE;
+        `
+        await this.dataSource.query(query)
       }
+      await queryRunner.commitTransaction();
 
-      await queryRunner.commitTransaction()
+      return false
     } catch (e) {
-      await queryRunner.rollbackTransaction()
+      await queryRunner.rollbackTransaction();
+
       return false
     } finally {
-      await queryRunner.release()
+      await queryRunner.release();
     }
-
-    return true
   }
 }

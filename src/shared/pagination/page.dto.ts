@@ -1,4 +1,4 @@
-import { QueryParametersDto } from "./query-parameters/query-parameters.dto";
+import { QueryParametersDto } from './query-parameters/query-parameters.dto';
 
 export class PageDto<I> {
   items: I[];

@@ -1,8 +1,8 @@
-import { IsEnum, IsInt, IsOptional, IsString, Min } from "class-validator";
-import { PublishedStatus } from "./published-status";
-import { SortByField } from "./sort-by-field";
-import { Type } from "class-transformer";
-import { SortDirection } from "./sort-direction";
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { PublishedStatus } from './published-status';
+import { SortByField } from './sort-by-field';
+import { Type } from 'class-transformer';
+import { SortDirection } from './sort-direction';
 
 export class QueryParametersDto {
   @IsString()
@@ -19,17 +19,17 @@ export class QueryParametersDto {
 
   @IsEnum(SortDirection)
   @IsOptional()
-  sortDirection: SortDirection = SortDirection.Descending
+  sortDirection: SortDirection = SortDirection.Descending;
 
   @Type(() => Number)
   @IsInt()
   @Min(1)
   @IsOptional()
-  pageNumber: number = 1;
+  pageNumber = 1;
 
   @Type(() => Number)
   @IsInt()
   @Min(1)
   @IsOptional()
-  pageSize: number = 10;
+  pageSize = 10;
 }

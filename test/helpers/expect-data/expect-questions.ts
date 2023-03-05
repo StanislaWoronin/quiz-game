@@ -1,4 +1,4 @@
-import { preparedQuestions } from "../prepeared-data/prepared-questions";
+import { preparedQuestions } from '../prepeared-data/prepared-questions';
 
 export const expectCreatedQuestion = {
   id: expect.any(String),
@@ -6,5 +6,5 @@ export const expectCreatedQuestion = {
   correctAnswers: preparedQuestions.valid.correctAnswers,
   published: preparedQuestions.published.default,
   createdAt: expect.any(String),
-  updatedAt: expect.any(String)
-}
+  updatedAt: expect.any(String),
+};

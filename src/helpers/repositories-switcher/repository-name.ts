@@ -1,4 +1,6 @@
+
 export const repositoryName = {
   QuestionsRepository: 'questionsRepository',
-  QuestionsQueryRepository: 'questionsQueryRepository'
-}
+  QuestionsQueryRepository: 'questionsQueryRepository',
+  TestingRepository: 'testingRepository'
+};

@@ -5,8 +5,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Response } from 'express';
-import {settings} from "../../settings";
-
+import { settings } from '../../settings';
 
 @Catch()
 export class ErrorExceptionFilter implements ExceptionFilter {

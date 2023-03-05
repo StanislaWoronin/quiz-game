@@ -6,5 +6,5 @@ export const preparedSuperUser = {
   valid: {
     login: 'admin',
     password: 'qwerty',
-  }
-}
+  },
+};

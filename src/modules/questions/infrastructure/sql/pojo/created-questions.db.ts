@@ -1,7 +1,6 @@
-export class CreatedQuestions {
+export class CreatedQuestionsDb {
   id: string;
   body: string;
-  correctAnswers: string[];
   published: boolean;
   createdAt: string;
   updatedAt: string;

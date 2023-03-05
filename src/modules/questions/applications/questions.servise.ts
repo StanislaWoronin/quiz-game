@@ -1,26 +1,21 @@
-import { CreatedQuestions } from "../api/view/created-questions";
-import { CreateQuestionsDto } from "../api/dto/create-questions.dto";
-import { NewQuestionDto } from "./dto/new-question.dto";
-import { randomUUID } from "crypto";
-import { Inject } from "@nestjs/common";
-import { IQuestionsRepository } from "../infrastructure/i-questions.repository";
+import { CreatedQuestions } from '../api/view/created-questions';
+import { CreateQuestionDto } from '../api/dto/create-question.dto';
+import { NewQuestionDto } from './dto/new-question.dto';
+import { Inject } from '@nestjs/common';
+import { IQuestionsRepository } from '../infrastructure/i-questions.repository';
 
 export class QuestionsService {
   constructor(
-    @Inject(IQuestionsRepository) protected questionsRepository: IQuestionsRepository
-  ) {
-  }
+    @Inject(IQuestionsRepository)
+    protected questionsRepository: IQuestionsRepository,
+  ) {}
 
-  async createQuestion(dto: CreateQuestionsDto): Promise<CreatedQuestions | null> {
-    const newQuestion: NewQuestionDto = new NewQuestionDto(dto)
+  async createQuestion(
+    dto: CreateQuestionDto,
+  ): Promise<CreatedQuestions | null> {
+    const newQuestion: NewQuestionDto = new NewQuestionDto(dto);
+    const answers: string[] = dto.correctAnswers;
 
-    return {
-      id: randomUUID(),
-      body: newQuestion.body,
-      correctAnswers: newQuestion.correctAnswers,
-      published: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
+    return await this.questionsRepository.createQuestion(newQuestion, answers)
   }
 }

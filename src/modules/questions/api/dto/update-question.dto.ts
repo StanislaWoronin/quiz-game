@@ -1,4 +1,4 @@
-import { CreateQuestionsDto } from "./create-questions.dto";
-import { PartialType } from "@nestjs/mapped-types";
+import { CreateQuestionDto } from './create-question.dto';
+import { PartialType } from '@nestjs/mapped-types';
 
-export class UpdateQuestionDto extends PartialType(CreateQuestionsDto) {}
+export class UpdateQuestionDto extends PartialType(CreateQuestionDto) {}
