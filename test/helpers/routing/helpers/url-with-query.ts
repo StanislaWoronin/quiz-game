@@ -1,4 +1,4 @@
-import { Query } from './query';
+import { Query } from '../query';
 
 export const getUrlWithQuery = (endpoint: string, query): string => {
   let url = endpoint;

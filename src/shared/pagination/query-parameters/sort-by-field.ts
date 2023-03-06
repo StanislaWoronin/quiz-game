@@ -1,5 +1,6 @@
 export enum SortByField {
   CreatedAt = 'createdAt',
   Body = 'body',
-  Id = 'id'
+  Id = 'id',
+  PublishedStatus = 'publishedStatus'
 }
