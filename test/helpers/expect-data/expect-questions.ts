@@ -3,14 +3,17 @@ import {CreatedQuestions} from "../../../src/modules/questions/api/view/created-
 import {ViewPage} from "../../../src/shared/pagination/view-page";
 import {SortByField} from "../../../src/shared/pagination/query-parameters/sort-by-field";
 import {SortDirection} from "../../../src/shared/pagination/query-parameters/sort-direction";
+import {PageDto} from "../../../src/shared/pagination/page.dto";
 
-export const expectCreatedQuestion: CreatedQuestions = {
-  id: expect.any(String),
-  body: preparedQuestions.valid.body,
-  correctAnswers: preparedQuestions.valid.correctAnswers,
-  published: preparedQuestions.published.default,
-  createdAt: expect.any(String),
-  updatedAt: expect.any(String),
+export const expectCreatedQuestion = (): CreatedQuestions => {
+  return {
+    id: expect.any(String),
+    body: preparedQuestions.valid.body,
+    correctAnswers: preparedQuestions.valid.correctAnswers,
+    published: preparedQuestions.published.default,
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+  }
 };
 
 export const expectResponseForGetAllQuestions = (

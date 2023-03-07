@@ -201,8 +201,8 @@ describe('/sa/quiz/questions (e2e)', () => {
 
         const requestWithShortInputData = await questions
             .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.notValid.short)
-        expect(requestWithLongInputData.status).toBe(HttpStatus.BAD_REQUEST)
-        expect(requestWithLongInputData.body).toStrictEqual({incorrectBody})
+        expect(requestWithShortInputData.status).toBe(HttpStatus.BAD_REQUEST)
+        expect(requestWithShortInputData.body).toStrictEqual({incorrectBody})
 
         const updateStatus = await questions
             .updateQuestionStatus(preparedSuperUser.valid, questionId, preparedQuestions.publishStatus.true)
@@ -211,7 +211,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         const requestForPublishedQuestion = await questions
             .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.updateWithoutAnswers)
         expect(requestForPublishedQuestion.status).toBe(HttpStatus.BAD_REQUEST)
-        expect(requestWithLongInputData.body).toStrictEqual({incorrectAnswers})
+        expect(requestForPublishedQuestion.body).toStrictEqual({incorrectAnswers})
       })
 
       it('Should update question', async () => {
@@ -297,5 +297,44 @@ describe('/sa/quiz/questions (e2e)', () => {
         })
       })
     });
+
+    describe('DELETE -> "sa/quiz/question/:id', () => {
+        it('Clear all data', async () => {
+            await testing.clearDb();
+        });
+
+        it('Create data', async () => {
+            const [createdQuestions] = await questionsFactories.createQuestions(1)
+
+            expect. setState({
+                questionId: createdQuestions.id
+            })
+        })
+
+        it('User without permissions try delete question', async () => {
+            const { questionId } = expect.getState()
+
+            const status = await questions.deleteQuestion(preparedSuperUser.notValid, questionId)
+            expect(status).toBe(HttpStatus.UNAUTHORIZED)
+        })
+
+        it('Should delete question', async () => {
+            const { questionId } = expect.getState()
+
+            const status = await questions.deleteQuestion(preparedSuperUser.valid, questionId)
+            expect(status).toBe(HttpStatus.NO_CONTENT)
+        })
+
+        it('Try delete not exist question', async () => {
+            const { questionId } = expect.getState()
+            const randomId = randomUUID()
+
+            const status = await questions.deleteQuestion(preparedSuperUser.valid, randomId)
+            expect(status).toBe(HttpStatus.NOT_FOUND)
+
+            const deletedAgain = await questions.deleteQuestion(preparedSuperUser.valid, questionId)
+            expect(deletedAgain).toBe(HttpStatus.NOT_FOUND)
+        })
+    })
   });
 });
