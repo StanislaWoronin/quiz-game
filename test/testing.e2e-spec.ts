@@ -5,6 +5,8 @@ import { Testing } from "./helpers/request/testing";
 import { Test, TestingModule } from "@nestjs/testing";
 import { AppModule } from "../src/app.module";
 import { createApp } from "../src/helpers/create-app";
+import { preparedSuperUser } from "./helpers/prepeared-data/prepared-super-user";
+import { preparedQuestions } from "./helpers/prepeared-data/prepared-questions";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -37,8 +39,29 @@ describe('/sa/quiz/questions (e2e)', () => {
 
   describe('/testing/delete-all', () => {
     it('Clear all data', async () => {
+      await testing.clearDb();
+    });
+
+    it('Create data', async () => {
+      // createQuestion contains one row in table Question and tree row in table Answer -> SUM 4 row
+      await questions.createQuestion(preparedSuperUser.valid,preparedQuestions.valid)
+
+      const rowCount = await testing.getAllRowCount()
+      expect(rowCount).toBe(4)
+
+      expect.setState({rowCount});
+    });
+
+    it('Drop all data', async () => {
+      const { rowCount } = expect.getState()
       const status = await testing.clearDb();
       expect(status).toBe(204)
-    });
+
+      const rowCountAfterClearDb = await testing.getAllRowCount()
+      expect(rowCountAfterClearDb).not.toBe(rowCount)
+      expect(rowCountAfterClearDb).toBe(0)
+
+      const a = await questions.createQuestion(preparedSuperUser.valid,preparedQuestions.valid)
+    })
   });
 })

@@ -1,17 +1,18 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
-  Inject,
+  Inject, NotFoundException,
   Param,
   Post,
   Put,
   Query,
-  UseGuards,
-} from '@nestjs/common';
+  UseGuards
+} from "@nestjs/common";
 import { AuthBasicGuard } from '../../../guards/auth-basic.guard';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { CreatedQuestions } from './view/created-questions';
@@ -22,6 +23,7 @@ import { QueryParametersDto } from '../../../shared/pagination/query-parameters/
 import { ParamsId } from '../../../shared/dto/params-id';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { UpdatePublishStatusDto } from './dto/update-publish-status.dto';
+import { ViewQuestion } from "./view/view-question";
 
 @UseGuards(AuthBasicGuard)
 @Controller('sa/quiz/questions')
@@ -43,26 +45,40 @@ export class QuestionsController {
   @Get()
   async getAllQuestions(
     @Query() query: QueryParametersDto,
-  ): Promise<ViewPage<CreatedQuestions>> {
+  ): Promise<ViewPage<ViewQuestion>> {
     return await this.questionsQueryRepository.getAllQuestions(query);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Put('id')
+  @Put(':id')
   async updateQuestion(
-    @Param('id') questionId: ParamsId,
+    @Param('id') questionId: string,
     @Body() dto: UpdateQuestionDto,
   ) {
-    return true;
+    const result = await this.questionsService.updateQuestion(questionId, dto);
+
+    if (result === null) {
+      throw new NotFoundException()
+    }
+    if (!result) {
+      throw new BadRequestException()
+    }
+
+    return result
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Put('id')
+  @Put(':id/publish')
   async updatePublishStatus(
-    @Param('id') questionId: ParamsId,
+    @Param('id') questionId: string,
     @Body() dto: UpdatePublishStatusDto,
   ) {
-    return true;
+    const isUpdated = await this.questionsService.updatePublishStatus(questionId, dto);
+
+    if (!isUpdated) {
+      throw new BadRequestException()
+    }
+    return
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

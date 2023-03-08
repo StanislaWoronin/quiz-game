@@ -1,37 +1,40 @@
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, getConnection } from 'typeorm';
+import { DataSource } from "typeorm";
 import { Injectable } from "@nestjs/common";
-import { entity } from "../../../../shared/entity";
 
 @Injectable()
 export class TestingRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async deleteAll(): Promise<boolean> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
     try {
-      const entities = entity;
+      const queryRunner = this.dataSource.manager.connection.createQueryRunner()
 
-      for (const entity of [...entities]) {
-        // const repository = this.dataSource.getRepository(entity);
-        // await repository.clear();
-        const query = `
-          DELETE FROM ${entity.name.toLowerCase()} CASCADE;
-        `
-        await this.dataSource.query(query)
-      }
-      await queryRunner.commitTransaction();
+      await queryRunner.dropSchema('public', false, true);
+      await queryRunner.createSchema('public', true);
 
-      return false
+      return true
     } catch (e) {
-      await queryRunner.rollbackTransaction();
-
+      console.log(e);
       return false
-    } finally {
-      await queryRunner.release();
     }
+  }
+
+  async getAllRowCount(): Promise<number> {
+    const query = `
+      SELECT (xpath('/row/cnt/text()', xml_count))[1]::text::int AS "rowCount"
+        FROM (SELECT table_schema, 
+              query_to_xml(
+                format('select count(*) as cnt from %I.%I', table_schema, table_name),
+                false,
+                true,
+                '') as xml_count
+                FROM information_schema.tables
+               WHERE table_schema = 'public') t
+    `
+    const result = await this.dataSource.query(query)
+    const allRowCount = result.reduce((acc, el) => acc + el.rowCount , 0)
+
+    return allRowCount
   }
 }

@@ -4,8 +4,8 @@ import { DataSource } from 'typeorm';
 import { QueryParametersDto } from '../../../../shared/pagination/query-parameters/query-parameters.dto';
 import { CreatedQuestions } from '../../api/view/created-questions';
 import { ViewPage } from '../../../../shared/pagination/view-page';
-import {giveSkipNumber} from "../../../../shared/pagination/query-parameters/helpers";
-import {PublishedStatus} from "../../../../shared/pagination/query-parameters/published-status";
+import { giveSkipNumber } from "../../../../shared/pagination/helpers";
+import { PublishedStatus } from "../../../../shared/pagination/query-parameters/published-status";
 
 @Injectable()
 export class QuestionsQueryRepository {
@@ -17,43 +17,45 @@ export class QuestionsQueryRepository {
     const filter = this.getFilter(queryDto)
 
     const query = `
-      SELECT q.id, q.body, q.published, q."createdAt", q."updatedAt", a."correctAnswer"
+      SELECT q.id, q.body, q.published, q."createdAt", q."updatedAt",
+             (SELECT ARRAY (SELECT a."correctAnswer" FROM answers a
+               WHERE a."questionId" = q.id)) AS "correctAnswers"
         FROM questions q
-        LEFT JOIN answers a
-          ON a."questionId" = q.id
              ${filter}
-       ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-       LIMIT ${queryDto.pageSize} OFFSET ${giveSkipNumber(
-           queryDto.pageNumber,
-           queryDto.pageSize,
-         )};
+      ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+      LIMIT ${queryDto.pageSize} OFFSET ${giveSkipNumber(
+        queryDto.pageNumber,
+        queryDto.pageSize,
+      )};
     `
-
-    // const query = `
-    //   SELECT q.id, q.body, q.published, q."createdAt", q."updatedAt",
-    //          (SELECT ARRAY (SELECT a."correctAnswer" FROM answers a
-    //            WHERE a."questionId" = q.id)) AS "correctAnswers"
-    //     FROM questions q
-    //          ${filter}
-    //   ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-    //   LIMIT ${queryDto.pageSize} OFFSET ${giveSkipNumber(
-    //     queryDto.pageNumber,
-    //     queryDto.pageSize,
-    //   )};
-    // `
-    console.log(query)
     const questions = await this.dataSource.query(query)
-    console.log(questions)
-    //const items = questions.map(q => toViewQuesion(q))
+
     const countQuery = ` 
       SELECT COUNT(id)
         FROM questions
              ${filter} 
     `
-    console.log(countQuery)
     const totalCount = await this.dataSource.query(countQuery)
-    return
-    //return new ViewPage<CreatedQuestions>({items, queryDto, totalCount})
+
+    return new ViewPage<CreatedQuestions>({
+      items: questions ?? [],
+      query: queryDto,
+      totalCount: totalCount[0].count
+    })
+  }
+
+  async questionExists(questionId: string): Promise<boolean | null> {
+    const query = `
+      SELECT published
+        FROM questions
+       WHERE id = $1;
+    `
+    const result = await this.dataSource.query(query, [questionId])
+
+    if (!result.length) {
+      return null
+    }
+    return result[0].published
   }
 
   private getFilter(query: QueryParametersDto): string {

@@ -7,12 +7,16 @@ import { Questions } from "./entity/questions.entity";
 import { Answers } from "./entity/answers.entity";
 import { toCreatedQuestions } from "../../../../shared/data-mapper/to-created-quesions";
 import { CreatedQuestionsDb } from "./pojo/created-questions.db";
+import { UpdateQuestionDto } from "../../api/dto/update-question.dto";
 
 @Injectable()
 export class QuestionsRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async createQuestion(newQuestion: NewQuestionDto, answers: string[]): Promise<CreatedQuestions | null> {
+  async createQuestion(
+    newQuestion: NewQuestionDto,
+    answers: string[]
+  ): Promise<CreatedQuestions | null> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -23,8 +27,9 @@ export class QuestionsRepository {
         .getRepository(Questions)
         .save(newQuestion)
 
+      let createdAnswer
       for (const answer in answers) {
-        const createdAnswer = await manager
+        createdAnswer = await manager
           .getRepository(Answers)
           .save({ questionId: createdQuestions.id, correctAnswer: answer })
       }
@@ -33,10 +38,62 @@ export class QuestionsRepository {
       return toCreatedQuestions(createdQuestions, answers)
     } catch (e) {
       await queryRunner.rollbackTransaction();
-      console.log(e);
       return null
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async updateQuestion(
+    questionId: string,
+    dto: UpdateQuestionDto
+  ): Promise<boolean> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    const manager = queryRunner.manager;
+    try {
+      await manager.getRepository(Questions).update({
+        id: questionId
+      }, {
+        body: dto.body
+      })
+
+      await manager.getRepository(Answers).delete(questionId)
+
+      for (const answer in dto.correctAnswers) {
+        await manager
+          .getRepository(Answers)
+          .save({ questionId, correctAnswer: answer })
+      }
+
+      return true
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      return false
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async updatePublishStatus(
+    questionId: string,
+    published: boolean
+  ): Promise<boolean> {
+    const query = `
+      UPDATE questions
+         SET published = '${published}'
+       WHERE id = '${questionId}'
+         AND EXISTS(SELECT "questionId"
+                      FROM answers
+                     WHERE "questionId" = '${questionId}')
+    `
+    const result = await this.dataSource.query(query )
+
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
   }
 }

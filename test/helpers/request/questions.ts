@@ -5,7 +5,7 @@ import { ViewPage } from '../../../src/shared/pagination/view-page';
 import { getUrlWithQuery } from '../routing/helpers/url-with-query';
 import { Query } from "../routing/query";
 import {UpdateQuestionDto} from "../../../src/modules/questions/api/dto/update-question.dto";
-import {ErrorsMessages} from "../../../src/shared/dto/errors-messages";
+import {ErrorsMessages} from "../../../src/shared/errors-messages";
 import {getUrlWithId} from "../routing/helpers/url-with-id";
 import {UpdatePublishStatusDto} from "../../../src/modules/questions/api/dto/update-publish-status.dto";
 import {getUrlForUpdatePublishStatus} from "../routing/helpers/questions-url";
@@ -80,16 +80,16 @@ export class Questions {
   }
 
   async deleteQuestion(
-      superUser: { login: string; password: string },
-      questionId: string,
+    superUser: { login: string; password: string },
+    questionId: string,
   ): Promise<number> {
     const url = getUrlWithId(endpoints.sa.quiz.questions, questionId)
 
     const response = await request(this.server)
-        .delete(url)
-        .auth(superUser.login, superUser.password, {
-          type: 'basic'
-        })
+      .delete(url)
+      .auth(superUser.login, superUser.password, {
+        type: 'basic'
+      })
 
     return response.status
   }

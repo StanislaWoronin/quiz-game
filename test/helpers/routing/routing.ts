@@ -9,5 +9,6 @@ export const endpoints = {
   },
   testing: {
     allData: `${testingController}/all-data`,
+    allRowCount: `${testingController}/all-row-count`
   },
 };

@@ -33,7 +33,6 @@ export class QuestionsFactories {
           `${3}${faker.random.alpha(3)}`
         ]
       };
-
       const response = await this.questions.createQuestion(preparedSuperUser.valid, inputData)
 
       result.push(response.body)

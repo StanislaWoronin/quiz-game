@@ -1,4 +1,5 @@
 import { PageDto } from './page.dto';
+import { givePagesCount } from "./helpers";
 
 export class ViewPage<I> {
   readonly page: number;
@@ -11,7 +12,7 @@ export class ViewPage<I> {
     this.page = query.pageNumber;
     this.pageSize = query.pageSize;
     this.totalCount = totalCount;
-    this.pagesCount = Math.ceil(this.totalCount / this.pageSize);
+    this.pagesCount = givePagesCount(this.totalCount, this.pageSize);
     this.items = items;
   }
 }

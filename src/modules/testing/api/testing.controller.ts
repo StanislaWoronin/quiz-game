@@ -1,10 +1,10 @@
 import {
   Controller,
-  Delete,
+  Delete, Get,
   HttpCode,
   HttpStatus,
-  Inject,
-} from '@nestjs/common';
+  Inject
+} from "@nestjs/common";
 import { ITestingRepository } from '../infrastructure/i-testing.repository';
 
 @Controller('testing')
@@ -17,5 +17,10 @@ export class TestingController {
   @Delete('all-data')
   async deleteAll(): Promise<boolean> {
     return this.testingRepository.deleteAll();
+  }
+
+  @Get(`all-row-count`)
+  async getAllRowCount(): Promise<number> {
+    return this.testingRepository.getAllRowCount()
   }
 }
