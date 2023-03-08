@@ -88,7 +88,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         );
         expect(response.status).toBe(HttpStatus.OK);
         expect(response.body).toStrictEqual(
-          expectCreatedQuestion,
+          expectCreatedQuestion(),
         );
       });
     });
