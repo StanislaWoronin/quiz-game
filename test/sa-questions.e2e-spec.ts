@@ -12,8 +12,8 @@ import {
 } from './helpers/expect-data/expect-questions';
 import {preparedQuery} from "./helpers/prepeared-data/prepared-query";
 import {randomUUID} from "crypto";
-import {SortByField} from "../src/shared/pagination/query-parameters/sort-by-field";
-import {SortDirection} from "../src/shared/pagination/query-parameters/sort-direction";
+import {SortByField} from "../src/common/pagination/query-parameters/sort-by-field";
+import {SortDirection} from "../src/common/pagination/query-parameters/sort-direction";
 import {preparedQuestions} from "./helpers/prepeared-data/prepared-questions";
 import {getErrorMessage} from "./helpers/routing/errors-messages";
 

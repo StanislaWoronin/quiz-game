@@ -1,10 +1,10 @@
 import { preparedQuestions } from '../prepeared-data/prepared-questions';
 import {CreatedQuestions} from "../../../src/modules/sa/questions/api/view/created-questions";
-import {ViewPage} from "../../../src/shared/pagination/view-page";
-import {SortByField} from "../../../src/shared/pagination/query-parameters/sort-by-field";
-import {SortDirection} from "../../../src/shared/pagination/query-parameters/sort-direction";
-import {PageDto} from "../../../src/shared/pagination/page.dto";
-import {giveSkipNumber} from "../../../src/shared/pagination/helpers";
+import {ViewPage} from "../../../src/common/pagination/view-page";
+import {SortByField} from "../../../src/common/pagination/query-parameters/sort-by-field";
+import {SortDirection} from "../../../src/common/pagination/query-parameters/sort-direction";
+import {PageDto} from "../../../src/common/pagination/page.dto";
+import {giveSkipNumber} from "../../../src/common/pagination/helpers";
 
 export const expectCreatedQuestion = (): CreatedQuestions => {
   return {

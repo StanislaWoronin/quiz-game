@@ -3,10 +3,12 @@ import {InjectDataSource} from "@nestjs/typeorm";
 import {DataSource} from "typeorm";
 import {NewUserDto} from "../../applications/dto/new-user.dto";
 import {CreatedUser} from "../../api/view/created-user";
-import {CreatedUserDb} from "./pojo/created-user-db";
 import {Users} from "./entity/users.entity";
 import {Credentials} from "./entity/credentials.entity";
-import {toCreatedUser} from "../../../../../shared/data-mapper/to-created-user";
+import {toCreatedUser} from "../../../../../common/data-mapper/to-created-user";
+import { CreatedUserDb } from "./pojo/created-user.db";
+import { UserBanInfo } from "./entity/ban-info.entity";
+import { UpdateUserBanStatusDto } from "../../api/dto/update-user-ban-status.dto";
 
 @Injectable()
 export class UsersRepository {
@@ -36,5 +38,21 @@ export class UsersRepository {
         } finally {
             await queryRunner.release();
         }
+    }
+
+    async updateBanStatus(userId: string, dto: UpdateUserBanStatusDto): Promise<boolean> {
+        await this.dataSource.getRepository(UserBanInfo).upsert([
+            {isBanned: dto.isBanned},
+            {banReason: dto.banReason},
+            {banDate: new Date().toISOString()}
+        ], [userId])
+
+        return true
+    }
+
+    async removeBanStatus(userId: string): Promise<boolean> {
+        await this.dataSource.getRepository(UserBanInfo).delete({userId})
+
+        return true
     }
 }

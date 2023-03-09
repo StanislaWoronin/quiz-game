@@ -1,4 +1,4 @@
-import {QueryDto} from "../../../../../../shared/dto/query.dto";
+import {QueryDto} from "../../../../../../common/dto/query.dto";
 import {IsEnum, IsOptional, IsString} from "class-validator";
 import {BanStatus} from "./ban-status";
 

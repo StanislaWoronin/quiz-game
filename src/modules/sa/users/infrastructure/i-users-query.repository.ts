@@ -1,5 +1,5 @@
 import {UsersQueryDto} from "../api/dto/query/users-query.dto";
-import {ViewPage} from "../../../../shared/pagination/view-page";
+import {ViewPage} from "../../../../common/pagination/view-page";
 import {ViewUser} from "../api/view/view-user";
 
 export interface IUsersQueryRepository {

@@ -5,7 +5,7 @@ import { NewQuestionDto } from "../../applications/dto/new-question.dto";
 import { CreatedQuestions } from "../../api/view/created-questions";
 import { Questions } from "./entity/questions.entity";
 import { Answers } from "./entity/answers.entity";
-import { toCreatedQuestions } from "../../../../../shared/data-mapper/to-created-quesions";
+import { toCreatedQuestions } from "../../../../../common/data-mapper/to-created-quesions";
 import { CreatedQuestionsDb } from "./pojo/created-questions.db";
 import { UpdateQuestionDto } from "../../api/dto/update-question.dto";
 

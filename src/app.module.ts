@@ -10,11 +10,11 @@ import { settings } from './settings';
 import { repositoryName } from './helpers/repositories-switcher/repository-name';
 import { ITestingRepository } from "./modules/testing/infrastructure/i-testing.repository";
 import { TestingController } from "./modules/testing/api/testing.controller";
-import { entity } from "./shared/entity";
+import { entity } from "./common/entity";
 import {IUsersRepository} from "./modules/sa/users/infrastructure/i-users.repository";
 import {IUsersQueryRepository} from "./modules/sa/users/infrastructure/i-users-query.repository";
 import {UsersService} from "./modules/sa/users/applications/users.service";
-import {UsersController} from "./modules/sa/questions/api/users.controller";
+import {UsersController} from "./modules/sa/users/api/users.controller";
 
 const controllers = [QuestionsController, TestingController, UsersController];
 

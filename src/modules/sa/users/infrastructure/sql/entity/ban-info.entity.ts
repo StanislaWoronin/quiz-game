@@ -13,7 +13,7 @@ export class UserBanInfo {
         nullable: true,
         collation: 'C'
     })
-    banDate: boolean;
+    banDate: string;
 
 
     @Column({
@@ -21,7 +21,7 @@ export class UserBanInfo {
         nullable: true,
         collation: 'C'
     })
-    banReason: boolean;
+    banReason: string;
 
     @OneToOne(() => Users, (u) => u.banInfo)
     @JoinColumn()

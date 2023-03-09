@@ -3,7 +3,7 @@ import {InjectDataSource} from '@nestjs/typeorm';
 import {DataSource} from 'typeorm';
 import {QuestionsQueryDto} from '../../api/dto/query/questions-query.dto';
 import {CreatedQuestions} from '../../api/view/created-questions';
-import {ViewPage} from '../../../../../shared/pagination/view-page';
+import {ViewPage} from '../../../../../common/pagination/view-page';
 import {PublishedStatus} from "../../api/dto/query/published-status";
 
 @Injectable()
@@ -27,7 +27,7 @@ export class QuestionsQueryRepository {
     const questions = await this.dataSource.query(query)
 
     const countQuery = ` 
-      SELECT COUNT(id)
+      SELECT COUNT(*)
         FROM questions q
              ${filter} 
     `

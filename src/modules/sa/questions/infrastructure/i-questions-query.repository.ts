@@ -1,5 +1,5 @@
 import { QuestionsQueryDto } from '../api/dto/query/questions-query.dto';
-import { ViewPage } from '../../../../shared/pagination/view-page';
+import { ViewPage } from '../../../../common/pagination/view-page';
 import { ViewQuestion } from "../api/view/view-question";
 
 export interface IQuestionsQueryRepository {

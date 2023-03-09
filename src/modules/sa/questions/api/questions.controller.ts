@@ -18,7 +18,7 @@ import { CreateQuestionDto } from './dto/create-question.dto';
 import { CreatedQuestions } from './view/created-questions';
 import { QuestionsService } from '../applications/questions.servise';
 import { IQuestionsQueryRepository } from '../infrastructure/i-questions-query.repository';
-import { ViewPage } from '../../../../shared/pagination/view-page';
+import { ViewPage } from '../../../../common/pagination/view-page';
 import { QuestionsQueryDto } from './dto/query/questions-query.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { UpdatePublishStatusDto } from './dto/update-publish-status.dto';
