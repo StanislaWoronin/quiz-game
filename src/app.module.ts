@@ -8,11 +8,8 @@ import { IQuestionsRepository } from './modules/questions/infrastructure/i-quest
 import { repositorySwitcher } from './helpers/repositories-switcher/repositories-switcher';
 import { settings } from './settings';
 import { repositoryName } from './helpers/repositories-switcher/repository-name';
-import { Answers } from "./modules/questions/infrastructure/sql/entity/answers.entity";
-import { Questions } from "./modules/questions/infrastructure/sql/entity/questions.entity";
 import { ITestingRepository } from "./modules/testing/infrastructure/i-testing.repository";
 import { TestingController } from "./modules/testing/api/testing.controller";
-import { TestingRepository } from "./modules/testing/infrastructure/sql/testing.repository";
 import { entity } from "./shared/entity";
 
 const controllers = [QuestionsController, TestingController];

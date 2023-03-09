@@ -20,7 +20,6 @@ import { QuestionsService } from '../applications/questions.servise';
 import { IQuestionsQueryRepository } from '../infrastructure/i-questions-query.repository';
 import { ViewPage } from '../../../shared/pagination/view-page';
 import { QueryParametersDto } from '../../../shared/pagination/query-parameters/query-parameters.dto';
-import { ParamsId } from '../../../shared/dto/params-id';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { UpdatePublishStatusDto } from './dto/update-publish-status.dto';
 import { ViewQuestion } from "./view/view-question";
