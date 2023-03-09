@@ -4,6 +4,7 @@ import {ViewPage} from "../../../src/shared/pagination/view-page";
 import {SortByField} from "../../../src/shared/pagination/query-parameters/sort-by-field";
 import {SortDirection} from "../../../src/shared/pagination/query-parameters/sort-direction";
 import {PageDto} from "../../../src/shared/pagination/page.dto";
+import {giveSkipNumber} from "../../../src/shared/pagination/helpers";
 
 export const expectCreatedQuestion = (): CreatedQuestions => {
   return {
@@ -26,10 +27,10 @@ export const expectResponseForGetAllQuestions = (
     questions: CreatedQuestions[]
 ): ViewPage<CreatedQuestions> => {
   const sortingQuestions = getSortingItems(sortBy, sortDirection, questions)
-  const skip = pageSize * page
+  const skip = giveSkipNumber(page, pageSize)
 
   let items = sortingQuestions.slice(skip)
-  if(skip + pageSize < pagesCount) {
+  if(skip + pageSize < totalCount) {
     items = sortingQuestions.slice(0, skip + pageSize)
   }
 

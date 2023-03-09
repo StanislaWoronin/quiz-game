@@ -60,8 +60,6 @@ describe('/sa/quiz/questions (e2e)', () => {
       const rowCountAfterClearDb = await testing.getAllRowCount()
       expect(rowCountAfterClearDb).not.toBe(rowCount)
       expect(rowCountAfterClearDb).toBe(0)
-
-      const a = await questions.createQuestion(preparedSuperUser.valid,preparedQuestions.valid)
     })
   });
 })

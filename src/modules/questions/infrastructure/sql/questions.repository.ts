@@ -28,10 +28,10 @@ export class QuestionsRepository {
         .save(newQuestion)
 
       let createdAnswer
-      for (const answer in answers) {
+      for (let i = 0, length = answers.length; i < length; i++) {
         createdAnswer = await manager
           .getRepository(Answers)
-          .save({ questionId: createdQuestions.id, correctAnswer: answer })
+          .save({ questionId: createdQuestions.id, correctAnswer: answers[i] })
       }
 
       await queryRunner.commitTransaction();

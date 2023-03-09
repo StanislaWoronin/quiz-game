@@ -32,7 +32,7 @@ export class QuestionsQueryRepository {
 
     const countQuery = ` 
       SELECT COUNT(id)
-        FROM questions
+        FROM questions q
              ${filter} 
     `
     const totalCount = await this.dataSource.query(countQuery)
@@ -40,7 +40,7 @@ export class QuestionsQueryRepository {
     return new ViewPage<CreatedQuestions>({
       items: questions ?? [],
       query: queryDto,
-      totalCount: totalCount[0].count
+      totalCount: Number(totalCount[0].count)
     })
   }
 
@@ -59,7 +59,7 @@ export class QuestionsQueryRepository {
   }
 
   private getFilter(query: QueryParametersDto): string {
-    const { bodySearchTerm, publishedStatus } = expect.getState()
+    const { bodySearchTerm, publishedStatus } = query
 
     let status
     if (publishedStatus === PublishedStatus.Published) status = true

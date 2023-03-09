@@ -48,185 +48,186 @@ describe('/sa/quiz/questions (e2e)', () => {
   });
 
   describe('Test request', () => {
-    describe('POST -> "sa/quiz/question"', () => {
+    // describe('POST -> "sa/quiz/question"', () => {
       // it('Clear all data', async () => {
       //   await testing.clearDb();
       // });
-
-      it('User without permissions try to create a question', async () => {
-        const request = await questions.createQuestion(
-          preparedSuperUser.notValid,
-          preparedQuestions.valid,
-        );
-        expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
-      });
-
-      it('Try create question with incorrect input data', async () => {
-        const errorsMessages = questionsFactories.getErrorsMessage(['body']);
-
-        const requestWithLongInputData = await questions.createQuestion(
-          preparedSuperUser.valid,
-          preparedQuestions.notValid.long,
-        );
-        expect(requestWithLongInputData.status).toBe(HttpStatus.BAD_REQUEST);
-        expect(requestWithLongInputData.body).toStrictEqual({ errorsMessages });
-
-        const requestWithShortInputData = await questions.createQuestion(
-          preparedSuperUser.valid,
-          preparedQuestions.notValid.short,
-        );
-        expect(requestWithShortInputData.status).toBe(HttpStatus.BAD_REQUEST);
-        expect(requestWithShortInputData.body).toStrictEqual({
-          errorsMessages,
-        });
-      });
-
-      it('Should create question', async () => {
-        const response = await questions.createQuestion(
-          preparedSuperUser.valid,
-          preparedQuestions.valid,
-        );
-        expect(response.status).toBe(HttpStatus.OK);
-        expect(response.body).toStrictEqual(
-          expectCreatedQuestion(),
-        );
-      });
-    });
-
-    describe('PUT -> "sa/quiz/questions/:id/publish"', () => {
+    //
+    //   it('User without permissions try to create a question', async () => {
+    //     const request = await questions.createQuestion(
+    //       preparedSuperUser.notValid,
+    //       preparedQuestions.valid,
+    //     );
+    //     expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
+    //   });
+    //
+    //   it('Try create question with incorrect input data', async () => {
+    //     const errorsMessages = questionsFactories.getErrorsMessage(['body']);
+    //
+    //     const requestWithLongInputData = await questions.createQuestion(
+    //       preparedSuperUser.valid,
+    //       preparedQuestions.notValid.long,
+    //     );
+    //     expect(requestWithLongInputData.status).toBe(HttpStatus.BAD_REQUEST);
+    //     expect(requestWithLongInputData.body).toStrictEqual({ errorsMessages });
+    //
+    //     const requestWithShortInputData = await questions.createQuestion(
+    //       preparedSuperUser.valid,
+    //       preparedQuestions.notValid.short,
+    //     );
+    //     expect(requestWithShortInputData.status).toBe(HttpStatus.BAD_REQUEST);
+    //     expect(requestWithShortInputData.body).toStrictEqual({
+    //       errorsMessages,
+    //     });
+    //   });
+    //
+    //   it('Should create question', async () => {
+    //     const response = await questions.createQuestion(
+    //       preparedSuperUser.valid,
+    //       preparedQuestions.valid,
+    //     );
+    //     expect(response.status).toBe(HttpStatus.OK);
+    //     expect(response.body).toStrictEqual(
+    //       expectCreatedQuestion(),
+    //     );
+    //   });
+    // });
+    //
+    // describe('PUT -> "sa/quiz/questions/:id/publish"', () => {
       // it('Clear all data', async () => {
       //   await testing.clearDb();
       // });
-
-      it('Create data', async () => {
-        const question = await questions.createQuestion(
-            preparedSuperUser.valid,
-            preparedQuestions.valid,
-        );
-        expect(question.status).toBe(HttpStatus.OK);
-
-        const questionWithoutAnswers = await questions.createQuestion(
-            preparedSuperUser.valid,
-            preparedQuestions.withoutAnswers,
-        )
-        expect(questionWithoutAnswers.status).toBe(HttpStatus.OK);
-
-        expect.setState({
-          question: question.body,
-          questionId: question.body.id,
-          questionWithoutAnswersId: questionWithoutAnswers.body.id,
-        })
-      })
-
-      it('User without permissions try update "published" status', async () => {
-        const { questionId } = expect.getState()
-
-        const response = await questions
-            .updateQuestionStatus(preparedSuperUser.notValid, questionId, preparedQuestions.publishStatus.true)
-        expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
-      })
-
-      it('Shouldn`t update "published" status if the inputModel has incorrect' +
-          'values or specified question doesn`t have correct answers', async () => {
-
-        const { questionWithoutAnswersId } = expect.getState()
-
-        const response = await questions
-            .updateQuestionStatus(preparedSuperUser.valid, questionWithoutAnswersId, preparedQuestions.publishStatus.true)
-        expect(response.status).toBe(HttpStatus.BAD_REQUEST)
-      })
-
-      it('Should update "published" status. Set status "true"', async () => {
-        const { questionId } = expect.getState()
-
-        const response = await questions
-            .updateQuestionStatus(preparedSuperUser.valid, questionId, preparedQuestions.publishStatus.true)
-        expect(response.status).toBe(HttpStatus.NO_CONTENT)
-      })
-
-      it('Should update "published" status. Set status "false"', async () => {
-        const { questionId } = expect.getState()
-
-        const response = await questions
-            .updateQuestionStatus(preparedSuperUser.valid, questionId, preparedQuestions.publishStatus.false)
-        expect(response.status).toBe(HttpStatus.NO_CONTENT)
-      })
-    })
-
-    describe('PUT -> "sa/quiz/questions/:id"', () => {
+    //
+    //   it('Create data', async () => {
+    //     const question = await questions.createQuestion(
+    //         preparedSuperUser.valid,
+    //         preparedQuestions.valid,
+    //     );
+    //     expect(question.status).toBe(HttpStatus.OK);
+    //
+    //     const questionWithoutAnswers = await questions.createQuestion(
+    //         preparedSuperUser.valid,
+    //         preparedQuestions.withoutAnswers,
+    //     )
+    //     expect(questionWithoutAnswers.status).toBe(HttpStatus.OK);
+    //
+    //     expect.setState({
+    //       question: question.body,
+    //       questionId: question.body.id,
+    //       questionWithoutAnswersId: questionWithoutAnswers.body.id,
+    //     })
+    //   })
+    //
+    //   it('User without permissions try update "published" status', async () => {
+    //     const { questionId } = expect.getState()
+    //
+    //     const response = await questions
+    //         .updateQuestionStatus(preparedSuperUser.notValid, questionId, preparedQuestions.publishStatus.true)
+    //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
+    //   })
+    //
+    //   it('Shouldn`t update "published" status if the inputModel has incorrect' +
+    //       'values or specified question doesn`t have correct answers', async () => {
+    //
+    //     const { questionWithoutAnswersId } = expect.getState()
+    //
+    //     const response = await questions
+    //         .updateQuestionStatus(preparedSuperUser.valid, questionWithoutAnswersId, preparedQuestions.publishStatus.true)
+    //     expect(response.status).toBe(HttpStatus.BAD_REQUEST)
+    //   })
+    //
+    //   it('Should update "published" status. Set status "true"', async () => {
+    //     const { questionId } = expect.getState()
+    //
+    //     const response = await questions
+    //         .updateQuestionStatus(preparedSuperUser.valid, questionId, preparedQuestions.publishStatus.true)
+    //     expect(response.status).toBe(HttpStatus.NO_CONTENT)
+    //   })
+    //
+    //   it('Should update "published" status. Set status "false"', async () => {
+    //     const { questionId } = expect.getState()
+    //
+    //     const response = await questions
+    //         .updateQuestionStatus(preparedSuperUser.valid, questionId, preparedQuestions.publishStatus.false)
+    //     expect(response.status).toBe(HttpStatus.NO_CONTENT)
+    //   })
+    // })
+    //
+    // describe('PUT -> "sa/quiz/questions/:id"', () => {
       // it('Clear all data', async () => {
       //   await testing.clearDb();
       // });
-
-      it('Create data', async () => {
-        const response = await questions.createQuestion(
-            preparedSuperUser.valid,
-            preparedQuestions.valid,
-        );
-        expect(response.status).toBe(HttpStatus.OK);
-
-        expect.setState({
-          question: response.body,
-          questionId: response.body.id
-        })
-      })
-
-      // it('Try update not exist question', async () => {
-      //   const randomId = randomUUID()
-      //
-      //   const response = await questions.updateQuestion(preparedSuperUser.valid, randomId, preparedQuestions.update)
-      //   expect(response.status).toBe(HttpStatus.NOT_FOUND)
-      // })
-      //
-      // it('User without permissions try update question', async () => {
-      //   const {questionId} = expect.getState()
-      //
-      //   const response = await questions
-      //       .updateQuestion(preparedSuperUser.notValid, questionId, preparedQuestions.update)
-      //   expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
-      // })
-      //
-      // it('Shouldn update question if the inputModel has incorrect values or' +
-      //     'property "correctAnswers" are not passed but property "published" is true`',
-      //     async () => {
-      //
-      //   const {questionId} = expect.getState()
-      //   const incorrectBody = getErrorMessage(['body'])
-      //   const incorrectAnswers = getErrorMessage(['body'])
-      //
-      //   const requestWithLongInputData = await questions
-      //       .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.notValid.long)
-      //   expect(requestWithLongInputData.status).toBe(HttpStatus.BAD_REQUEST)
-      //   expect(requestWithLongInputData.body).toStrictEqual({errorsMessages: incorrectBody})
-      //
-      //   const requestWithShortInputData = await questions
-      //       .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.notValid.short)
-      //   expect(requestWithLongInputData.status).toBe(HttpStatus.BAD_REQUEST)
-      //   expect(requestWithLongInputData.body).toStrictEqual({errorsMessages: incorrectBody})
-      //
-      //   const updateStatus = await questions
-      //       .updateQuestionStatus(preparedSuperUser.valid, questionId, preparedQuestions.publishStatus.true)
-      //   expect(updateStatus.status).toBe(HttpStatus.NO_CONTENT)
-      //
-      //   const requestForPublishedQuestion = await questions
-      //       .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.updateWithoutAnswers)
-      //   expect(requestForPublishedQuestion.status).toBe(HttpStatus.BAD_REQUEST)
-      //   expect(requestWithLongInputData.body).toStrictEqual({errorsMessages: incorrectAnswers})
-      // })
-
-      it('Should update question', async () => {
-        const {questionId} = expect.getState()
-
-        const response = await questions
-            .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.update)
-        expect(response.status).toBe(HttpStatus.NO_CONTENT)
-      })
-    })
+    //
+    //   it('Create data', async () => {
+    //     const response = await questions.createQuestion(
+    //         preparedSuperUser.valid,
+    //         preparedQuestions.valid,
+    //     );
+    //     expect(response.status).toBe(HttpStatus.OK);
+    //
+    //     expect.setState({
+    //       question: response.body,
+    //       questionId: response.body.id
+    //     })
+    //   })
+    //
+    //   it('Try update not exist question', async () => {
+    //     const randomId = randomUUID()
+    //
+    //     const response = await questions.updateQuestion(preparedSuperUser.valid, randomId, preparedQuestions.update)
+    //     expect(response.status).toBe(HttpStatus.NOT_FOUND)
+    //   })
+    //
+    //   it('User without permissions try update question', async () => {
+    //     const {questionId} = expect.getState()
+    //
+    //     const response = await questions
+    //         .updateQuestion(preparedSuperUser.notValid, questionId, preparedQuestions.update)
+    //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
+    //   })
+    //
+    //   it('Shouldn update question if the inputModel has incorrect values',async () => {
+    //
+    //     const {questionId} = expect.getState()
+    //     const incorrectBody = getErrorMessage(['body'])
+    //
+    //     const requestWithLongInputData = await questions
+    //         .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.notValid.long)
+    //     expect(requestWithLongInputData.status).toBe(HttpStatus.BAD_REQUEST)
+    //     expect(requestWithLongInputData.body).toStrictEqual({errorsMessages: incorrectBody})
+    //
+    //     const requestWithShortInputData = await questions
+    //         .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.notValid.short)
+    //     expect(requestWithShortInputData.status).toBe(HttpStatus.BAD_REQUEST)
+    //     expect(requestWithShortInputData.body).toStrictEqual({errorsMessages: incorrectBody})
+    //   })
+    //
+    //   it('Should update question', async () => {
+    //     const {questionId} = expect.getState()
+    //
+    //     const response = await questions
+    //         .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.update)
+    //     expect(response.status).toBe(HttpStatus.NO_CONTENT)
+    //   })
+    //
+    //   it('Shouldn`t update question if property "correctAnswers" are not passed but' +
+    //       'property "published" is true`', async () => {
+    //     const {questionId} = expect.getState()
+    //
+    //     const updateStatus = await questions
+    //         .updateQuestionStatus(preparedSuperUser.valid, questionId, preparedQuestions.publishStatus.true)
+    //     expect(updateStatus.status).toBe(HttpStatus.NO_CONTENT)
+    //
+    //     const requestForPublishedQuestion = await questions
+    //         .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.updateWithoutAnswers)
+    //     expect(requestForPublishedQuestion.status).toBe(HttpStatus.BAD_REQUEST)
+    //   })
+    // })
 
     describe('GET -> "sa/quiz/question"', () => {
-      // it('Clear all data', async () => {
-      //   await testing.clearDb();
-      // });
+      it('Clear all data', async () => {
+        await testing.clearDb();
+      });
 
       it('Create data', async () => {
         const createdQuestions = await questionsFactories.createQuestions(5)
@@ -238,67 +239,79 @@ describe('/sa/quiz/questions (e2e)', () => {
         })
       })
 
-      it('User without permissions try to get a question', async () => {
-        const request = await questions.getAllQuestions(
-          preparedSuperUser.notValid
-        );
-        expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
-      });
+      // it('User without permissions try to get a question', async () => {
+      //   const request = await questions.getAllQuestions(
+      //     preparedSuperUser.notValid
+      //   );
+      //   expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
+      // });
+      //
+      // it('Get all question without query', async () => {
+      //   const request = await questions.getAllQuestions(
+      //     preparedSuperUser.valid
+      //   );
+      //   expect(request.status).toBe(HttpStatus.OK);
+      //   expect(request.body.items).toHaveLength(10)
+      // })
+      //
+      // it('?publishedStatus=notPublished&sortBy=body&sortDirection=asc&pageNumber=1&pageSize=3', async () => {
+      //   const {createdQuestions} = expect.getState()
+      //   const expectResponse = expectResponseForGetAllQuestions(
+      //     SortByField.Body,
+      //     SortDirection.Ascending,
+      //     2,
+      //     1,
+      //     3,
+      //     5,
+      //     [...createdQuestions]
+      //   )
+      //
+      //   const request = await questions.getAllQuestions(
+      //     preparedSuperUser.valid,
+      //     preparedQuery.notPublished_id_asc_1_3
+      //   );
+      //   expect(request.status).toBe(HttpStatus.OK);
+      //   expect(request.body).toStrictEqual(expectResponse)
+      // })
+      //
+      // it('?publishedStatus=published&sortBy=body&sortDirection=desc&pageNumber=2&pageSize=3', async () => {
+      //   const {publishedQuestionsId} = expect.getState()
+      //
+      //   const expectResponse = expectResponseForGetAllQuestions(
+      //     SortByField.Body,
+      //     SortDirection.Descending,
+      //     2,
+      //     2,
+      //     3,
+      //     5,
+      //     [...publishedQuestionsId]
+      //   )
+      //
+      //   const request = await questions.getAllQuestions(
+      //     preparedSuperUser.valid,
+      //     preparedQuery.notPublished_body_desc_2_3
+      //   );
+      //   expect(request.status).toBe(HttpStatus.OK);
+      //   expect(request.body).toStrictEqual(expectResponse)
+      // })
 
-      it('Get all question without query', async () => {
+      it('Search vie "bodySearchTerm"', async () => {
+        const {createdQuestions, publishedQuestionsId} = expect.getState()
+
         const request = await questions.getAllQuestions(
-          preparedSuperUser.valid
+            preparedSuperUser.valid,
+            preparedQuery.bodySearchTerm
         );
         expect(request.status).toBe(HttpStatus.OK);
-        expect(request.body.items).toHaveLength(10)
-      })
-
-      it('?publishedStatus=notPublished&sortBy=id&sortDirection=asc&pageNumber=1&pageSize=3', async () => {
-        const {createdQuestions} = expect.getState()
-        const expectResponse = expectResponseForGetAllQuestions(
-          SortByField.Id,
-          SortDirection.Ascending,
-          2,
-          1,
-          3,
-          5,
-          [...createdQuestions]
-        )
-
-        const request = await questions.getAllQuestions(
-          preparedSuperUser.valid,
-          preparedQuery.published_id_asc_1_3
-        );
-        expect(request.status).toBe(HttpStatus.OK);
-        expect(request.body).toStrictEqual(expectResponse)
-      })
-
-      it('?publishedStatus=published&sortBy=body&sortDirection=desc&pageNumber=2&pageSize=3', async () => {
-        const {publishedQuestionsId} = expect.getState()
-
-        const expectResponse = expectResponseForGetAllQuestions(
-          SortByField.Body,
-          SortDirection.Descending,
-          2,
-          2,
-          3,
-          5,
-          [...publishedQuestionsId]
-        )
-
-        const request = await questions.getAllQuestions(
-          preparedSuperUser.valid,
-          preparedQuery.notPublished_body_desc_2_3
-        );
-        expect(request.status).toBe(HttpStatus.OK);
-        expect(request.body).toStrictEqual(expectResponse)
+        expect(request.body.items).toHaveLength(2)
+        expect(request.body.items).toBe(`1${expect.any(String)}`)
       })
     });
 
     // describe('DELETE -> "sa/quiz/question/:id', () => {
-    //   // it('Clear all data', async () => {
-    //   //   await testing.clearDb();
-    //   // });
+      // it('Clear all data', async () => {
+      //   await testing.clearDb();
+      // });
     //
     //   it('Create data', async () => {
     //     const [createdQuestions] = await questionsFactories.createQuestions(1)

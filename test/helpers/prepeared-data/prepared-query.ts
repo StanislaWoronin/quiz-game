@@ -11,10 +11,10 @@ export const preparedQuery = {
     pageNumber: null,
     pageSize: null,
   },
-  published_id_asc_1_3: {
+  notPublished_id_asc_1_3: {
     bodySearchTerm: null,
-    publishedStatus: PublishedStatus.Published,
-    sortBy: SortByField.Id,
+    publishedStatus: PublishedStatus.NotPublished,
+    sortBy: SortByField.Body,
     sortDirection: SortDirection.Ascending,
     pageNumber: 1,
     pageSize: 3,
@@ -22,9 +22,17 @@ export const preparedQuery = {
   notPublished_body_desc_2_3: {
     bodySearchTerm: null,
     publishedStatus: PublishedStatus.Published,
-    sortBy: SortByField.Id,
+    sortBy: SortByField.Body,
     sortDirection: SortDirection.Ascending,
     pageNumber: 2,
     pageSize: 3,
+  },
+  bodySearchTerm: {
+    bodySearchTerm: '1',
+    publishedStatus: null,
+    sortBy: null,
+    sortDirection: null,
+    pageNumber: null,
+    pageSize: null,
   }
 }

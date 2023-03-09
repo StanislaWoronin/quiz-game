@@ -1,5 +1,5 @@
 import { QuestionsRepository } from '../../modules/questions/infrastructure/sql/questions.repository';
-import { QuestionsQueryRepository } from '../../modules/questions/infrastructure/sql/questions-query-repository.service';
+import { QuestionsQueryRepository } from '../../modules/questions/infrastructure/sql/questions-query.repository';
 import { TestingRepository } from "../../modules/testing/infrastructure/sql/testing.repository";
 
 export const repositories = {

@@ -31,7 +31,7 @@ export class QuestionsService {
     const isExists = await this.questionsQueryRepository.questionExists(questionId);
 
     if(isExists === null) return null
-    if(isExists) return false // if question "published" return false
+    if(isExists && !dto.correctAnswers.length) return false // if question "published" and correctAnswers = [] return false
 
     return await this.questionsRepository.updateQuestion(questionId, dto);
   }

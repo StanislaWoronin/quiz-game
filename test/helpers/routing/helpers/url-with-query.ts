@@ -2,14 +2,6 @@ import { Query } from '../query';
 
 export const getUrlWithQuery = (endpoint: string, query): string => {
   let url = endpoint;
-  const {
-    bodySearchTerm,
-    publishedStatus,
-    sortBy,
-    sortDirection,
-    pageNumber,
-    pageSize,
-  } = query;
 
   if (Object.keys(query).length) {
     url += `?`;
