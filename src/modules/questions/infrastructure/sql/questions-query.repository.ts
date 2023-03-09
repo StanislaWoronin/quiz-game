@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { QueryParametersDto } from '../../../../shared/pagination/query-parameters/query-parameters.dto';
-import { CreatedQuestions } from '../../api/view/created-questions';
-import { ViewPage } from '../../../../shared/pagination/view-page';
-import { giveSkipNumber } from "../../../../shared/pagination/helpers";
-import { PublishedStatus } from "../../../../shared/pagination/query-parameters/published-status";
+import {Injectable} from '@nestjs/common';
+import {InjectDataSource} from '@nestjs/typeorm';
+import {DataSource} from 'typeorm';
+import {QueryParametersDto} from '../../../../shared/pagination/query-parameters/query-parameters.dto';
+import {CreatedQuestions} from '../../api/view/created-questions';
+import {ViewPage} from '../../../../shared/pagination/view-page';
+import {giveSkipNumber} from "../../../../shared/pagination/helpers";
+import {PublishedStatus} from "../../../../shared/pagination/query-parameters/published-status";
 
 @Injectable()
 export class QuestionsQueryRepository {
@@ -65,16 +65,18 @@ export class QuestionsQueryRepository {
     if (publishedStatus === PublishedStatus.Published) status = true
     if (publishedStatus === PublishedStatus.NotPublished) status = false
 
-    if (bodySearchTerm && publishedStatus !== PublishedStatus.All) {
-      return `WHERE q.published = ${status}
-                AND q.body ILIKE '%${bodySearchTerm}%'`
-    }
-    if (publishedStatus) {
+    if (publishedStatus !== PublishedStatus.All) {
+      if (bodySearchTerm) {
+        return `WHERE q.published = ${status}
+                  AND q.body ILIKE '%${bodySearchTerm}%'`
+      }
+
       return `WHERE q.published = ${status}`
     }
     if (bodySearchTerm) {
-      return `AND q.body ILIKE '%${bodySearchTerm}%'`
+      return `WHERE q.body ILIKE '%${bodySearchTerm}%'`
     }
+
     return ''
   }
 }

@@ -8,6 +8,7 @@ import { Answers } from "./entity/answers.entity";
 import { toCreatedQuestions } from "../../../../shared/data-mapper/to-created-quesions";
 import { CreatedQuestionsDb } from "./pojo/created-questions.db";
 import { UpdateQuestionDto } from "../../api/dto/update-question.dto";
+import {ParamsId} from "../../../../shared/dto/params-id";
 
 @Injectable()
 export class QuestionsRepository {
@@ -95,5 +96,29 @@ export class QuestionsRepository {
       return false;
     }
     return true;
+  }
+
+  async deleteQuestion(questionId: string): Promise<boolean> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    const manager = queryRunner.manager;
+    try {
+      const result = await manager.delete(Answers, {questionId})
+
+      if (result.affected === 0) {
+        return false
+      }
+
+      await manager.delete(Questions, {id: questionId})
+
+      return true
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      return false
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

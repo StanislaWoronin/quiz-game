@@ -48,13 +48,14 @@ const repositories = [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: 'postgresql://postgres:admin@localhost:5432/quiz_game',
+      // url: 'postgresql://postgres:admin@localhost:5432/quiz_game',
+      url: 'postgres://Bucktabu:XLwGsHz65uMy@ep-super-cloud-404173.eu-central-1.aws.neon.tech/neondb',
       // process.env.ENV_TYPE === 'local'
       //     ? process.env.POSTGRES_LOCAL_URI
       //     : process.env.POSTGRES_URI,
       autoLoadEntities: true,
       synchronize: true,
-      ssl: false,
+      ssl: true,
     }),
     TypeOrmModule.forFeature([...entity]),
   ],

@@ -82,8 +82,13 @@ export class QuestionsController {
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete('id')
-  async deleteQuestion(@Param('id') questionId: ParamsId) {
-    return true;
+  @Delete(':id')
+  async deleteQuestion(@Param('id') questionId: string) {
+    const isDeleted = await this.questionsService.deleteQuestion(questionId);
+
+    if (!isDeleted) {
+      throw new NotFoundException()
+    }
+    return
   }
 }
