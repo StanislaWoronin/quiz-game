@@ -1,10 +1,10 @@
-import { QueryParametersDto } from '../../../shared/pagination/query-parameters/query-parameters.dto';
-import { ViewPage } from '../../../shared/pagination/view-page';
+import { QuestionsQueryDto } from '../api/dto/query/questions-query.dto';
+import { ViewPage } from '../../../../shared/pagination/view-page';
 import { ViewQuestion } from "../api/view/view-question";
 
 export interface IQuestionsQueryRepository {
-  getAllQuestions(
-    query: QueryParametersDto,
+  getQuestions(
+    query: QuestionsQueryDto,
   ): Promise<ViewPage<ViewQuestion>>;
   questionExists(questionId: string): Promise<boolean | null>;
 }

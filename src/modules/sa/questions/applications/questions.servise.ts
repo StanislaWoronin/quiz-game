@@ -1,13 +1,14 @@
 import { CreatedQuestions } from '../api/view/created-questions';
 import { CreateQuestionDto } from '../api/dto/create-question.dto';
 import { NewQuestionDto } from './dto/new-question.dto';
-import { Inject } from '@nestjs/common';
+import {Inject, Injectable} from '@nestjs/common';
 import { IQuestionsRepository } from '../infrastructure/i-questions.repository';
 import { UpdatePublishStatusDto } from "../api/dto/update-publish-status.dto";
 import { IQuestionsQueryRepository } from "../infrastructure/i-questions-query.repository";
 import { UpdateQuestionDto } from "../api/dto/update-question.dto";
-import {ParamsId} from "../../../shared/dto/params-id";
+import {ParamsId} from "../../../../shared/dto/params-id";
 
+@Injectable()
 export class QuestionsService {
   constructor(
     @Inject(IQuestionsRepository)

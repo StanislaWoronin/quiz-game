@@ -1,13 +1,13 @@
-import { CreatedQuestions } from '../../../src/modules/questions/api/view/created-questions';
+import { CreatedQuestions } from '../../../src/modules/sa/questions/api/view/created-questions';
 import request from 'supertest';
 import { endpoints } from '../routing/routing';
 import { ViewPage } from '../../../src/shared/pagination/view-page';
 import { getUrlWithQuery } from '../routing/get-url/url-with-query';
 import { Query } from "../routing/query";
-import {UpdateQuestionDto} from "../../../src/modules/questions/api/dto/update-question.dto";
+import {UpdateQuestionDto} from "../../../src/modules/sa/questions/api/dto/update-question.dto";
 
 import {getUrlWithId} from "../routing/get-url/url-with-id";
-import {UpdatePublishStatusDto} from "../../../src/modules/questions/api/dto/update-publish-status.dto";
+import {UpdatePublishStatusDto} from "../../../src/modules/sa/questions/api/dto/update-publish-status.dto";
 import {getUrlForUpdatePublishStatus} from "../routing/get-url/questions-url";
 import { ErrorsMessages } from "../../../src/shared/dto/errors-messages";
 

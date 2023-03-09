@@ -1,4 +1,4 @@
-import { PublishedStatus } from '../../../src/shared/pagination/query-parameters/published-status';
+import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
 import { SortByField } from '../../../src/shared/pagination/query-parameters/sort-by-field';
 import { SortDirection } from '../../../src/shared/pagination/query-parameters/sort-direction';
 

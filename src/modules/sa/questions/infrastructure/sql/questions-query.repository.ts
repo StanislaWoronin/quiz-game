@@ -1,18 +1,17 @@
 import {Injectable} from '@nestjs/common';
 import {InjectDataSource} from '@nestjs/typeorm';
 import {DataSource} from 'typeorm';
-import {QueryParametersDto} from '../../../../shared/pagination/query-parameters/query-parameters.dto';
+import {QuestionsQueryDto} from '../../api/dto/query/questions-query.dto';
 import {CreatedQuestions} from '../../api/view/created-questions';
-import {ViewPage} from '../../../../shared/pagination/view-page';
-import {giveSkipNumber} from "../../../../shared/pagination/helpers";
-import {PublishedStatus} from "../../../../shared/pagination/query-parameters/published-status";
+import {ViewPage} from '../../../../../shared/pagination/view-page';
+import {PublishedStatus} from "../../api/dto/query/published-status";
 
 @Injectable()
 export class QuestionsQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async getAllQuestions(
-    queryDto: QueryParametersDto,
+  async getQuestions(
+    queryDto: QuestionsQueryDto,
   ): Promise<ViewPage<CreatedQuestions>> {
     const filter = this.getFilter(queryDto)
 
@@ -23,10 +22,7 @@ export class QuestionsQueryRepository {
         FROM questions q
              ${filter}
       ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-      LIMIT ${queryDto.pageSize} OFFSET ${giveSkipNumber(
-        queryDto.pageNumber,
-        queryDto.pageSize,
-      )};
+      LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};
     `
     const questions = await this.dataSource.query(query)
 
@@ -58,7 +54,7 @@ export class QuestionsQueryRepository {
     return result[0].published
   }
 
-  private getFilter(query: QueryParametersDto): string {
+  private getFilter(query: QuestionsQueryDto): string {
     const { bodySearchTerm, publishedStatus } = query
 
     let status

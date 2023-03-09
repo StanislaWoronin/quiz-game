@@ -1,5 +1,5 @@
 import { preparedQuestions } from '../prepeared-data/prepared-questions';
-import {CreatedQuestions} from "../../../src/modules/questions/api/view/created-questions";
+import {CreatedQuestions} from "../../../src/modules/sa/questions/api/view/created-questions";
 import {ViewPage} from "../../../src/shared/pagination/view-page";
 import {SortByField} from "../../../src/shared/pagination/query-parameters/sort-by-field";
 import {SortDirection} from "../../../src/shared/pagination/query-parameters/sort-direction";

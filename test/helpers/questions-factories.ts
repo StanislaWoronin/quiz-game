@@ -1,5 +1,5 @@
-import { CreatedQuestions } from "../../src/modules/questions/api/view/created-questions";
-import { CreateQuestionDto } from "../../src/modules/questions/api/dto/create-question.dto";
+import { CreatedQuestions } from "../../src/modules/sa/questions/api/view/created-questions";
+import { CreateQuestionDto } from "../../src/modules/sa/questions/api/dto/create-question.dto";
 import { faker } from "@faker-js/faker";
 import { Questions } from "./request/questions";
 import { preparedSuperUser } from "./prepeared-data/prepared-super-user";
