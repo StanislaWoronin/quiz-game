@@ -6,6 +6,7 @@ export const endpoints = {
     quiz: {
       questions: `${saController}/quiz/questions`,
     },
+    users: `${saController}/users`
   },
   testing: {
     allData: `${testingController}/all-data`,

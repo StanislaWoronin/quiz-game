@@ -1,6 +1,6 @@
 import {
     Body,
-    Controller,
+    Controller, Delete,
     Get,
     HttpCode,
     HttpStatus,
@@ -52,5 +52,13 @@ export class UsersController {
       @Body() dto: UpdateUserBanStatusDto
     ) {
         return await this.usersService.updateUserBanInfo(userId, dto)
+    }
+
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @Delete(':id')
+    async deleteUser(
+      @Param('id') userId: string,
+    ) {
+        return await this.usersService.deleteUser(userId)
     }
 }

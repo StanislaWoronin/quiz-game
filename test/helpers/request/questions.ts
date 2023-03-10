@@ -28,10 +28,10 @@ export class Questions {
     return { body: response.body, status: response.status };
   }
 
-  async getAllQuestions(
+  async getQuestions(
     superUser: { login: string; password: string },
     query?: Query,
-  ): Promise<{ body: ViewPage<CreatedQuestions>; status: number }> {
+  ): Promise<{ body: ViewPage<CreatedQuestions>, status: number }> {
     let url = endpoints.sa.quiz.questions;
     if (query) {
       url = getUrlWithQuery(endpoints.sa.quiz.questions, query);

@@ -3,14 +3,6 @@ import { SortByField } from "../../../src/common/pagination/query-parameters/sor
 import { SortDirection } from "../../../src/common/pagination/query-parameters/sort-direction";
 
 export const preparedQuery = {
-  onlySearchTerm: {
-    bodySearchTerm: '1',
-    publishedStatus: null,
-    sortBy: null,
-    sortDirection: null,
-    pageNumber: null,
-    pageSize: null,
-  },
   notPublished_id_asc_1_3: {
     bodySearchTerm: null,
     publishedStatus: PublishedStatus.NotPublished,

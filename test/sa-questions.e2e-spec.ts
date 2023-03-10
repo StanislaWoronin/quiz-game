@@ -2,7 +2,7 @@ import {Test, TestingModule} from '@nestjs/testing';
 import {HttpStatus, INestApplication} from '@nestjs/common';
 import {AppModule} from './../src/app.module';
 import {createApp} from '../src/helpers/create-app';
-import {QuestionsFactories} from './helpers/questions-factories';
+import {QuestionsFactories} from './helpers/factories/questions-factories';
 import {Testing} from './helpers/request/testing';
 import {Questions} from './helpers/request/questions';
 import {preparedSuperUser} from './helpers/prepeared-data/prepared-super-user';
@@ -16,6 +16,7 @@ import {SortByField} from "../src/common/pagination/query-parameters/sort-by-fie
 import {SortDirection} from "../src/common/pagination/query-parameters/sort-direction";
 import {preparedQuestions} from "./helpers/prepeared-data/prepared-questions";
 import {getErrorMessage} from "./helpers/routing/errors-messages";
+import {getErrorsMessage} from "./helpers/expect-data/expect-errors-messages";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -61,7 +62,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('Try create question with incorrect input data', async () => {
-        const errorsMessages = questionsFactories.getErrorsMessage(['body']);
+        const errorsMessages = getErrorsMessage(['body']);
 
         const requestWithLongInputData = await questions.createQuestion(
           preparedSuperUser.valid,
@@ -85,10 +86,8 @@ describe('/sa/quiz/questions (e2e)', () => {
           preparedSuperUser.valid,
           preparedQuestions.valid,
         );
-        expect(response.status).toBe(HttpStatus.OK);
-        expect(response.body).toStrictEqual(
-          expectCreatedQuestion(),
-        );
+        expect(response.status).toBe(HttpStatus.CREATED);
+        expect(response.body).toStrictEqual(expectCreatedQuestion());
       });
     });
 
@@ -98,21 +97,17 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('Create data', async () => {
-        const question = await questions.createQuestion(
-            preparedSuperUser.valid,
-            preparedQuestions.valid,
-        );
-        expect(question.status).toBe(HttpStatus.OK);
+        const [question] = await questionsFactories.createQuestions(1);
 
         const questionWithoutAnswers = await questions.createQuestion(
             preparedSuperUser.valid,
             preparedQuestions.withoutAnswers,
         )
-        expect(questionWithoutAnswers.status).toBe(HttpStatus.OK);
+        expect(questionWithoutAnswers.status).toBe(HttpStatus.CREATED);
 
         expect.setState({
-          question: question.body,
-          questionId: question.body.id,
+          question: question,
+          questionId: question.id,
           questionWithoutAnswersId: questionWithoutAnswers.body.id,
         })
       })
@@ -141,6 +136,9 @@ describe('/sa/quiz/questions (e2e)', () => {
         const response = await questions
             .updateQuestionStatus(preparedSuperUser.valid, questionId, preparedQuestions.publishStatus.true)
         expect(response.status).toBe(HttpStatus.NO_CONTENT)
+
+        const question = await questions.getQuestions(preparedSuperUser.valid)
+        expect(question.body.items[0].published).toBe(true)
       })
 
       it('Should update "published" status. Set status "false"', async () => {
@@ -149,6 +147,9 @@ describe('/sa/quiz/questions (e2e)', () => {
         const response = await questions
             .updateQuestionStatus(preparedSuperUser.valid, questionId, preparedQuestions.publishStatus.false)
         expect(response.status).toBe(HttpStatus.NO_CONTENT)
+
+        const question = await questions.getQuestions(preparedSuperUser.valid)
+        expect(question.body.items[0].published).toBe(false)
       })
     })
 
@@ -158,15 +159,11 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('Create data', async () => {
-        const response = await questions.createQuestion(
-            preparedSuperUser.valid,
-            preparedQuestions.valid,
-        );
-        expect(response.status).toBe(HttpStatus.OK);
+        const [question] = await questionsFactories.createQuestions(1);
 
         expect.setState({
-          question: response.body,
-          questionId: response.body.id
+          question,
+          questionId: question.id
         })
       })
 
@@ -239,14 +236,14 @@ describe('/sa/quiz/questions (e2e)', () => {
       })
 
       it('User without permissions try to get a question', async () => {
-        const request = await questions.getAllQuestions(
+        const request = await questions.getQuestions(
           preparedSuperUser.notValid
         );
         expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
       });
 
       it('Get all question without query', async () => {
-        const request = await questions.getAllQuestions(
+        const request = await questions.getQuestions(
           preparedSuperUser.valid
         );
         expect(request.status).toBe(HttpStatus.OK);
@@ -265,7 +262,7 @@ describe('/sa/quiz/questions (e2e)', () => {
           [...createdQuestions]
         )
 
-        const request = await questions.getAllQuestions(
+        const request = await questions.getQuestions(
           preparedSuperUser.valid,
           preparedQuery.notPublished_id_asc_1_3
         );
@@ -286,7 +283,7 @@ describe('/sa/quiz/questions (e2e)', () => {
           [...publishedQuestionsId]
         )
 
-        const request = await questions.getAllQuestions(
+        const request = await questions.getQuestions(
           preparedSuperUser.valid,
           preparedQuery.notPublished_body_desc_2_3
         );
@@ -297,7 +294,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       it('Search vie "bodySearchTerm"', async () => {
         const {createdQuestions, publishedQuestionsId} = expect.getState()
 
-        const request = await questions.getAllQuestions(
+        const request = await questions.getQuestions(
             preparedSuperUser.valid,
             preparedQuery.bodySearchTerm
         );

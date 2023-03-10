@@ -18,14 +18,15 @@ export class UsersQueryRepository {
 
         const query = `
             SELECT u.id, u.login, u.email, u."createdAt",
-                   b."banStatus" AS "isBanned", b."banDate", b."banReason"
+                   bi."isBanned", bi."banDate", bi."banReason"
               FROM users u
               LEFT JOIN user_ban_info bi
-                ON u.id = b."userId"
+                ON u.id = bi."userId"
                    ${filter}
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};         
         `
+        console.log(query)
         const users: UserWithBanInfoDb[] = await this.dataSource.query(query)
         const items = users.map(u => toViewUser(u))
 
@@ -33,7 +34,7 @@ export class UsersQueryRepository {
             SELECT COUNT(*)
               FROM users u
               LEFT JOIN user_ban_info bi
-                ON u.id = b."userId"
+                ON u.id = bi."userId"
                    ${filter}
         `
         const totalCount = await this.dataSource.query(countQuery)
@@ -55,7 +56,7 @@ export class UsersQueryRepository {
             if (searchLoginTerm && searchEmailTerm) {
                 return `${banStatusFilter} AND ${searchLoginFilter} OR ${searchEmailFilter}`
             }
-            if (searchLoginTerm) {
+            if (searchLoginTerm !== null) {
                 return `${banStatusFilter} AND ${searchLoginFilter}`
             }
             if (searchEmailTerm) {
@@ -65,7 +66,7 @@ export class UsersQueryRepository {
         if (searchLoginTerm && searchEmailTerm) {
             return `WHERE ${searchLoginFilter} OR ${searchEmailFilter}`
         }
-        if (searchLoginTerm) {
+        if (searchLoginTerm ?? '') {
             return `WHERE ${searchLoginFilter}`
         }
         if (searchEmailFilter) {

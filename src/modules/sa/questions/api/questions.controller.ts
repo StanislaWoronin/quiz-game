@@ -33,7 +33,6 @@ export class QuestionsController {
     protected questionsQueryRepository: IQuestionsQueryRepository,
   ) {}
 
-  @HttpCode(HttpStatus.OK)
   @Post()
   async createQuestion(
     @Body() dto: CreateQuestionDto,

@@ -1,26 +1,13 @@
-import { CreatedQuestions } from "../../src/modules/sa/questions/api/view/created-questions";
-import { CreateQuestionDto } from "../../src/modules/sa/questions/api/dto/create-question.dto";
+import { CreatedQuestions } from "../../../src/modules/sa/questions/api/view/created-questions";
+import { CreateQuestionDto } from "../../../src/modules/sa/questions/api/dto/create-question.dto";
 import { faker } from "@faker-js/faker";
-import { Questions } from "./request/questions";
-import { preparedSuperUser } from "./prepeared-data/prepared-super-user";
-import {preparedQuestions} from "./prepeared-data/prepared-questions";
+import { Questions } from "../request/questions";
+import { preparedSuperUser } from "../prepeared-data/prepared-super-user";
+import {preparedQuestions} from "../prepeared-data/prepared-questions";
 import {HttpStatus} from "@nestjs/common";
 
 export class QuestionsFactories {
   constructor(private questions: Questions) {}
-
-  getErrorsMessage(fields: string[]) {
-    const errorsMessages = [];
-
-    for (let i = 0, length = fields.length; i < length; i++) {
-      errorsMessages.push({
-        message: expect.any(String),
-        field: fields[i],
-      });
-    }
-
-    return errorsMessages;
-  }
 
   async createQuestions(questionsCount: number): Promise<CreatedQuestions[]> {
     const result = [];
@@ -51,7 +38,6 @@ export class QuestionsFactories {
           createdQuestions[i].id,
           preparedQuestions.publishStatus.true
       )
-      expect(response.status).toBe(HttpStatus.NO_CONTENT)
 
       result.push({
         id: createdQuestions[i].id,

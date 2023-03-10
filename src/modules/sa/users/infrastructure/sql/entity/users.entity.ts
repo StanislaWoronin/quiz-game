@@ -22,6 +22,13 @@ export class Users {
     })
     email: string;
 
+    @Column({
+        type: 'character varying',
+        nullable: false,
+        collation: 'C'
+    })
+    createdAt: string;
+
     @OneToOne(() => UserBanInfo, (bi) => bi.user)
     banInfo: UserBanInfo;
 

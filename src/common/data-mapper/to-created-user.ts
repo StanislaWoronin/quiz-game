@@ -1,5 +1,5 @@
-import {CreatedUserDb} from "../../modules/sa/users/infrastructure/sql/pojo/created-user-db";
 import {CreatedUser} from "../../modules/sa/users/api/view/created-user";
+import {CreatedUserDb} from "../../modules/sa/users/infrastructure/sql/pojo/created-user.db";
 
 export const toCreatedUser = (
     createdUser: CreatedUserDb,

@@ -34,18 +34,20 @@ export class UsersRepository {
             return toCreatedUser(createdUser)
         } catch (e) {
             await queryRunner.rollbackTransaction()
+            console.log(e)
             return null
         } finally {
             await queryRunner.release();
         }
     }
 
-    async updateBanStatus(userId: string, dto: UpdateUserBanStatusDto): Promise<boolean> {
-        await this.dataSource.getRepository(UserBanInfo).upsert([
-            {isBanned: dto.isBanned},
-            {banReason: dto.banReason},
-            {banDate: new Date().toISOString()}
-        ], [userId])
+    async updateBanStatus(id: string, dto: UpdateUserBanStatusDto): Promise<boolean> {
+        const a = await this.dataSource.getRepository(UserBanInfo).upsert({
+            userId: id,
+            isBanned: dto.isBanned,
+            banReason: dto.banReason,
+            banDate: new Date().toISOString()
+        }, ['userId'])
 
         return true
     }
@@ -54,5 +56,20 @@ export class UsersRepository {
         await this.dataSource.getRepository(UserBanInfo).delete({userId})
 
         return true
+    }
+
+    async deleteUser(userId: string): Promise<boolean> {
+        const query = `
+            DELETE FROM users u
+              LEFT JOIN ban_ban_info ban_ban_info  
+                ON u.id = bi."userId"
+             WHERE u.id = '${userId}';
+        `
+        const result = await this.dataSource.query(query)
+
+        if (result[1] !== 0) {
+            return false;
+        }
+        return true;
     }
 }

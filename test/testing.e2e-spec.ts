@@ -1,5 +1,5 @@
 import { INestApplication } from "@nestjs/common";
-import { QuestionsFactories } from "./helpers/questions-factories";
+import { QuestionsFactories } from "./helpers/factories/questions-factories";
 import { Questions } from "./helpers/request/questions";
 import { Testing } from "./helpers/request/testing";
 import { Test, TestingModule } from "@nestjs/testing";
@@ -7,6 +7,7 @@ import { AppModule } from "../src/app.module";
 import { createApp } from "../src/helpers/create-app";
 import { preparedSuperUser } from "./helpers/prepeared-data/prepared-super-user";
 import { preparedQuestions } from "./helpers/prepeared-data/prepared-questions";
+import {Users} from "./helpers/request/users";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -17,6 +18,7 @@ describe('/sa/quiz/questions (e2e)', () => {
   let factories: QuestionsFactories;
   let questions: Questions;
   let testing: Testing;
+  let users: Users;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -30,7 +32,8 @@ describe('/sa/quiz/questions (e2e)', () => {
 
     questions = new Questions(server);
     testing = new Testing(server);
-    factories = new QuestionsFactories(questions);
+    users = new Users(server)
+
   });
 
   afterAll(async () => {
@@ -45,6 +48,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     it('Create data', async () => {
       // createQuestion contains one row in table Question and tree row in table Answer -> SUM 4 row
       await questions.createQuestion(preparedSuperUser.valid,preparedQuestions.valid)
+
 
       const rowCount = await testing.getAllRowCount()
       expect(rowCount).toBe(4)

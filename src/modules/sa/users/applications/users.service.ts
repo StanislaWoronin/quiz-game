@@ -19,19 +19,27 @@ export class UsersService {
     async createUser(dto: CreateUserDto): Promise<CreatedUser> {
         const newUser = new NewUserDto(dto);
 
-        const saltOrRounds = settings.SALT_GENERATE_ROUND;
-        const password = dto.password;
-        const hash = await bcrypt.hash(password, saltOrRounds);
+        try {
+            const salt = await bcrypt.genSalt(Number(settings.SALT_GENERATE_ROUND))
+            const hash = await bcrypt.hash(dto.password, salt);
 
-        return await this.usersRepository.createUser(newUser, hash);
+            return await this.usersRepository.createUser(newUser, hash);
+        } catch (e) {
+            // Error try again
+        }
     }
 
     async updateUserBanInfo(userId: string, dto: UpdateUserBanStatusDto): Promise<boolean> {
         if (!dto.isBanned) {
             await this.usersRepository.removeBanStatus(userId)
+        } else {
+            await this.usersRepository.updateBanStatus(userId, dto)
         }
-        await this.usersRepository.updateBanStatus(userId, dto)
 
         return true
+    }
+
+    async deleteUser(userId: string): Promise<boolean> {
+        return await this.usersRepository.deleteUser(userId)
     }
 }
