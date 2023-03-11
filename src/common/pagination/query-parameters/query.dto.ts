@@ -1,7 +1,7 @@
-import {giveSkipNumber} from "../pagination/helpers";
+import {giveSkipNumber} from "../helpers";
 import {IsEnum, IsInt, IsOptional, Min} from "class-validator";
-import {SortByField} from "../pagination/query-parameters/sort-by-field";
-import {SortDirection} from "../pagination/query-parameters/sort-direction";
+import {SortByField} from "./sort-by-field";
+import {SortDirection} from "./sort-direction";
 import {Type} from "class-transformer";
 
 export class QueryDto {
@@ -38,6 +38,6 @@ export class QueryDto {
 
     /**
      * Property "skip" are only getter. Don\'t set value
-     */
-    skip?: number = 0;
+*/
+skip?: number = 0;
 }

@@ -1,6 +1,4 @@
-import { Query } from '../query';
-
-export const getUrlWithQuery = (endpoint: string, query): string => {
+export const getUrlWithQuery = <T>(endpoint: string, query: T): string => {
   let url = endpoint;
 
   if (Object.keys(query).length) {

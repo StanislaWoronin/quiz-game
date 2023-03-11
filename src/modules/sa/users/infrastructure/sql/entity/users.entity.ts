@@ -29,9 +29,16 @@ export class Users {
     })
     createdAt: string;
 
-    @OneToOne(() => UserBanInfo, (bi) => bi.user)
+    @OneToOne(
+      () => UserBanInfo,
+      (bi) => bi.user,
+      { cascade: true })
     banInfo: UserBanInfo;
 
-    @OneToOne(() => Credentials, (c) => c.user)
+    @OneToOne(
+      () => Credentials,
+      (c) => c.user,
+      { cascade: true }
+    )
     credentials: Credentials;
 }

@@ -26,7 +26,6 @@ export class UsersQueryRepository {
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};         
         `
-        console.log(query)
         const users: UserWithBanInfoDb[] = await this.dataSource.query(query)
         const items = users.map(u => toViewUser(u))
 
@@ -48,28 +47,28 @@ export class UsersQueryRepository {
 
     private getFilter(query: UsersQueryDto): string {
         const { banStatus, searchLoginTerm, searchEmailTerm } = query;
+        const banStatusFilter = `bi.banStatus = ${banStatus}`
         const searchLoginFilter = `u.login ILIKE '%${searchLoginTerm}%'`
         const searchEmailFilter = `u.email ILIKE '%${searchEmailTerm}%'`
 
         if (banStatus !== BanStatus.All) {
-            let banStatusFilter = `WHERE bi.banStatus = ${banStatus}`
             if (searchLoginTerm && searchEmailTerm) {
-                return `${banStatusFilter} AND ${searchLoginFilter} OR ${searchEmailFilter}`
+                return `WHERE ${banStatusFilter} AND ${searchLoginFilter} OR ${searchEmailFilter}`
             }
-            if (searchLoginTerm !== null) {
-                return `${banStatusFilter} AND ${searchLoginFilter}`
+            if (searchLoginTerm) {
+                return `WHERE ${banStatusFilter} AND ${searchLoginFilter}`
             }
             if (searchEmailTerm) {
-                return `${banStatusFilter} AND ${searchEmailFilter}`
+                return `WHERE ${banStatusFilter} AND ${searchEmailFilter}`
             }
         }
         if (searchLoginTerm && searchEmailTerm) {
             return `WHERE ${searchLoginFilter} OR ${searchEmailFilter}`
         }
-        if (searchLoginTerm ?? '') {
+        if (searchLoginTerm) {
             return `WHERE ${searchLoginFilter}`
         }
-        if (searchEmailFilter) {
+        if (searchEmailTerm) {
             return `WHERE ${searchEmailFilter}`
         }
 

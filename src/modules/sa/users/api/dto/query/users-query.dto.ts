@@ -1,4 +1,4 @@
-import {QueryDto} from "../../../../../../common/dto/query.dto";
+import {QueryDto} from "../../../../../../common/pagination/query-parameters/query.dto";
 import {IsEnum, IsOptional, IsString} from "class-validator";
 import {BanStatus} from "./ban-status";
 
@@ -9,9 +9,9 @@ export class UsersQueryDto extends QueryDto {
 
     @IsString()
     @IsOptional()
-    searchLoginTerm: string | null = null;
+    searchLoginTerm: string | null;
 
     @IsString()
     @IsOptional()
-    searchEmailTerm: string | null = null;
+    searchEmailTerm: string | null;
 }

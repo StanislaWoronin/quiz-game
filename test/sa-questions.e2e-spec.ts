@@ -1,7 +1,7 @@
 import {Test, TestingModule} from '@nestjs/testing';
 import {HttpStatus, INestApplication} from '@nestjs/common';
 import {AppModule} from './../src/app.module';
-import {createApp} from '../src/helpers/create-app';
+import {createApp} from '../src/common/create-app';
 import {QuestionsFactories} from './helpers/factories/questions-factories';
 import {Testing} from './helpers/request/testing';
 import {Questions} from './helpers/request/questions';
@@ -138,7 +138,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         expect(response.status).toBe(HttpStatus.NO_CONTENT)
 
         const question = await questions.getQuestions(preparedSuperUser.valid)
-        expect(question.body.items[0].published).toBe(true)
+        expect(question.body.items[1].published).toBe(true)
       })
 
       it('Should update "published" status. Set status "false"', async () => {
@@ -182,7 +182,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
       })
 
-      it('Shouldn update question if the inputModel has incorrect values',async () => {
+      it('Shouldn`t update question if the inputModel has incorrect values',async () => {
 
         const {questionId} = expect.getState()
         const incorrectBody = getErrorMessage(['body'])
@@ -204,6 +204,10 @@ describe('/sa/quiz/questions (e2e)', () => {
         const response = await questions
             .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.update)
         expect(response.status).toBe(HttpStatus.NO_CONTENT)
+
+        const question = await questions.getQuestions(preparedSuperUser.valid)
+        expect(question.body.items[0].body).toStrictEqual(preparedQuestions.update.body)
+        expect(question.body.items[0].correctAnswers).toStrictEqual(preparedQuestions.update.correctAnswers)
       })
 
       it('Shouldn`t update question if property "correctAnswers" are not passed but' +
@@ -313,7 +317,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       it('Create data', async () => {
         const [createdQuestions] = await questionsFactories.createQuestions(1)
 
-        expect. setState({
+        expect.setState({
           questionId: createdQuestions.id
         })
       })

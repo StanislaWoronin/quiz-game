@@ -2,12 +2,11 @@ import {HttpStatus, INestApplication} from "@nestjs/common";
 import {Testing} from "./helpers/request/testing";
 import {Test, TestingModule} from "@nestjs/testing";
 import {AppModule} from "../src/app.module";
-import {createApp} from "../src/helpers/create-app";
+import {createApp} from "../src/common/create-app";
 import {Users} from "./helpers/request/users";
 import {preparedSuperUser} from "./helpers/prepeared-data/prepared-super-user";
 import {preparedUser} from "./helpers/prepeared-data/prepared-user";
 import {getErrorsMessage} from "./helpers/expect-data/expect-errors-messages";
-import {expectCreatedQuestion} from "./helpers/expect-data/expect-questions";
 import {expectCreatedUser} from "./helpers/expect-data/expect-user";
 import {UsersFactory} from "./helpers/factories/users-factory";
 
@@ -131,8 +130,8 @@ describe('/sa/users (e2e)', () => {
                 );
                 expect(response.status).toBe(HttpStatus.NO_CONTENT);
 
-                // const user = await users.getUsers(preparedSuperUser.valid)
-                // expect(user.body.items[0].banInfo.isBanned).toBe(true) // TODO uncomment
+                const user = await users.getUsers(preparedSuperUser.valid)
+                expect(user.body.items[0].banInfo.isBanned).toBe(true) // TODO uncomment
             })
 
             it('Should update ban status. Set status "false"', async () => {
@@ -145,8 +144,8 @@ describe('/sa/users (e2e)', () => {
                 );
                 expect(response.status).toBe(HttpStatus.NO_CONTENT);
 
-                // const user = await users.getUsers(preparedSuperUser.valid)
-                // expect(user.body.items[0].banInfo.isBanned).toBe(false) // TODO uncomment
+                const user = await users.getUsers(preparedSuperUser.valid)
+                expect(user.body.items[0].banInfo.isBanned).toBe(false) // TODO uncomment
             })
         })
 
@@ -177,6 +176,49 @@ describe('/sa/users (e2e)', () => {
                 expect(request.status).toBe(HttpStatus.OK);
                 expect(request.body.items).toHaveLength(10)
             })
+
+            it('', async () => {
+                // TODO
+            })
+        })
+
+        describe('DELETE -> "sa/users/:id"', () => {
+            it('Clear all data', async () => {
+                await testing.clearDb();
+            });
+
+            it('Create data', async () => {
+                const [user] = await usersFactories.createUsers(1)
+
+                expect.setState({
+                    userId: user.id
+                })
+            })
+
+            it('User without permissions try delete another user', async () => {
+                const { userId } = expect.getState()
+
+                const status = await users.deleteUser(preparedSuperUser.notValid, userId)
+                expect(status).toBe(HttpStatus.UNAUTHORIZED)
+            })
+
+            it('Should delete user', async () => {
+                const { userId } = expect.getState()
+
+                const status = await users.deleteUser(preparedSuperUser.valid, userId)
+                expect(status).toBe(HttpStatus.NO_CONTENT)
+            })
+
+            // it('Try delete not exist user', async () => {
+            //     const { userId } = expect.getState()
+            //     const randomId = randomUUID()
+            //
+            //     const status = await users.deleteUser(preparedSuperUser.valid, randomId)
+            //     expect(status).toBe(HttpStatus.NOT_FOUND)
+            //
+            //     const deletedAgain = await users.deleteUser(preparedSuperUser.valid, userId)
+            //     expect(deletedAgain).toBe(HttpStatus.NOT_FOUND)
+            // })
         })
     })
 });

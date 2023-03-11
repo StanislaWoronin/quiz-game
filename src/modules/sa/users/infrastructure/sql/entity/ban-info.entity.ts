@@ -23,7 +23,10 @@ export class UserBanInfo {
     })
     banReason: string;
 
-    @OneToOne(() => Users, (u) => u.banInfo)
+    @OneToOne(
+      () => Users,
+      (u) => u.banInfo,
+      { onDelete: 'CASCADE' })
     @JoinColumn()
     user: Users;
     @PrimaryColumn() userId: string;

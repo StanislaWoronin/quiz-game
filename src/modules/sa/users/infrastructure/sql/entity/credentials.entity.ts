@@ -9,7 +9,10 @@ export class Credentials {
     })
     credentials: string;
 
-    @OneToOne(() => Users, (u) => u.credentials)
+    @OneToOne(
+      () => Users,
+      (u) => u.credentials,
+      { onDelete: 'CASCADE' })
     @JoinColumn()
     user: Users;
     @PrimaryColumn() userId: string;

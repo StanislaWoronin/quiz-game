@@ -13,7 +13,7 @@ import {
   Query,
   UseGuards
 } from "@nestjs/common";
-import { AuthBasicGuard } from '../../../../guards/auth-basic.guard';
+import { AuthBasicGuard } from '../../../../common/guards/auth-basic.guard';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { CreatedQuestions } from './view/created-questions';
 import { QuestionsService } from '../applications/questions.servise';

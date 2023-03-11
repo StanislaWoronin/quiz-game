@@ -4,7 +4,7 @@ import { Questions } from "./helpers/request/questions";
 import { Testing } from "./helpers/request/testing";
 import { Test, TestingModule } from "@nestjs/testing";
 import { AppModule } from "../src/app.module";
-import { createApp } from "../src/helpers/create-app";
+import { createApp } from "../src/common/create-app";
 import { preparedSuperUser } from "./helpers/prepeared-data/prepared-super-user";
 import { preparedQuestions } from "./helpers/prepeared-data/prepared-questions";
 import {Users} from "./helpers/request/users";

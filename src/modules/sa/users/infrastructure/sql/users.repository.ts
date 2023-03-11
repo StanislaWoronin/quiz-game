@@ -59,17 +59,41 @@ export class UsersRepository {
     }
 
     async deleteUser(userId: string): Promise<boolean> {
-        const query = `
-            DELETE FROM users u
-              LEFT JOIN ban_ban_info ban_ban_info  
-                ON u.id = bi."userId"
-             WHERE u.id = '${userId}';
-        `
-        const result = await this.dataSource.query(query)
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
 
-        if (result[1] !== 0) {
-            return false;
+        const manager = queryRunner.manager;
+        try {
+            const result = await this.dataSource
+              .query(this
+                .getQuery('users', 'id'), [userId]);
+
+            if (result.affected === 0) {
+                return false
+            }
+
+            await this.dataSource
+              .query(this
+                .getQuery('credentials', 'userId'), [userId])
+
+            await this.dataSource
+              .query(this
+                .getQuery('user_ban_info', 'userId'), [userId])
+
+            return true
+        } catch (e) {
+            console.log(e);
+            await queryRunner.rollbackTransaction();
+            return false
+        } finally {
+            await queryRunner.release();
         }
-        return true;
+    }
+
+    private getQuery(tableName: string, fieldName: string): string {
+        return `DELETE 
+                  FROM ${tableName} CASCADE
+                 WHERE "${fieldName}" = $1`
     }
 }

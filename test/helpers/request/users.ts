@@ -3,13 +3,13 @@ import {CreateUserDto} from "../../../src/modules/sa/users/api/dto/create-user.d
 import request from "supertest";
 import {endpoints} from "../routing/routing";
 import {UpdateUserBanStatusDto} from "../../../src/modules/sa/users/api/dto/update-user-ban-status.dto";
-import {getUrlForUpdatePublishStatus} from "../routing/get-url/questions-url";
 import {getUrlForUpdateBanStatus} from "../routing/get-url/users-url";
 import {ErrorsMessages} from "../../../src/common/dto/errors-messages";
-import {Query} from "../routing/query";
 import {ViewPage} from "../../../src/common/pagination/view-page";
 import {ViewUser} from "../../../src/modules/sa/users/api/view/view-user";
 import {getUrlWithQuery} from "../routing/get-url/url-with-query";
+import { getUrlWithId } from "../routing/get-url/url-with-id";
+import { UsersQueryDto } from "../../../src/modules/sa/users/api/dto/query/users-query.dto";
 
 export class Users {
     constructor(private readonly server: any) {
@@ -31,11 +31,11 @@ export class Users {
 
     async getUsers(
         superUser: { login: string; password: string },
-        query?: Query,
+        query?: UsersQueryDto,
     ): Promise<{ body: ViewPage<ViewUser>, status: number }> {
         let url = endpoints.sa.users
         if (query) {
-            url = getUrlWithQuery(endpoints.sa.users, query)
+            url = getUrlWithQuery<UsersQueryDto>(endpoints.sa.users, query)
         }
 
         const response = await request(this.server)
@@ -62,5 +62,20 @@ export class Users {
             .send(dto)
 
         return { body: response.body, status: response.status };
+    }
+
+    async deleteUser(
+      superUser: { login: string; password: string },
+      userId: string
+    ): Promise<number> {
+        const url = getUrlWithId(endpoints.sa.users, userId)
+
+        const response = await request(this.server)
+          .delete(url)
+          .auth(superUser.login, superUser.password, {
+              type: 'basic'
+          })
+
+        return response.status
     }
 }

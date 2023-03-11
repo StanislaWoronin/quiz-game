@@ -54,18 +54,17 @@ export class QuestionsRepository {
 
     const manager = queryRunner.manager;
     try {
-      await manager.getRepository(Questions).update({
-        id: questionId
-      }, {
-        body: dto.body
-      })
+      await this.dataSource.createQueryBuilder().update(Questions)
+        .set({body: dto.body})
+        .where("id = :id", { id: questionId })
+        .execute()
 
-      await manager.getRepository(Answers).delete(questionId)
+      await manager.delete(Answers, {questionId})
 
-      for (const answer in dto.correctAnswers) {
+      for (let i = 0, length = dto.correctAnswers.length; i < length; i++) {
         await manager
           .getRepository(Answers)
-          .save({ questionId, correctAnswer: answer })
+          .save({ questionId: questionId, correctAnswer: dto.correctAnswers[i] })
       }
 
       return true
@@ -89,7 +88,7 @@ export class QuestionsRepository {
                       FROM answers
                      WHERE "questionId" = '${questionId}')
     `
-    const result = await this.dataSource.query(query )
+    const result = await this.dataSource.query(query)
 
     if (result[1] !== 1) {
       return false;
@@ -104,13 +103,12 @@ export class QuestionsRepository {
 
     const manager = queryRunner.manager;
     try {
-      const result = await manager.delete(Answers, {questionId})
-
+      const result = await manager.delete(Questions, {id: questionId})
       if (result.affected === 0) {
         return false
       }
 
-      await manager.delete(Questions, {id: questionId})
+      await manager.delete(Answers, {questionId})
 
       return true
     } catch (e) {

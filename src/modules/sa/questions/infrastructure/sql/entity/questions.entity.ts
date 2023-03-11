@@ -36,6 +36,7 @@ export class Questions {
   @OneToMany(
     () => Answers,
     (a) => a.question,
-    { cascade: true })
+    { cascade: true }
+  )
   correctAnswers: Answers
 }

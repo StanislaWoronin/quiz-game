@@ -4,12 +4,12 @@ import { SortDirection } from "../../../src/common/pagination/query-parameters/s
 
 export const preparedQuery = {
   notPublished_id_asc_1_3: {
-    bodySearchTerm: null,
     publishedStatus: PublishedStatus.NotPublished,
     sortBy: SortByField.Body,
     sortDirection: SortDirection.Ascending,
     pageNumber: 1,
     pageSize: 3,
+    bodySearchTerm: null,
   },
   notPublished_body_desc_2_3: {
     bodySearchTerm: null,

@@ -4,14 +4,14 @@ import {
     Get,
     HttpCode,
     HttpStatus,
-    Inject,
+    Inject, NotFoundException,
     Param,
     Post,
     Put,
     Query,
     UseGuards
 } from "@nestjs/common";
-import {AuthBasicGuard} from "../../../../guards/auth-basic.guard";
+import {AuthBasicGuard} from "../../../../common/guards/auth-basic.guard";
 import {UsersService} from "../applications/users.service";
 import {IUsersQueryRepository} from "../infrastructure/i-users-query.repository";
 import {CreateUserDto} from "./dto/create-user.dto";
@@ -59,6 +59,11 @@ export class UsersController {
     async deleteUser(
       @Param('id') userId: string,
     ) {
-        return await this.usersService.deleteUser(userId)
+        const isDeleted = await this.usersService.deleteUser(userId)
+
+        if (!isDeleted) {
+            throw new NotFoundException()
+        }
+        return
     }
 }
