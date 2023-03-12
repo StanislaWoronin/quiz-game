@@ -22,5 +22,5 @@ export const settings = {
     mongoose: 'mongo',
     sql: 'sql',
   },
-  currentRepository: 'mongo',
+  currentRepository: 'sql',
 };
