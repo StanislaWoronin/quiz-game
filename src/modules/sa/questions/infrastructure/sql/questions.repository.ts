@@ -3,8 +3,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { NewQuestionDto } from "../../applications/dto/new-question.dto";
 import { CreatedQuestions } from "../../api/view/created-questions";
-import { Questions } from "./entity/questions.entity";
-import { Answers } from "./entity/answers.entity";
+import { SqlQuestions } from "./entity/questions.entity";
+import { SqlAnswers } from "./entity/answers.entity";
 import { toCreatedQuestions } from "../../../../../common/data-mapper/to-created-quesions";
 import { CreatedQuestionsDb } from "./pojo/created-questions.db";
 import { UpdateQuestionDto } from "../../api/dto/update-question.dto";
@@ -24,13 +24,13 @@ export class QuestionsRepository {
     const manager = queryRunner.manager;
     try {
       const createdQuestions: CreatedQuestionsDb = await manager
-        .getRepository(Questions)
+        .getRepository(SqlQuestions)
         .save(newQuestion)
 
       let createdAnswer
       for (let i = 0, length = answers.length; i < length; i++) {
         createdAnswer = await manager
-          .getRepository(Answers)
+          .getRepository(SqlAnswers)
           .save({ questionId: createdQuestions.id, correctAnswer: answers[i] })
       }
 
@@ -54,16 +54,16 @@ export class QuestionsRepository {
 
     const manager = queryRunner.manager;
     try {
-      await this.dataSource.createQueryBuilder().update(Questions)
+      await this.dataSource.createQueryBuilder().update(SqlQuestions)
         .set({body: dto.body})
         .where("id = :id", { id: questionId })
         .execute()
 
-      await manager.delete(Answers, {questionId})
+      await manager.delete(SqlAnswers, {questionId})
 
       for (let i = 0, length = dto.correctAnswers.length; i < length; i++) {
         await manager
-          .getRepository(Answers)
+          .getRepository(SqlAnswers)
           .save({ questionId: questionId, correctAnswer: dto.correctAnswers[i] })
       }
 
@@ -103,12 +103,12 @@ export class QuestionsRepository {
 
     const manager = queryRunner.manager;
     try {
-      const result = await manager.delete(Questions, {id: questionId})
+      const result = await manager.delete(SqlQuestions, {id: questionId})
       if (result.affected === 0) {
         return false
       }
 
-      await manager.delete(Answers, {questionId})
+      await manager.delete(SqlAnswers, {questionId})
 
       return true
     } catch (e) {

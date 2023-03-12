@@ -2,13 +2,14 @@ import {HttpStatus, INestApplication} from "@nestjs/common";
 import {Testing} from "./helpers/request/testing";
 import {Test, TestingModule} from "@nestjs/testing";
 import {AppModule} from "../src/app.module";
-import {createApp} from "../src/common/create-app";
+import {createApp} from "../src/config/create-app";
 import {Users} from "./helpers/request/users";
 import {preparedSuperUser} from "./helpers/prepeared-data/prepared-super-user";
 import {preparedUser} from "./helpers/prepeared-data/prepared-user";
 import {getErrorsMessage} from "./helpers/expect-data/expect-errors-messages";
 import {expectCreatedUser} from "./helpers/expect-data/expect-user";
 import {UsersFactory} from "./helpers/factories/users-factory";
+import { randomUUID } from "crypto";
 
 describe('/sa/users (e2e)', () => {
     const second = 1000;
@@ -149,6 +150,7 @@ describe('/sa/users (e2e)', () => {
             })
         })
 
+
         describe('GET -> sa/users', () => {
             it('Clear all data', async () => {
                 await testing.clearDb();
@@ -209,16 +211,16 @@ describe('/sa/users (e2e)', () => {
                 expect(status).toBe(HttpStatus.NO_CONTENT)
             })
 
-            // it('Try delete not exist user', async () => {
-            //     const { userId } = expect.getState()
-            //     const randomId = randomUUID()
-            //
-            //     const status = await users.deleteUser(preparedSuperUser.valid, randomId)
-            //     expect(status).toBe(HttpStatus.NOT_FOUND)
-            //
-            //     const deletedAgain = await users.deleteUser(preparedSuperUser.valid, userId)
-            //     expect(deletedAgain).toBe(HttpStatus.NOT_FOUND)
-            // })
+            it('Try delete not exist user', async () => {
+                const { userId } = expect.getState()
+                const randomId = randomUUID()
+
+                const status = await users.deleteUser(preparedSuperUser.valid, randomId)
+                expect(status).toBe(HttpStatus.NOT_FOUND)
+
+                const deletedAgain = await users.deleteUser(preparedSuperUser.valid, userId)
+                expect(deletedAgain).toBe(HttpStatus.NOT_FOUND)
+            })
         })
     })
 });

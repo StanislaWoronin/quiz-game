@@ -3,6 +3,13 @@ import { QuestionsQueryRepository } from '../../modules/sa/questions/infrastruct
 import { TestingRepository } from "../../modules/testing/infrastructure/sql/testing.repository";
 import {UsersRepository} from "../../modules/sa/users/infrastructure/sql/users.repository";
 import {UsersQueryRepository} from "../../modules/sa/users/infrastructure/sql/users-query.repository";
+import { MUsersRepository } from "../../modules/sa/users/infrastructure/mongoose/m-users.repository";
+import { MUsersQueryRepository } from "../../modules/sa/users/infrastructure/mongoose/m-users-query.repository";
+import { MTestingRepository } from "../../modules/testing/infrastructure/mongoose/m-testing.repository";
+import {
+  MQuestionsQueryRepository
+} from "../../modules/sa/questions/infrastructure/mongoose/m-questions-query.repository";
+import { MQuestionsRepository } from "../../modules/sa/questions/infrastructure/mongoose/m-questions.repository";
 
 export const repositories = {
   sql: {
@@ -12,5 +19,11 @@ export const repositories = {
     usersRepository: UsersRepository,
     usersQueryRepository: UsersQueryRepository,
   },
-  mongo: {},
+  mongo: {
+    questionsRepository: MQuestionsRepository,
+    questionsQueryRepository: MQuestionsQueryRepository,
+    testingRepository: MTestingRepository,
+    usersRepository: MUsersRepository,
+    usersQueryRepository: MUsersQueryRepository,
+  },
 };

@@ -6,7 +6,6 @@ import { IQuestionsRepository } from '../infrastructure/i-questions.repository';
 import { UpdatePublishStatusDto } from "../api/dto/update-publish-status.dto";
 import { IQuestionsQueryRepository } from "../infrastructure/i-questions-query.repository";
 import { UpdateQuestionDto } from "../api/dto/update-question.dto";
-import {ParamsId} from "../../../../common/dto/params-id";
 
 @Injectable()
 export class QuestionsService {

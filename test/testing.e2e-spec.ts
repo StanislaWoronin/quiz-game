@@ -4,21 +4,21 @@ import { Questions } from "./helpers/request/questions";
 import { Testing } from "./helpers/request/testing";
 import { Test, TestingModule } from "@nestjs/testing";
 import { AppModule } from "../src/app.module";
-import { createApp } from "../src/common/create-app";
-import { preparedSuperUser } from "./helpers/prepeared-data/prepared-super-user";
-import { preparedQuestions } from "./helpers/prepeared-data/prepared-questions";
+import { createApp } from "../src/config/create-app";
 import {Users} from "./helpers/request/users";
+import { UsersFactory } from "./helpers/factories/users-factory";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
-  jest.setTimeout(30 * second);
+  jest.setTimeout(5 * second);
 
   let app: INestApplication;
   let server;
-  let factories: QuestionsFactories;
   let questions: Questions;
-  let testing: Testing;
+  let questionsFactory: QuestionsFactories;
   let users: Users;
+  let usersFactory: UsersFactory;
+  let testing: Testing;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -30,10 +30,11 @@ describe('/sa/quiz/questions (e2e)', () => {
     await app.init();
     server = await app.getHttpServer();
 
-    questions = new Questions(server);
     testing = new Testing(server);
-    users = new Users(server)
-
+    questions = new Questions(server);
+    questionsFactory = new QuestionsFactories(questions);
+    users = new Users(server);
+    usersFactory = new UsersFactory(users);
   });
 
   afterAll(async () => {
@@ -46,12 +47,13 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Create data', async () => {
-      // createQuestion contains one row in table Question and tree row in table Answer -> SUM 4 row
-      await questions.createQuestion(preparedSuperUser.valid,preparedQuestions.valid)
-
+      // createQuestion contains one row in table Questions and tree row in table Answers -> SUM 4 row
+      await questionsFactory.createQuestions(1)
+      // createAndBanUser contain one row in table Users, one row in Credentials and one row in UserBanInfo -> SUM 3 row
+      await usersFactory.crateAndBanUsers(1)
 
       const rowCount = await testing.getAllRowCount()
-      expect(rowCount).toBe(4)
+      expect(rowCount).toBe(7)
 
       expect.setState({rowCount});
     });

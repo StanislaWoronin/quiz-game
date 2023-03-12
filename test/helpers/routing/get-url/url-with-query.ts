@@ -1,3 +1,9 @@
+
+type PaginationQueryType = Partial<{
+  searchNameTerm: string
+  pageSize: number
+}>
+
 export const getUrlWithQuery = <T>(endpoint: string, query: T): string => {
   let url = endpoint;
 
@@ -13,3 +19,14 @@ export const getUrlWithQuery = <T>(endpoint: string, query: T): string => {
 
   return url.slice(0, -1);
 };
+
+export const testedFunc = (endpoint: string, {searchNameTerm = null, pageSize = 10}: PaginationQueryType) => {
+  let url = `${endpoint}?`
+  if (searchNameTerm) {
+    url += `searchNameTerm=${searchNameTerm}&`
+  }
+  if (pageSize){
+    url += `pageSize=${pageSize}`
+  }
+  return url
+}

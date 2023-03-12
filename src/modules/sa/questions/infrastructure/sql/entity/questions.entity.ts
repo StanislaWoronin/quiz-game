@@ -1,8 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Answers } from "./answers.entity";
+import { SqlAnswers } from "./answers.entity";
 
 @Entity()
-export class Questions {
+export class SqlQuestions {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
@@ -34,9 +34,9 @@ export class Questions {
   updatedAt: string;
 
   @OneToMany(
-    () => Answers,
+    () => SqlAnswers,
     (a) => a.question,
     { cascade: true }
   )
-  correctAnswers: Answers
+  correctAnswers: SqlAnswers
 }

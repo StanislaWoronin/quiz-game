@@ -1,8 +1,8 @@
 import {Column, Entity, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
-import {Users} from "./users.entity";
+import {SqlUsers} from "./users.entity";
 
 @Entity()
-export class UserBanInfo {
+export class SqlUserBanInfo {
     @Column({
         type: 'boolean',
     })
@@ -24,10 +24,10 @@ export class UserBanInfo {
     banReason: string;
 
     @OneToOne(
-      () => Users,
+      () => SqlUsers,
       (u) => u.banInfo,
       { onDelete: 'CASCADE' })
     @JoinColumn()
-    user: Users;
+    user: SqlUsers;
     @PrimaryColumn() userId: string;
 }

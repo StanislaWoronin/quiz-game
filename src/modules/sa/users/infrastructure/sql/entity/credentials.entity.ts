@@ -1,8 +1,8 @@
 import {Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
-import {Users} from "./users.entity";
+import {SqlUsers} from "./users.entity";
 
 @Entity()
-export class Credentials {
+export class SqlCredentials {
     @Column({
         type: 'character varying',
         nullable: false,
@@ -10,10 +10,10 @@ export class Credentials {
     credentials: string;
 
     @OneToOne(
-      () => Users,
+      () => SqlUsers,
       (u) => u.credentials,
       { onDelete: 'CASCADE' })
     @JoinColumn()
-    user: Users;
+    user: SqlUsers;
     @PrimaryColumn() userId: string;
 }

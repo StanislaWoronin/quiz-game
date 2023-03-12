@@ -1,8 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { Questions } from "./questions.entity";
+import { SqlQuestions } from "./questions.entity";
 
 @Entity()
-export class Answers {
+export class SqlAnswers {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -13,10 +13,10 @@ export class Answers {
   correctAnswer: string;
 
   @ManyToOne(
-    () => Questions,
+    () => SqlQuestions,
     (q) => q.correctAnswers,
     { onDelete: 'CASCADE' })
-  question: Questions;
+  question: SqlQuestions;
   @Column({
     nullable: false,
   })

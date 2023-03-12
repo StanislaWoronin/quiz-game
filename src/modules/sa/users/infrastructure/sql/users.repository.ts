@@ -3,11 +3,11 @@ import {InjectDataSource} from "@nestjs/typeorm";
 import {DataSource} from "typeorm";
 import {NewUserDto} from "../../applications/dto/new-user.dto";
 import {CreatedUser} from "../../api/view/created-user";
-import {Users} from "./entity/users.entity";
-import {Credentials} from "./entity/credentials.entity";
+import {SqlUsers} from "./entity/users.entity";
+import {SqlCredentials} from "./entity/credentials.entity";
 import {toCreatedUser} from "../../../../../common/data-mapper/to-created-user";
 import { CreatedUserDb } from "./pojo/created-user.db";
-import { UserBanInfo } from "./entity/ban-info.entity";
+import { SqlUserBanInfo } from "./entity/ban-info.entity";
 import { UpdateUserBanStatusDto } from "../../api/dto/update-user-ban-status.dto";
 
 @Injectable()
@@ -22,10 +22,10 @@ export class UsersRepository {
         const manager = queryRunner.manager;
         try {
             const createdUser: CreatedUserDb = await manager
-                .getRepository(Users)
+                .getRepository(SqlUsers)
                 .save(newUser)
 
-            await manager.getRepository(Credentials).save({
+            await manager.getRepository(SqlCredentials).save({
                 userId: createdUser.id,
                 credentials: hash
             })
@@ -42,7 +42,7 @@ export class UsersRepository {
     }
 
     async updateBanStatus(id: string, dto: UpdateUserBanStatusDto): Promise<boolean> {
-        const a = await this.dataSource.getRepository(UserBanInfo).upsert({
+        const a = await this.dataSource.getRepository(SqlUserBanInfo).upsert({
             userId: id,
             isBanned: dto.isBanned,
             banReason: dto.banReason,
@@ -53,7 +53,7 @@ export class UsersRepository {
     }
 
     async removeBanStatus(userId: string): Promise<boolean> {
-        await this.dataSource.getRepository(UserBanInfo).delete({userId})
+        await this.dataSource.getRepository(SqlUserBanInfo).delete({userId})
 
         return true
     }

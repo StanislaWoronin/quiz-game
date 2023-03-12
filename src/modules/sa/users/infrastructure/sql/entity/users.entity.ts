@@ -1,9 +1,9 @@
 import {Column, Entity, OneToOne, PrimaryGeneratedColumn} from "typeorm";
-import {UserBanInfo} from "./ban-info.entity";
-import {Credentials} from "./credentials.entity";
+import {SqlUserBanInfo} from "./ban-info.entity";
+import {SqlCredentials} from "./credentials.entity";
 
 @Entity()
-export class Users {
+export class SqlUsers {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
@@ -30,15 +30,15 @@ export class Users {
     createdAt: string;
 
     @OneToOne(
-      () => UserBanInfo,
+      () => SqlUserBanInfo,
       (bi) => bi.user,
       { cascade: true })
-    banInfo: UserBanInfo;
+    banInfo: SqlUserBanInfo;
 
     @OneToOne(
-      () => Credentials,
+      () => SqlCredentials,
       (c) => c.user,
       { cascade: true }
     )
-    credentials: Credentials;
+    credentials: SqlCredentials;
 }
