@@ -139,6 +139,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
         const question = await questions.getQuestions(preparedSuperUser.valid)
         expect(question.body.items[1].published).toBe(true)
+        expect(question.body.items[1].updatedAt).not.toBeNull()
       })
 
       it('Should update "published" status. Set status "false"', async () => {
@@ -149,7 +150,9 @@ describe('/sa/quiz/questions (e2e)', () => {
         expect(response.status).toBe(HttpStatus.NO_CONTENT)
 
         const question = await questions.getQuestions(preparedSuperUser.valid)
-        expect(question.body.items[0].published).toBe(false)
+        console.log(question.body)
+        expect(question.body.items[1].published).toBe(false)
+        expect(question.body.items[1].updatedAt).not.toBeNull()
       })
     })
 
@@ -208,6 +211,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         const question = await questions.getQuestions(preparedSuperUser.valid)
         expect(question.body.items[0].body).toStrictEqual(preparedQuestions.update.body)
         expect(question.body.items[0].correctAnswers).toStrictEqual(preparedQuestions.update.correctAnswers)
+        expect(question.body.items[0].updatedAt).not.toBeNull()
       })
 
       it('Shouldn`t update question if property "correctAnswers" are not passed but' +

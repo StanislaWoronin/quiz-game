@@ -55,7 +55,10 @@ export class QuestionsRepository {
     const manager = queryRunner.manager;
     try {
       await this.dataSource.createQueryBuilder().update(SqlQuestions)
-        .set({body: dto.body})
+        .set({
+          body: dto.body,
+          updatedAt: new Date().toISOString()
+        })
         .where("id = :id", { id: questionId })
         .execute()
 
@@ -82,7 +85,7 @@ export class QuestionsRepository {
   ): Promise<boolean> {
     const query = `
       UPDATE sql_questions
-         SET published = '${published}'
+         SET published = '${published}', "updatedAt" = '${new Date().toISOString()}'
        WHERE id = '${questionId}'
          AND EXISTS(SELECT "questionId"
                       FROM sql_answers
