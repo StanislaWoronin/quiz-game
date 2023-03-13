@@ -1,32 +1,32 @@
+import {TestsPaginationType} from "../../type/pagination.type";
 
-type PaginationQueryType = Partial<{
-  searchNameTerm: string
-  pageSize: number
-}>
 
-export const getUrlWithQuery = <T>(endpoint: string, query: T): string => {
-  let url = endpoint;
-
-  if (Object.keys(query).length) {
-    url += `?`;
+export const getUrlWithQuery = (
+    endpoint: string,
+    query: TestsPaginationType
+): string => {
+  let result = `${endpoint}?`;
+  if (query.searchLoginTerm) {
+    result += `searchLoginTerm=${query.searchLoginTerm}&`;
   }
-
-  for (const key in query) {
-    if (query[key]) {
-      url += `${key}=${query[key]}&`;
-    }
+  if (query.searchEmailTerm) {
+    result += `searchEmailTerm=${query.searchEmailTerm}&`;
   }
+  if (query.bodySearchTerm) {
+    result += `bodySearchTerm=${query.bodySearchTerm}&`;
+  }
+  if (query.banStatus) {
+    result += `banStatus=${query.banStatus}&`
+  }
+  if (query.publishedStatus) {
+    result += `publishedStatus=${query.publishedStatus}&`
+  }
+  result += `sortBy=${query.sortBy}&`;
+  result += `sortDirection=${query.sortDirection}&`;
+  result += `pageNumber=${query.pageNumber}&`;
+  result += `pageSize=${query.pageSize}`;
 
-  return url.slice(0, -1);
+  return result;
 };
 
-export const testedFunc = (endpoint: string, {searchNameTerm = null, pageSize = 10}: PaginationQueryType) => {
-  let url = `${endpoint}?`
-  if (searchNameTerm) {
-    url += `searchNameTerm=${searchNameTerm}&`
-  }
-  if (pageSize){
-    url += `pageSize=${pageSize}`
-  }
-  return url
-}
+

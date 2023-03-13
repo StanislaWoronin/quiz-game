@@ -8,7 +8,10 @@ import {getUrlWithId} from "../routing/get-url/url-with-id";
 import {UpdatePublishStatusDto} from "../../../src/modules/sa/questions/api/dto/update-publish-status.dto";
 import {getUrlForUpdatePublishStatus} from "../routing/get-url/questions-url";
 import { ErrorsMessages } from "../../../src/common/dto/errors-messages";
-import { QuestionsQueryDto } from "../../../src/modules/sa/questions/api/dto/query/questions-query.dto";
+import {SortByField} from "../../../src/common/pagination/query-parameters/sort-by-field";
+import {SortDirection} from "../../../src/common/pagination/query-parameters/sort-direction";
+import {PublishedStatus} from "../../../src/modules/sa/questions/api/dto/query/published-status";
+import {TestsPaginationType} from "../type/pagination.type";
 
 export class Questions {
   constructor(private readonly server: any) {}
@@ -29,13 +32,25 @@ export class Questions {
 
   async getQuestions(
     superUser: { login: string; password: string },
-    query?: QuestionsQueryDto,
+    {
+      bodySearchTerm = null,
+      sortBy = SortByField.CreatedAt,
+      sortDirection = SortDirection.Descending,
+      publishedStatus = PublishedStatus.All,
+      pageNumber = 1,
+      pageSize = 10,
+    }: TestsPaginationType,
   ): Promise<{ body: ViewPage<CreatedQuestions>, status: number }> {
-    let url = endpoints.sa.quiz.questions;
-    if (query) {
-      url = getUrlWithQuery<QuestionsQueryDto>(endpoints.sa.quiz.questions, query);
+    const query = {
+      bodySearchTerm,
+      sortBy,
+      sortDirection,
+      publishedStatus,
+      pageNumber,
+      pageSize
     }
 
+    const url = getUrlWithQuery(endpoints.sa.quiz.questions, query);
     const response = await request(this.server)
       .get(url)
       .auth(superUser.login, superUser.password, {

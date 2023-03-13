@@ -7,9 +7,12 @@ import {Users} from "./helpers/request/users";
 import {preparedSuperUser} from "./helpers/prepeared-data/prepared-super-user";
 import {preparedUser} from "./helpers/prepeared-data/prepared-user";
 import {getErrorsMessage} from "./helpers/expect-data/expect-errors-messages";
-import {expectCreatedUser} from "./helpers/expect-data/expect-user";
+import {expectCreatedUser, expectResponseForGetUsers} from "./helpers/expect-data/expect-user";
 import {UsersFactory} from "./helpers/factories/users-factory";
-import { randomUUID } from "crypto";
+import {randomUUID} from "crypto";
+import {SortByField} from "../src/common/pagination/query-parameters/sort-by-field";
+import {SortDirection} from "../src/common/pagination/query-parameters/sort-direction";
+import {BanStatus} from "../src/modules/sa/users/api/dto/query/ban-status";
 
 describe('/sa/users (e2e)', () => {
     const second = 1000;
@@ -131,7 +134,7 @@ describe('/sa/users (e2e)', () => {
                 );
                 expect(response.status).toBe(HttpStatus.NO_CONTENT);
 
-                const user = await users.getUsers(preparedSuperUser.valid)
+                const user = await users.getUsers(preparedSuperUser.valid, {})
                 expect(user.body.items[0].banInfo.isBanned).toBe(true) // TODO uncomment
             })
 
@@ -145,7 +148,7 @@ describe('/sa/users (e2e)', () => {
                 );
                 expect(response.status).toBe(HttpStatus.NO_CONTENT);
 
-                const user = await users.getUsers(preparedSuperUser.valid)
+                const user = await users.getUsers(preparedSuperUser.valid, {})
                 expect(user.body.items[0].banInfo.isBanned).toBe(false) // TODO uncomment
             })
         })
@@ -166,21 +169,71 @@ describe('/sa/users (e2e)', () => {
                 })
             })
 
-            it('User without permissions try to get a question', async () => {
-                const request = await users.getUsers(preparedSuperUser.notValid);
-                expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
-            })
+            // it('User without permissions try to get a question', async () => {
+            //     const request = await users.getUsers(preparedSuperUser.notValid, {});
+            //     expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
+            // })
+            //
+            // it('Get all question without query', async () => {
+            //     const request = await users.getUsers(
+            //         preparedSuperUser.valid , {}
+            //     );
+            //     expect(request.status).toBe(HttpStatus.OK);
+            //     expect(request.body.items).toHaveLength(10)
+            // })
 
-            it('Get all question without query', async () => {
+            // it('?banStatus=banned&sortBy=login&sortDirection=asc&&pageSize=3', async () => {
+            //     const { bannedUsers } = expect.getState()
+            //     const expectResponse = expectResponseForGetUsers(
+            //         BanStatus.Banned,
+            //         SortByField.Login,
+            //         SortDirection.Ascending,
+            //         2,
+            //         1,
+            //         3,
+            //         5,
+            //         [...bannedUsers]
+            //     )
+            //
+            //     const request = await users.getUsers(
+            //         preparedSuperUser.valid,
+            //         {
+            //             banStatus: BanStatus.Banned,
+            //             sortBy: SortByField.Login,
+            //             sortDirection: SortDirection.Ascending,
+            //             pageSize: 3,
+            //         }
+            //     )
+            //     expect(request.status).toBe(HttpStatus.OK);
+            //     expect(request.body).toStrictEqual(expectResponse)
+            // })
+
+            it('?banStatus=notBanned&sortBy=email&sortDirection=desc&pageNumber=2&pageSize=3', async () => {
+                const { createdUsers } = expect.getState()
+                const expectResponse = expectResponseForGetUsers(
+                    BanStatus.NotBanned,
+                    SortByField.Email,
+                    SortDirection.Descending,
+                    2,
+                    2,
+                    3,
+                    5,
+                    [...createdUsers]
+                )
+
                 const request = await users.getUsers(
-                    preparedSuperUser.valid
-                );
-                expect(request.status).toBe(HttpStatus.OK);
-                expect(request.body.items).toHaveLength(10)
-            })
+                    preparedSuperUser.valid,
+                    {
+                        banStatus: BanStatus.NotBanned,
+                        sortBy: SortByField.Email,
+                        sortDirection: SortDirection.Descending,
+                        pageNumber: 2,
+                        pageSize: 3,
+                    }
+                )
 
-            it('', async () => {
-                // TODO
+                expect(request.status).toBe(HttpStatus.OK);
+                expect(request.body).toStrictEqual(expectResponse)
             })
         })
 

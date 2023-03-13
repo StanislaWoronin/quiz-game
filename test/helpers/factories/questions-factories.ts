@@ -1,10 +1,10 @@
-import { CreatedQuestions } from "../../../src/modules/sa/questions/api/view/created-questions";
-import { CreateQuestionDto } from "../../../src/modules/sa/questions/api/dto/create-question.dto";
-import { faker } from "@faker-js/faker";
-import { Questions } from "../request/questions";
-import { preparedSuperUser } from "../prepeared-data/prepared-super-user";
+import {CreatedQuestions} from "../../../src/modules/sa/questions/api/view/created-questions";
+import {CreateQuestionDto} from "../../../src/modules/sa/questions/api/dto/create-question.dto";
+import {faker} from "@faker-js/faker";
+import {Questions} from "../request/questions";
+import {preparedSuperUser} from "../prepeared-data/prepared-super-user";
 import {preparedQuestions} from "../prepeared-data/prepared-questions";
-import {HttpStatus} from "@nestjs/common";
+import {PublishedStatus} from "../../../src/modules/sa/questions/api/dto/query/published-status";
 
 export class QuestionsFactories {
   constructor(private questions: Questions) {}
@@ -39,13 +39,19 @@ export class QuestionsFactories {
           preparedQuestions.publishStatus.true
       )
 
+      const questions = await this.questions.getQuestions(
+          preparedSuperUser.valid,
+          {
+            publishedStatus: PublishedStatus.Published
+          })
+
       result.push({
         id: createdQuestions[i].id,
         body: createdQuestions[i].body,
         correctAnswers: createdQuestions[i].correctAnswers,
         published: true,
         createdAt: createdQuestions[i].createdAt,
-        updatedAt: createdQuestions[i].updatedAt,
+        updatedAt: questions.body.items[0].updatedAt,
       })
     }
 

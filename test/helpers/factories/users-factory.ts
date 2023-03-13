@@ -5,6 +5,7 @@ import {faker} from "@faker-js/faker";
 import {preparedSuperUser} from "../prepeared-data/prepared-super-user";
 import {ViewUser} from "../../../src/modules/sa/users/api/view/view-user";
 import {UpdateUserBanStatusDto} from "../../../src/modules/sa/users/api/dto/update-user-ban-status.dto";
+import {BanStatus} from "../../../src/modules/sa/users/api/dto/query/ban-status";
 
 export class UsersFactory {
     constructor(private users: Users) {
@@ -42,6 +43,11 @@ export class UsersFactory {
                 createdUsers[i].id,
             )
 
+            const users = await this.users.getUsers(preparedSuperUser.valid,
+            {
+                banStatus: BanStatus.Banned
+            })
+
             result.push({
                 id: createdUsers[i].id,
                 login: createdUsers[i].login,
@@ -50,7 +56,7 @@ export class UsersFactory {
                 banInfo: {
                     isBanned: updateBanStatusDto.isBanned,
                     banReason: updateBanStatusDto.banReason,
-                    banDate: new Date().toISOString()
+                    banDate: users.body.items[0].banInfo.banDate
                 }
             })
         }

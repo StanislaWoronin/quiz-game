@@ -30,7 +30,6 @@ export class QuestionsService {
     dto: UpdateQuestionDto
   ): Promise<boolean | null> {
     const isExists = await this.questionsQueryRepository.questionExists(questionId);
-
     if(isExists === null) return null
     if(isExists && !dto.correctAnswers.length) return false // if question "published" and correctAnswers = [] return false
 
@@ -40,7 +39,10 @@ export class QuestionsService {
   async updatePublishStatus(
     questionId: string,
     dto: UpdatePublishStatusDto
-  ): Promise<boolean> {
+  ): Promise<boolean | null> {
+    const isExists = await this.questionsQueryRepository.questionExists(questionId);
+    if(isExists === null) return null
+
     return await this.questionsRepository.updatePublishStatus(questionId, dto.published);
   }
 

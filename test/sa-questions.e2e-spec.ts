@@ -6,17 +6,14 @@ import {QuestionsFactories} from './helpers/factories/questions-factories';
 import {Testing} from './helpers/request/testing';
 import {Questions} from './helpers/request/questions';
 import {preparedSuperUser} from './helpers/prepeared-data/prepared-super-user';
-import {
-  expectCreatedQuestion,
-  expectResponseForGetAllQuestions,
-} from './helpers/expect-data/expect-questions';
-import {preparedQuery} from "./helpers/prepeared-data/prepared-query";
+import {expectCreatedQuestion, expectResponseForGetQuestions,} from './helpers/expect-data/expect-questions';
 import {randomUUID} from "crypto";
 import {SortByField} from "../src/common/pagination/query-parameters/sort-by-field";
 import {SortDirection} from "../src/common/pagination/query-parameters/sort-direction";
 import {preparedQuestions} from "./helpers/prepeared-data/prepared-questions";
 import {getErrorMessage} from "./helpers/routing/errors-messages";
 import {getErrorsMessage} from "./helpers/expect-data/expect-errors-messages";
+import {PublishedStatus} from "../src/modules/sa/questions/api/dto/query/published-status";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -112,6 +109,14 @@ describe('/sa/quiz/questions (e2e)', () => {
         })
       })
 
+      it('Shouldn`t update status if id from uri param not found', async () => {
+        const randomId = randomUUID()
+
+        const response = await questions
+            .updateQuestionStatus(preparedSuperUser.valid, randomId, preparedQuestions.publishStatus.true)
+        expect(response.status).toBe(HttpStatus.NOT_FOUND)
+      })
+
       it('User without permissions try update "published" status', async () => {
         const { questionId } = expect.getState()
 
@@ -137,7 +142,7 @@ describe('/sa/quiz/questions (e2e)', () => {
             .updateQuestionStatus(preparedSuperUser.valid, questionId, preparedQuestions.publishStatus.true)
         expect(response.status).toBe(HttpStatus.NO_CONTENT)
 
-        const question = await questions.getQuestions(preparedSuperUser.valid)
+        const question = await questions.getQuestions(preparedSuperUser.valid, {})
         expect(question.body.items[1].published).toBe(true)
         expect(question.body.items[1].updatedAt).not.toBeNull()
       })
@@ -149,7 +154,7 @@ describe('/sa/quiz/questions (e2e)', () => {
             .updateQuestionStatus(preparedSuperUser.valid, questionId, preparedQuestions.publishStatus.false)
         expect(response.status).toBe(HttpStatus.NO_CONTENT)
 
-        const question = await questions.getQuestions(preparedSuperUser.valid)
+        const question = await questions.getQuestions(preparedSuperUser.valid, {})
         console.log(question.body)
         expect(question.body.items[1].published).toBe(false)
         expect(question.body.items[1].updatedAt).not.toBeNull()
@@ -208,7 +213,7 @@ describe('/sa/quiz/questions (e2e)', () => {
             .updateQuestion(preparedSuperUser.valid, questionId, preparedQuestions.update)
         expect(response.status).toBe(HttpStatus.NO_CONTENT)
 
-        const question = await questions.getQuestions(preparedSuperUser.valid)
+        const question = await questions.getQuestions(preparedSuperUser.valid, {})
         expect(question.body.items[0].body).toStrictEqual(preparedQuestions.update.body)
         expect(question.body.items[0].correctAnswers).toStrictEqual(preparedQuestions.update.correctAnswers)
         expect(question.body.items[0].updatedAt).not.toBeNull()
@@ -245,14 +250,14 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       it('User without permissions try to get a question', async () => {
         const request = await questions.getQuestions(
-          preparedSuperUser.notValid
+          preparedSuperUser.notValid, {}
         );
         expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
       });
 
       it('Get all question without query', async () => {
         const request = await questions.getQuestions(
-          preparedSuperUser.valid
+          preparedSuperUser.valid, {}
         );
         expect(request.status).toBe(HttpStatus.OK);
         expect(request.body.items).toHaveLength(10)
@@ -260,7 +265,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       it('?publishedStatus=notPublished&sortBy=body&sortDirection=asc&pageNumber=1&pageSize=3', async () => {
         const {createdQuestions} = expect.getState()
-        const expectResponse = expectResponseForGetAllQuestions(
+        const expectResponse = expectResponseForGetQuestions(
           SortByField.Body,
           SortDirection.Ascending,
           2,
@@ -272,7 +277,12 @@ describe('/sa/quiz/questions (e2e)', () => {
 
         const request = await questions.getQuestions(
           preparedSuperUser.valid,
-          preparedQuery.notPublished_id_asc_1_3
+            {
+              publishedStatus: PublishedStatus.NotPublished,
+              sortBy: SortByField.Body,
+              sortDirection: SortDirection.Ascending,
+              pageSize: 3
+            }
         );
         expect(request.status).toBe(HttpStatus.OK);
         expect(request.body).toStrictEqual(expectResponse)
@@ -281,7 +291,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       it('?publishedStatus=published&sortBy=body&sortDirection=desc&pageNumber=2&pageSize=3', async () => {
         const {publishedQuestionsId} = expect.getState()
 
-        const expectResponse = expectResponseForGetAllQuestions(
+        const expectResponse = expectResponseForGetQuestions(
           SortByField.Body,
           SortDirection.Descending,
           2,
@@ -293,18 +303,24 @@ describe('/sa/quiz/questions (e2e)', () => {
 
         const request = await questions.getQuestions(
           preparedSuperUser.valid,
-          preparedQuery.notPublished_body_desc_2_3
+            {
+              publishedStatus: PublishedStatus.Published,
+              sortBy: SortByField.Body,
+              sortDirection: SortDirection.Ascending,
+              pageNumber: 2,
+              pageSize: 3
+            }
         );
         expect(request.status).toBe(HttpStatus.OK);
         expect(request.body).toStrictEqual(expectResponse)
       })
 
       it('Search vie "bodySearchTerm"', async () => {
-        const {createdQuestions, publishedQuestionsId} = expect.getState()
-
         const request = await questions.getQuestions(
             preparedSuperUser.valid,
-            preparedQuery.bodySearchTerm
+            {
+              bodySearchTerm: '1'
+            }
         );
         expect(request.status).toBe(HttpStatus.OK);
         expect(request.body.items).toHaveLength(2)

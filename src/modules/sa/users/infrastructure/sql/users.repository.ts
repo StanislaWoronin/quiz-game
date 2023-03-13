@@ -67,19 +67,19 @@ export class UsersRepository {
         try {
             const result = await this.dataSource
               .query(this
-                .getQuery('users', 'id'), [userId]);
+                .getQuery('sql_users', 'id'), [userId]);
 
-            if (result.affected === 0) {
+            if (result[1] === 0) {
                 return false
             }
 
             await this.dataSource
               .query(this
-                .getQuery('credentials', 'userId'), [userId])
+                .getQuery('sql_credentials', 'userId'), [userId])
 
             await this.dataSource
               .query(this
-                .getQuery('user_ban_info', 'userId'), [userId])
+                .getQuery('sql_user_ban_info', 'userId'), [userId])
 
             return true
         } catch (e) {

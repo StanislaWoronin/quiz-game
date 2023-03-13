@@ -53,16 +53,15 @@ export class QuestionsController {
     @Param('id') questionId: string,
     @Body() dto: UpdateQuestionDto,
   ) {
-    const result = await this.questionsService.updateQuestion(questionId, dto);
+    const isUpdated = await this.questionsService.updateQuestion(questionId, dto);
 
-    if (result === null) {
+    if (isUpdated === null) {
       throw new NotFoundException()
     }
-    if (!result) {
+    if (!isUpdated) {
       throw new BadRequestException()
     }
-
-    return result
+    return
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -73,6 +72,9 @@ export class QuestionsController {
   ) {
     const isUpdated = await this.questionsService.updatePublishStatus(questionId, dto);
 
+    if (isUpdated === null) {
+      throw new NotFoundException()
+    }
     if (!isUpdated) {
       throw new BadRequestException()
     }

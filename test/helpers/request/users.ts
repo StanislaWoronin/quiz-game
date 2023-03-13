@@ -9,7 +9,12 @@ import {ViewPage} from "../../../src/common/pagination/view-page";
 import {ViewUser} from "../../../src/modules/sa/users/api/view/view-user";
 import {getUrlWithQuery} from "../routing/get-url/url-with-query";
 import { getUrlWithId } from "../routing/get-url/url-with-id";
-import { UsersQueryDto } from "../../../src/modules/sa/users/api/dto/query/users-query.dto";
+import {SortByField} from "../../../src/common/pagination/query-parameters/sort-by-field";
+import {SortDirection} from "../../../src/common/pagination/query-parameters/sort-direction";
+import {PublishedStatus} from "../../../src/modules/sa/questions/api/dto/query/published-status";
+import {TestsPaginationType} from "../type/pagination.type";
+import {BanStatus} from "../../../src/modules/sa/users/api/dto/query/ban-status";
+
 
 export class Users {
     constructor(private readonly server: any) {
@@ -31,13 +36,29 @@ export class Users {
 
     async getUsers(
         superUser: { login: string; password: string },
-        query?: UsersQueryDto,
+        {
+            searchLoginTerm = null,
+            searchEmailTerm = null,
+            sortBy = SortByField.CreatedAt,
+            sortDirection = SortDirection.Descending,
+            publishedStatus = PublishedStatus.All,
+            banStatus = BanStatus.All,
+            pageNumber = 1,
+            pageSize = 10,
+        }: TestsPaginationType,
     ): Promise<{ body: ViewPage<ViewUser>, status: number }> {
-        let url = endpoints.sa.users
-        if (query) {
-            url = getUrlWithQuery<UsersQueryDto>(endpoints.sa.users, query)
+        const query = {
+            searchLoginTerm,
+            searchEmailTerm,
+            sortBy,
+            sortDirection,
+            publishedStatus,
+            banStatus,
+            pageNumber,
+            pageSize
         }
 
+        const url = getUrlWithQuery(endpoints.sa.users, query)
         const response = await request(this.server)
             .get(url)
             .auth(superUser.login, superUser.password, {

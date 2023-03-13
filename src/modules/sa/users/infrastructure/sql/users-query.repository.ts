@@ -5,9 +5,8 @@ import {UsersQueryDto} from "../../api/dto/query/users-query.dto";
 import {ViewPage} from "../../../../../common/pagination/view-page";
 import {ViewUser} from "../../api/view/view-user";
 import {BanStatus} from "../../api/dto/query/ban-status";
-import { CreatedQuestions } from "../../../questions/api/view/created-questions";
-import { UserWithBanInfoDb } from "./pojo/user-with-ban-info.db";
-import { toViewUser } from "../../../../../common/data-mapper/to-view-user";
+import {UserWithBanInfoDb} from "./pojo/user-with-ban-info.db";
+import {toViewUser} from "../../../../../common/data-mapper/to-view-user";
 
 @Injectable()
 export class UsersQueryRepository {
@@ -22,10 +21,11 @@ export class UsersQueryRepository {
               FROM sql_users u
               LEFT JOIN sql_user_ban_info bi
                 ON u.id = bi."userId"
-                   ${filter}
+             WHERE ${filter}
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};         
         `
+        console.log(query)
         const users: UserWithBanInfoDb[] = await this.dataSource.query(query)
         const items = users.map(u => toViewUser(u))
 
@@ -34,7 +34,7 @@ export class UsersQueryRepository {
               FROM sql_users u
               LEFT JOIN sql_user_ban_info bi
                 ON u.id = bi."userId"
-                   ${filter}
+             WHERE ${filter}
         `
         const totalCount = await this.dataSource.query(countQuery)
 
@@ -47,31 +47,49 @@ export class UsersQueryRepository {
 
     private getFilter(query: UsersQueryDto): string {
         const { banStatus, searchLoginTerm, searchEmailTerm } = query;
-        const banStatusFilter = `bi.banStatus = ${banStatus}`
+        const banStatusFilter = this.getBanStatusFilter(banStatus)
+        const searTermFilter = this.getSearchTermFilter(searchLoginTerm, searchEmailTerm)
+
+        if (banStatusFilter && searTermFilter) {
+            return `${banStatusFilter} AND ${searTermFilter}`
+        }
+        if (banStatusFilter) {
+            return banStatusFilter
+        }
+        if (searTermFilter) {
+            return searTermFilter
+        }
+
+        return ''
+    }
+
+    private getBanStatusFilter(banStatus: BanStatus): string {
+        if (banStatus === BanStatus.All) {
+            return ''
+        }
+        let isBanned
+        if (banStatus === BanStatus.NotBanned) {
+            isBanned = null
+        }
+        if (banStatus === BanStatus.Banned) {
+            isBanned =  true
+        }
+        return `bi."isBanned" = ${isBanned}`
+    }
+
+    private getSearchTermFilter(searchLoginTerm: string, searchEmailTerm: string): string {
         const searchLoginFilter = `u.login ILIKE '%${searchLoginTerm}%'`
         const searchEmailFilter = `u.email ILIKE '%${searchEmailTerm}%'`
 
-        if (banStatus !== BanStatus.All) {
-            if (searchLoginTerm && searchEmailTerm) {
-                return `WHERE ${banStatusFilter} AND ${searchLoginFilter} OR ${searchEmailFilter}`
-            }
-            if (searchLoginTerm) {
-                return `WHERE ${banStatusFilter} AND ${searchLoginFilter}`
-            }
-            if (searchEmailTerm) {
-                return `WHERE ${banStatusFilter} AND ${searchEmailFilter}`
-            }
-        }
         if (searchLoginTerm && searchEmailTerm) {
-            return `WHERE ${searchLoginFilter} OR ${searchEmailFilter}`
+            return `${searchLoginFilter} OR ${searchEmailFilter}`
         }
         if (searchLoginTerm) {
-            return `WHERE ${searchLoginFilter}`
+            return `${searchLoginFilter}`
         }
         if (searchEmailTerm) {
-            return `WHERE ${searchEmailFilter}`
+            return `${searchEmailFilter}`
         }
-
         return ''
     }
 }

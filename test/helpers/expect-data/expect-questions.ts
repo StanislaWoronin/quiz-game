@@ -5,6 +5,8 @@ import {SortByField} from "../../../src/common/pagination/query-parameters/sort-
 import {SortDirection} from "../../../src/common/pagination/query-parameters/sort-direction";
 import {PageDto} from "../../../src/common/pagination/page.dto";
 import {giveSkipNumber} from "../../../src/common/pagination/helpers";
+import {ViewQuestion} from "../../../src/modules/sa/questions/api/view/view-question";
+import {getSortingItems} from "./sorting-expect-items";
 
 export const expectCreatedQuestion = (): CreatedQuestions => {
   return {
@@ -17,16 +19,16 @@ export const expectCreatedQuestion = (): CreatedQuestions => {
   }
 };
 
-export const expectResponseForGetAllQuestions = (
+export const expectResponseForGetQuestions = (
     sortBy: SortByField,
     sortDirection: SortDirection,
     pagesCount: number,
     page: number,
     pageSize: number,
     totalCount: number,
-    questions: CreatedQuestions[]
-): ViewPage<CreatedQuestions> => {
-  const sortingQuestions = getSortingItems(sortBy, sortDirection, questions)
+    questions: ViewQuestion[]
+): ViewPage<ViewQuestion> => {
+  const sortingQuestions = getSortingItems<ViewQuestion>(sortBy, sortDirection, questions)
   const skip = giveSkipNumber(page, pageSize)
 
   let items = sortingQuestions.slice(skip)
@@ -43,14 +45,3 @@ export const expectResponseForGetAllQuestions = (
   }
 }
 
-export const getSortingItems = (
-    sortBy: SortByField,
-    sortDirection: SortDirection,
-    questions: CreatedQuestions[]
-) => {
-  sortDirection === SortDirection.Ascending ?
-      questions.sort((first, second) => first[sortBy] - second[sortBy]) :
-      questions.sort((first, second) => second[sortBy] - first[sortBy])
-
-  return questions
-}
