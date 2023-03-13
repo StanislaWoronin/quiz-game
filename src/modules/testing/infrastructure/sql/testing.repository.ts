@@ -8,15 +8,15 @@ export class TestingRepository {
 
   async deleteAll(): Promise<boolean> {
     try {
-      const entities = this.dataSource.entityMetadatas;
-      const tableNames = entities.map((entity) => `"${entity.tableName}"`).join(", ");
-
-      await this.dataSource.query(`TRUNCATE ${tableNames} CASCADE;`);
-
-      // const queryRunner = this.dataSource.manager.connection.createQueryRunner()
+      // const entities = this.dataSource.entityMetadatas;
+      // const tableNames = entities.map((entity) => `"${entity.tableName}"`).join(", ");
       //
-      // await queryRunner.dropSchema('public', false, true);
-      // await queryRunner.createSchema('public', true);
+      // await this.dataSource.query(`TRUNCATE ${tableNames} CASCADE;`);
+
+      const queryRunner = this.dataSource.manager.connection.createQueryRunner()
+
+      await queryRunner.dropSchema('public', false, true);
+      await queryRunner.createSchema('public', true);
 
       return true
     } catch (e) {

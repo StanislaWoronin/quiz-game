@@ -44,6 +44,10 @@ describe('/sa/users (e2e)', () => {
         await app.close();
     });
 
+    beforeEach(async () => {
+
+    })
+
     describe('Test request', () => {
         describe('POST -> sa/users', () => {
             it('Clear all data', async () => {
@@ -152,7 +156,6 @@ describe('/sa/users (e2e)', () => {
                 expect(user.body.items[0].banInfo.isBanned).toBe(false) // TODO uncomment
             })
         })
-
 
         describe('GET -> sa/users', () => {
             it('Clear all data', async () => {
