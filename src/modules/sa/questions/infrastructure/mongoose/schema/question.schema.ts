@@ -8,10 +8,19 @@ export class MongoQuestion {
   id: string;
 
   @Prop({ required: true, unique: true, type: String })
-  body: string
+  body: string;
+
+  @Prop({ type: Boolean, default: false })
+  published: boolean;
+
+  @Prop({ required: true, type: String })
+  createdAt: string;
+
+  @Prop({ required: false, type: String, default: null })
+  updatedAt: string | null;
 
   @Prop({ required: true, type: MongoAnswers })
-  correctAnswers: MongoAnswers
+  correctAnswers: MongoAnswers;
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(MongoQuestion)

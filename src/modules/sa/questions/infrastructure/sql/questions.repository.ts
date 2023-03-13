@@ -81,11 +81,11 @@ export class QuestionsRepository {
     published: boolean
   ): Promise<boolean> {
     const query = `
-      UPDATE questions
+      UPDATE sql_questions
          SET published = '${published}'
        WHERE id = '${questionId}'
          AND EXISTS(SELECT "questionId"
-                      FROM answers
+                      FROM sql_answers
                      WHERE "questionId" = '${questionId}')
     `
     const result = await this.dataSource.query(query)

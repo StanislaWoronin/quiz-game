@@ -19,8 +19,8 @@ export class UsersQueryRepository {
         const query = `
             SELECT u.id, u.login, u.email, u."createdAt",
                    bi."isBanned", bi."banDate", bi."banReason"
-              FROM users u
-              LEFT JOIN user_ban_info bi
+              FROM sql_users u
+              LEFT JOIN sql_user_ban_info bi
                 ON u.id = bi."userId"
                    ${filter}
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
@@ -31,8 +31,8 @@ export class UsersQueryRepository {
 
         const countQuery = `
             SELECT COUNT(*)
-              FROM users u
-              LEFT JOIN user_ban_info bi
+              FROM sql_users u
+              LEFT JOIN sql_user_ban_info bi
                 ON u.id = bi."userId"
                    ${filter}
         `

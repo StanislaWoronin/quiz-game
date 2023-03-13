@@ -13,7 +13,7 @@ export const expectCreatedQuestion = (): CreatedQuestions => {
     correctAnswers: preparedQuestions.valid.correctAnswers,
     published: preparedQuestions.published.default,
     createdAt: expect.any(String),
-    updatedAt: expect.any(String),
+    updatedAt: null,
   }
 };
 

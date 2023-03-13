@@ -29,7 +29,8 @@ export class SqlQuestions {
 
   @Column({
     type: 'character varying',
-    nullable: false,
+    nullable: true,
+    default: null
   })
   updatedAt: string;
 

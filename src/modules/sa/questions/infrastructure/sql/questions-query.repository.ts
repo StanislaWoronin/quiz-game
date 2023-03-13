@@ -17,9 +17,10 @@ export class QuestionsQueryRepository {
 
     const query = `
       SELECT q.id, q.body, q.published, q."createdAt", q."updatedAt",
-             (SELECT ARRAY (SELECT a."correctAnswer" FROM answers a
-               WHERE a."questionId" = q.id)) AS "correctAnswers"
-        FROM questions q
+             (SELECT ARRAY (SELECT a."correctAnswer" 
+                              FROM sql_answers a
+                             WHERE a."questionId" = q.id)) AS "correctAnswers"
+        FROM sql_questions q
              ${filter}
       ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
       LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};
@@ -28,7 +29,7 @@ export class QuestionsQueryRepository {
 
     const countQuery = ` 
       SELECT COUNT(*)
-        FROM questions q
+        FROM sql_questions q
              ${filter} 
     `
     const totalCount = await this.dataSource.query(countQuery)
@@ -43,7 +44,7 @@ export class QuestionsQueryRepository {
   async questionExists(questionId: string): Promise<boolean | null> {
     const query = `
       SELECT published
-        FROM questions
+        FROM sql_questions
        WHERE id = $1;
     `
     const result = await this.dataSource.query(query, [questionId])
