@@ -7,7 +7,6 @@ import { CreatedUser } from "../../api/view/created-user";
 import { randomUUID } from "crypto";
 import { UpdateUserBanStatusDto } from "../../api/dto/update-user-ban-status.dto";
 import { CredentialsDocument, MongoCredentials } from "./schema/credential.schema";
-import { MongoUserBanInfo, UserBanInfoDocument } from "./schema/user-ban-info.schema";
 
 @Injectable()
 export class MUsersRepository {
@@ -25,9 +24,9 @@ export class MUsersRepository {
     try {
       await session.withTransaction(async () => {
         const user = { id: randomUUID(), ...newUser }
-        await this.usersRepository.create([{ ...user }], { session });
+        const r = await this.usersRepository.create([{ ...user }], { session });
         const res =  await this.credentialsRepository.create([{userId: user.id, credential: hash}], { session })
-
+        console.log(r, 'mongo repo')
         createdUser = res[0]
       })
     } finally {

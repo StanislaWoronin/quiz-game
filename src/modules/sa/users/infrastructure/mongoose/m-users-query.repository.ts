@@ -24,7 +24,7 @@ export class MUsersQueryRepository {
       { $project: { _id: false, __v: false }}
     ]);
     const totalCount = await this.usersRepository.countDocuments({ $and: filter });
-    console.log(users);
+
     return new ViewPage<ViewUser>({
       items: users ?? [],
       query: query,

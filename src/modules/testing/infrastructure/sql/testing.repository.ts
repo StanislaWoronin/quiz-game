@@ -17,7 +17,7 @@ export class TestingRepository {
       //
       // await queryRunner.dropSchema('public', false, true);
       // await queryRunner.createSchema('public', true);
-
+      // await this.dataSource.manager.synchronize()
       return true
     } catch (e) {
       return false

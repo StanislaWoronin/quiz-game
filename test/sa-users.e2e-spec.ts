@@ -7,7 +7,7 @@ import {Users} from "./helpers/request/users";
 import {preparedSuperUser} from "./helpers/prepeared-data/prepared-super-user";
 import {preparedUser} from "./helpers/prepeared-data/prepared-user";
 import {getErrorsMessage} from "./helpers/expect-data/expect-errors-messages";
-import {expectCreatedUser, expectResponseForGetUsers} from "./helpers/expect-data/expect-user";
+import {expectCreatedUser} from "./helpers/expect-data/expect-user";
 import {UsersFactory} from "./helpers/factories/users-factory";
 import {randomUUID} from "crypto";
 import {SortByField} from "../src/common/pagination/query-parameters/sort-by-field";
@@ -44,240 +44,231 @@ describe('/sa/users (e2e)', () => {
         await app.close();
     });
 
-    beforeEach(async () => {
+    describe('POST -> sa/users', () => {
+        it('Clear all data', async () => {
+            await testing.clearDb();
+        });
 
+        it('User without permissions try add new user to the system', async () => {
+            const request = await users.createUser(
+                preparedSuperUser.notValid,
+                preparedUser.valid
+            );
+            expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
+        })
+
+        it('Try create question with incorrect input data', async () => {
+            const errorsMessages = getErrorsMessage(['login', 'password', 'email'])
+
+            const requestWithLongInputData = await users.createUser(
+                preparedSuperUser.valid,
+                preparedUser.long
+            );
+            expect(requestWithLongInputData.status).toBe(HttpStatus.BAD_REQUEST);
+            expect(requestWithLongInputData.body).toStrictEqual({ errorsMessages });
+
+            const requestWithShortInputData = await users.createUser(
+                preparedSuperUser.valid,
+                preparedUser.short
+            );
+            expect(requestWithShortInputData.status).toBe(HttpStatus.BAD_REQUEST);
+            expect(requestWithShortInputData.body).toStrictEqual({ errorsMessages });
+        })
+
+        it('Should create user', async () => {
+            const response = await users.createUser(
+                preparedSuperUser.valid,
+                preparedUser.valid
+            );
+            expect(response.status).toBe(HttpStatus.CREATED);
+            expect(response.body).toStrictEqual(expectCreatedUser());
+        })
     })
 
-    describe('Test request', () => {
-        describe('POST -> sa/users', () => {
-            it('Clear all data', async () => {
-                await testing.clearDb();
-            });
+    describe('PUT -> sa/users/:id/ban', () => {
+        it('Clear all data', async () => {
+            await testing.clearDb();
+        });
 
-            it('User without permissions try add new user to the system', async () => {
-                const request = await users.createUser(
-                    preparedSuperUser.notValid,
-                    preparedUser.valid
-                );
-                expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
-            })
+        it('Create data', async () => {
+            const [user] = await usersFactories.createUsers(1)
 
-            it('Try create question with incorrect input data', async () => {
-                const errorsMessages = getErrorsMessage(['login', 'password', 'email'])
-
-                const requestWithLongInputData = await users.createUser(
-                    preparedSuperUser.valid,
-                    preparedUser.long
-                );
-                expect(requestWithLongInputData.status).toBe(HttpStatus.BAD_REQUEST);
-                expect(requestWithLongInputData.body).toStrictEqual({ errorsMessages });
-
-                const requestWithShortInputData = await users.createUser(
-                    preparedSuperUser.valid,
-                    preparedUser.short
-                );
-                expect(requestWithShortInputData.status).toBe(HttpStatus.BAD_REQUEST);
-                expect(requestWithShortInputData.body).toStrictEqual({ errorsMessages });
-            })
-
-            it('Should create user', async () => {
-                const response = await users.createUser(
-                    preparedSuperUser.valid,
-                    preparedUser.valid
-                );
-                expect(response.status).toBe(HttpStatus.CREATED);
-                expect(response.body).toStrictEqual(expectCreatedUser());
+            expect.setState({
+                user,
+                userId: user.id
             })
         })
 
-        describe('PUT -> sa/users/:id/ban', () => {
-            it('Clear all data', async () => {
-                await testing.clearDb();
-            });
+        // it('User without permissions try set ban status', async () => {
+        //     const { userId } = expect.getState()
+        //
+        //     const response = await users.setBanStatus(
+        //         preparedSuperUser.notValid,
+        //         preparedUser.updateBanStatus.banned,
+        //         userId
+        //     );
+        //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+        // })
+        //
+        // it('Should update if input model is incorrect', async () => {
+        //     const { userId } = expect.getState()
+        //     const errorsMessages = getErrorsMessage(['banReason'])
+        //
+        //     const response = await users.setBanStatus(
+        //         preparedSuperUser.valid,
+        //         preparedUser.updateBanStatus.notValid,
+        //         userId
+        //     );
+        //     expect(response.status).toBe(HttpStatus.BAD_REQUEST)
+        //     expect(response.body).toStrictEqual({ errorsMessages })
+        // })
 
-            it('Create data', async () => {
-                const [user] = await usersFactories.createUsers(1)
+        it('Should update ban status. Set status "true"', async () => {
+            const { userId } = expect.getState()
 
-                expect.setState({
-                    user,
-                    userId: user.id
-                })
-            })
+            const response = await users.setBanStatus(
+                preparedSuperUser.valid,
+                preparedUser.updateBanStatus.banned,
+                userId
+            );
+            expect(response.status).toBe(HttpStatus.NO_CONTENT);
 
-            // it('User without permissions try set ban status', async () => {
-            //     const { userId } = expect.getState()
-            //
-            //     const response = await users.setBanStatus(
-            //         preparedSuperUser.notValid,
-            //         preparedUser.updateBanStatus.banned,
-            //         userId
-            //     );
-            //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
-            // })
-            //
-            // it('Should update if input model is incorrect', async () => {
-            //     const { userId } = expect.getState()
-            //     const errorsMessages = getErrorsMessage(['banReason'])
-            //
-            //     const response = await users.setBanStatus(
-            //         preparedSuperUser.valid,
-            //         preparedUser.updateBanStatus.notValid,
-            //         userId
-            //     );
-            //     expect(response.status).toBe(HttpStatus.BAD_REQUEST)
-            //     expect(response.body).toStrictEqual({ errorsMessages })
-            // })
-
-            it('Should update ban status. Set status "true"', async () => {
-                const { userId } = expect.getState()
-
-                const response = await users.setBanStatus(
-                    preparedSuperUser.valid,
-                    preparedUser.updateBanStatus.banned,
-                    userId
-                );
-                expect(response.status).toBe(HttpStatus.NO_CONTENT);
-
-                const user = await users.getUsers(preparedSuperUser.valid, {})
-                console.log(user)
-                expect(user.body.items[0].banInfo.isBanned).toBe(true) // TODO uncomment
-            })
-
-            // it('Should update ban status. Set status "false"', async () => {
-            //     const { userId } = expect.getState()
-            //
-            //     const response = await users.setBanStatus(
-            //         preparedSuperUser.valid,
-            //         preparedUser.updateBanStatus.unBanned,
-            //         userId
-            //     );
-            //     expect(response.status).toBe(HttpStatus.NO_CONTENT);
-            //
-            //     const user = await users.getUsers(preparedSuperUser.valid, {})
-            //     expect(user.body.items[0].banInfo.isBanned).toBe(false) // TODO uncomment
-            // })
+            const user = await users.getUsers(preparedSuperUser.valid, {})
+            expect(user.body.items[0].banInfo.isBanned).toBe(true)
         })
 
-        describe('GET -> sa/users', () => {
-            it('Clear all data', async () => {
-                await testing.clearDb();
-            });
+        it('Should update ban status. Set status "false"', async () => {
+            const { userId } = expect.getState()
 
-            it('Create data', async () => {
-                const createdUsers = await usersFactories.createUsers(5)
-                const bannedUsers = await usersFactories.crateAndBanUsers(5)
+            const response = await users.setBanStatus(
+                preparedSuperUser.valid,
+                preparedUser.updateBanStatus.unBanned,
+                userId
+            );
+            expect(response.status).toBe(HttpStatus.NO_CONTENT);
 
-                expect.setState({
-                    createdUsers,
-                    bannedUsers
-                })
-            })
+            const user = await users.getUsers(preparedSuperUser.valid, {})
+            expect(user.body.items[0].banInfo.isBanned).toBe(false)
+        })
+    })
 
-            // it('User without permissions try to get a question', async () => {
-            //     const request = await users.getUsers(preparedSuperUser.notValid, {});
-            //     expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
-            // })
-            //
-            // it('Get all question without query', async () => {
-            //     const request = await users.getUsers(
-            //         preparedSuperUser.valid , {}
-            //     );
-            //     expect(request.status).toBe(HttpStatus.OK);
-            //     expect(request.body.items).toHaveLength(10)
-            // })
+    describe('GET -> sa/users', () => {
+        it('Clear all data', async () => {
+            await testing.clearDb();
+        });
 
-            // it('?banStatus=banned&sortBy=login&sortDirection=asc&&pageSize=3', async () => {
-            //     const { bannedUsers } = expect.getState()
-            //     const expectResponse = expectResponseForGetUsers(
-            //         BanStatus.Banned,
-            //         SortByField.Login,
-            //         SortDirection.Ascending,
-            //         2,
-            //         1,
-            //         3,
-            //         5,
-            //         [...bannedUsers]
-            //     )
-            //
-            //     const request = await users.getUsers(
-            //         preparedSuperUser.valid,
-            //         {
-            //             banStatus: BanStatus.Banned,
-            //             sortBy: SortByField.Login,
-            //             sortDirection: SortDirection.Ascending,
-            //             pageSize: 3,
-            //         }
-            //     )
-            //     expect(request.status).toBe(HttpStatus.OK);
-            //     expect(request.body).toStrictEqual(expectResponse)
-            // })
+        it('Create data', async () => {
+            const createdUsers = await usersFactories.createUsers(5)
+            const bannedUsers = await usersFactories.crateAndBanUsers(5)
 
-            it('?banStatus=notBanned&sortBy=email&sortDirection=desc&pageNumber=2&pageSize=3', async () => {
-                const { createdUsers } = expect.getState()
-                const expectResponse = expectResponseForGetUsers(
-                    BanStatus.NotBanned,
-                    SortByField.Email,
-                    SortDirection.Descending,
-                    2,
-                    2,
-                    3,
-                    5,
-                    [...createdUsers]
-                )
-
-                const request = await users.getUsers(
-                    preparedSuperUser.valid,
-                    {
-                        banStatus: BanStatus.NotBanned,
-                        sortBy: SortByField.Email,
-                        sortDirection: SortDirection.Descending,
-                        pageNumber: 2,
-                        pageSize: 3,
-                    }
-                )
-
-                expect(request.status).toBe(HttpStatus.OK);
-                expect(request.body).toStrictEqual(expectResponse)
+            expect.setState({
+                createdUsers,
+                bannedUsers
             })
         })
 
-        describe('DELETE -> "sa/users/:id"', () => {
-            it('Clear all data', async () => {
-                await testing.clearDb();
-            });
+        it('User without permissions try to get a question', async () => {
+            const request = await users.getUsers(preparedSuperUser.notValid, {});
+            expect(request.status).toBe(HttpStatus.UNAUTHORIZED);
+        })
 
-            it('Create data', async () => {
-                const [user] = await usersFactories.createUsers(1)
+        it('Get all question without query', async () => {
+            const request = await users.getUsers(
+                preparedSuperUser.valid , {}
+            );
+            expect(request.status).toBe(HttpStatus.OK);
+            expect(request.body.items).toHaveLength(10)
+        })
 
-                expect.setState({
-                    userId: user.id
-                })
+        it('?banStatus=banned&sortBy=login&sortDirection=asc&&pageSize=3', async () => {
+            const { bannedUsers } = expect.getState()
+
+            const request = await users.getUsers(
+                preparedSuperUser.valid,
+                {
+                    banStatus: BanStatus.Banned,
+                    sortBy: SortByField.Login,
+                    sortDirection: SortDirection.Ascending,
+                    pageSize: 3,
+                }
+            )
+            expect(request.status).toBe(HttpStatus.OK);
+            expect(request.body).toStrictEqual({
+                pagesCount: 2,
+                page: 1,
+                pageSize: 3,
+                totalCount: 5,
+                items: [
+                    bannedUsers[0],
+                    bannedUsers[1],
+                    bannedUsers[2]
+                ]
             })
+        })
 
-            it('User without permissions try delete another user', async () => {
-                const { userId } = expect.getState()
+        it('?banStatus=notBanned&sortBy=email&sortDirection=desc&pageNumber=2&pageSize=3', async () => {
+            const { createdUsers } = expect.getState()
 
-                const status = await users.deleteUser(preparedSuperUser.notValid, userId)
-                expect(status).toBe(HttpStatus.UNAUTHORIZED)
+            const request = await users.getUsers(
+                preparedSuperUser.valid,
+                {
+                    banStatus: BanStatus.NotBanned,
+                    sortBy: SortByField.Email,
+                    sortDirection: SortDirection.Descending,
+                    pageNumber: 2,
+                    pageSize: 3,
+                }
+            )
+            expect(request.status).toBe(HttpStatus.OK);
+            expect(request.body).toStrictEqual({
+                pagesCount: 2,
+                page: 2,
+                pageSize: 3,
+                totalCount: 5,
+                items: [
+                    createdUsers[1],
+                    createdUsers[0],
+                ]
             })
+        })
+    })
 
-            it('Should delete user', async () => {
-                const { userId } = expect.getState()
+    describe('DELETE -> "sa/users/:id"', () => {
+        it('Clear all data', async () => {
+            await testing.clearDb();
+        });
 
-                const status = await users.deleteUser(preparedSuperUser.valid, userId)
-                expect(status).toBe(HttpStatus.NO_CONTENT)
+        it('Create data', async () => {
+            const [user] = await usersFactories.createUsers(1)
+
+            expect.setState({
+                userId: user.id
             })
+        })
 
-            it('Try delete not exist user', async () => {
-                const { userId } = expect.getState()
-                const randomId = randomUUID()
+        it('User without permissions try delete another user', async () => {
+            const { userId } = expect.getState()
 
-                const status = await users.deleteUser(preparedSuperUser.valid, randomId)
-                expect(status).toBe(HttpStatus.NOT_FOUND)
+            const status = await users.deleteUser(preparedSuperUser.notValid, userId)
+            expect(status).toBe(HttpStatus.UNAUTHORIZED)
+        })
 
-                const deletedAgain = await users.deleteUser(preparedSuperUser.valid, userId)
-                expect(deletedAgain).toBe(HttpStatus.NOT_FOUND)
-            })
+        it('Should delete user', async () => {
+            const { userId } = expect.getState()
+
+            const status = await users.deleteUser(preparedSuperUser.valid, userId)
+            expect(status).toBe(HttpStatus.NO_CONTENT)
+        })
+
+        it('Try delete not exist user', async () => {
+            const { userId } = expect.getState()
+            const randomId = randomUUID()
+
+            const status = await users.deleteUser(preparedSuperUser.valid, randomId)
+            expect(status).toBe(HttpStatus.NOT_FOUND)
+
+            const deletedAgain = await users.deleteUser(preparedSuperUser.valid, userId)
+            expect(deletedAgain).toBe(HttpStatus.NOT_FOUND)
         })
     })
 });

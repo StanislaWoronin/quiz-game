@@ -19,9 +19,6 @@ import { SqlCredentials } from "./modules/sa/users/infrastructure/sql/entity/cre
 import { SqlQuestions } from "./modules/sa/questions/infrastructure/sql/entity/questions.entity";
 import { SqlUserBanInfo } from "./modules/sa/users/infrastructure/sql/entity/ban-info.entity";
 import { SqlUsers } from "./modules/sa/users/infrastructure/sql/entity/users.entity";
-import { TypeOrmConfig } from "./config/type-orm.config";
-import { MongooseModule } from "@nestjs/mongoose";
-import { MongooseConfig } from "./config/mongoose.config";
 import { MongoUsers, UserSchema } from "./modules/sa/users/infrastructure/mongoose/schema/userSchema";
 import {
   MongoUserBanInfo,
@@ -33,7 +30,6 @@ import {
 } from "./modules/sa/users/infrastructure/mongoose/schema/credential.schema";
 import { AnswerSchema, MongoAnswers } from "./modules/sa/questions/infrastructure/mongoose/schema/answerSchema";
 import { MongoQuestion, QuestionSchema } from "./modules/sa/questions/infrastructure/mongoose/schema/question.schema";
-import { MongooseCoreModule } from "@nestjs/mongoose/dist/mongoose-core.module";
 import { configSwitcher } from "./common/repositories-switcher/config-switcher";
 
 const controllers = [QuestionsController, TestingController, UsersController];

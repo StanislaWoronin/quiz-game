@@ -59,6 +59,7 @@ export class Users {
         }
 
         const url = getUrlWithQuery(endpoints.sa.users, query)
+
         const response = await request(this.server)
             .get(url)
             .auth(superUser.login, superUser.password, {

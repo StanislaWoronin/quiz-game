@@ -63,17 +63,13 @@ export class UsersQueryRepository {
     }
 
     private getBanStatusFilter(banStatus: BanStatus): string {
-        if (banStatus === BanStatus.All) {
-            return ''
-        }
-        let isBanned
         if (banStatus === BanStatus.NotBanned) {
-            isBanned = null
+            return `bi."isBanned" isNull`
         }
         if (banStatus === BanStatus.Banned) {
-            isBanned =  true
+            return `bi."isBanned" = true`
         }
-        return `bi."isBanned" = ${isBanned}`
+        return ''
     }
 
     private getSearchTermFilter(searchLoginTerm: string, searchEmailTerm: string): string {
