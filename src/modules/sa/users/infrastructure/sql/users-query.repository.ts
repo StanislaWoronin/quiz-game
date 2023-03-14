@@ -21,11 +21,10 @@ export class UsersQueryRepository {
               FROM sql_users u
               LEFT JOIN sql_user_ban_info bi
                 ON u.id = bi."userId"
-             WHERE ${filter}
+             ${filter}
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};         
         `
-        console.log(query)
         const users: UserWithBanInfoDb[] = await this.dataSource.query(query)
         const items = users.map(u => toViewUser(u))
 
@@ -34,7 +33,7 @@ export class UsersQueryRepository {
               FROM sql_users u
               LEFT JOIN sql_user_ban_info bi
                 ON u.id = bi."userId"
-             WHERE ${filter}
+             ${filter}
         `
         const totalCount = await this.dataSource.query(countQuery)
 
@@ -51,13 +50,13 @@ export class UsersQueryRepository {
         const searTermFilter = this.getSearchTermFilter(searchLoginTerm, searchEmailTerm)
 
         if (banStatusFilter && searTermFilter) {
-            return `${banStatusFilter} AND ${searTermFilter}`
+            return `WHERE ${banStatusFilter} AND ${searTermFilter}`
         }
         if (banStatusFilter) {
-            return banStatusFilter
+            return `WHERE ${banStatusFilter}`
         }
         if (searTermFilter) {
-            return searTermFilter
+            return `WHERE ${searTermFilter}`
         }
 
         return ''
