@@ -11,7 +11,7 @@ import {
     Query,
     UseGuards
 } from "@nestjs/common";
-import {AuthBasicGuard} from "../../../../common/guards/auth-basic.guard";
+import {AuthBasicGuard} from "../../../public/auth/guards/auth-basic.guard";
 import {UsersService} from "../applications/users.service";
 import {IUsersQueryRepository} from "../infrastructure/i-users-query.repository";
 import {CreateUserDto} from "./dto/create-user.dto";
@@ -20,7 +20,7 @@ import {ViewPage} from "../../../../common/pagination/view-page";
 import {ViewUser} from "./view/view-user";
 import {UsersQueryDto} from "./dto/query/users-query.dto";
 import { UpdateUserBanStatusDto } from "./dto/update-user-ban-status.dto";
-import {BaseAuthGuard} from "../../../../common/guards/base-auth-guard";
+import {BaseAuthGuard} from "../../../public/auth/guards/base-auth-guard";
 
 @UseGuards(BaseAuthGuard)
 @Controller('sa/users')

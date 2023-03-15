@@ -14,9 +14,9 @@ import {AnswerDto} from "./dto/answer.dto";
 import {ViewAnswer} from "./view/view-answer";
 import {PairQuizGameService} from "../applications/pair-quiz-game.service";
 import {UserId} from "../../../../common/decorators/user.decorator";
-import {LocalAuthGuard} from "../../../../common/guards/local-auth.guard";
+import {AuthBearerGuard} from "../../auth/guards/auth-bearer.guard";
 
-@UseGuards(LocalAuthGuard)
+@UseGuards(AuthBearerGuard)
 @Controller('pair-game-quiz/pair')
 export class PairQuizGameController {
     constructor(

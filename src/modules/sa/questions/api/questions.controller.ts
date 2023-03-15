@@ -13,7 +13,7 @@ import {
   Query,
   UseGuards
 } from "@nestjs/common";
-import { AuthBasicGuard } from '../../../../common/guards/auth-basic.guard';
+import { AuthBasicGuard } from '../../../public/auth/guards/auth-basic.guard';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { CreatedQuestions } from './view/created-questions';
 import { QuestionsService } from '../applications/questions.servise';
@@ -23,7 +23,7 @@ import { QuestionsQueryDto } from './dto/query/questions-query.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { UpdatePublishStatusDto } from './dto/update-publish-status.dto';
 import { ViewQuestion } from "./view/view-question";
-import {BaseAuthGuard} from "../../../../common/guards/base-auth-guard";
+import {BaseAuthGuard} from "../../../public/auth/guards/base-auth-guard";
 
 @UseGuards(BaseAuthGuard)
 @Controller('sa/quiz/questions')
