@@ -30,7 +30,7 @@ export class MQuestionsRepository {
   ): Promise<boolean> {
     const result = await this.questionsRepository.updateOne(
         { id: questionId },
-        {$set: {
+        { $set: {
             body: dto.body,
             correctAnswers: dto.correctAnswers,
             updatedAt: new Date().toISOString()
@@ -44,12 +44,17 @@ export class MQuestionsRepository {
       questionId: string,
       published: boolean
   ): Promise<boolean> {
-    const session: ClientSession = await this.connection.startSession();
+    const result = await this.questionsRepository.updateOne(
+      { id: questionId, correctAnswers: { $exists: true } }, 
+      { published, updatedAt: new Date().toISOString() }
+    )
+    
+    return result.matchedCount === 1;
+  }
 
-    try {
-      await session.withTransaction(async () => {
-        const
-      })
-    }
+  async deleteQuestion(questionId: string): Promise<boolean> {
+    const result = await this.questionsRepository.deleteOne({id: questionId})
+    
+    return result.deletedCount === 1;
   }
 }

@@ -31,10 +31,15 @@ import {
 import { AnswerSchema, MongoAnswers } from "./modules/sa/questions/infrastructure/mongoose/schema/answerSchema";
 import { MongoQuestion, QuestionSchema } from "./modules/sa/questions/infrastructure/mongoose/schema/question.schema";
 import { configSwitcher } from "./common/repositories-switcher/config-switcher";
+import {IJwtRepository} from "./modules/public/auth/infrastructure/i-jwt.repository";
+import {PairQuizGameController} from "./modules/public/pair-quiz-game/api/pair-quiz-game.controller";
+import {PairQuizGameService} from "./modules/public/pair-quiz-game/applications/pair-quiz-game.service";
+import {IQuizGameRepository} from "./modules/public/pair-quiz-game/infrastructure/i-quiz-game.repository";
+import {set} from "mongoose";
 
-const controllers = [QuestionsController, TestingController, UsersController];
+const controllers = [QuestionsController, PairQuizGameController, TestingController, UsersController];
 
-const services = [QuestionsService, UsersService];
+const services = [QuestionsService, PairQuizGameService, UsersService];
 
 const repositories = [
   {
@@ -49,6 +54,20 @@ const repositories = [
     useClass: repositorySwitcher(
       settings.currentRepository,
       repositoryName.QuestionsQueryRepository,
+    ),
+  },
+  {
+    provide: IQuizGameRepository,
+    useClass: repositorySwitcher(
+        settings.currentRepository,
+        repositoryName.GameRepository
+    )
+  },
+  {
+    provide: IJwtRepository,
+    useClass: repositorySwitcher(
+        settings.currentRepository,
+        repositoryName.Jwt,
     ),
   },
   {

@@ -1,6 +1,6 @@
 import {Test, TestingModule} from '@nestjs/testing';
 import {HttpStatus, INestApplication} from '@nestjs/common';
-import {AppModule} from './../src/app.module';
+import {AppModule} from '../src/app.module';
 import {createApp} from '../src/config/create-app';
 import {QuestionsFactories} from './helpers/factories/questions-factories';
 import {Testing} from './helpers/request/testing';

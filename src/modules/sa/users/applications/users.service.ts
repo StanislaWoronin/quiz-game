@@ -6,7 +6,6 @@ import {NewUserDto} from "./dto/new-user.dto";
 import * as bcrypt from 'bcrypt';
 import {settings} from "../../../../settings";
 import { UpdateUserBanStatusDto } from "../api/dto/update-user-ban-status.dto";
-import { BanStatus } from "../api/dto/query/ban-status";
 
 @Injectable()
 export class UsersService {

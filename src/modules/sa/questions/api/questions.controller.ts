@@ -23,8 +23,9 @@ import { QuestionsQueryDto } from './dto/query/questions-query.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { UpdatePublishStatusDto } from './dto/update-publish-status.dto';
 import { ViewQuestion } from "./view/view-question";
+import {BaseAuthGuard} from "../../../../common/guards/base-auth-guard";
 
-@UseGuards(AuthBasicGuard)
+@UseGuards(BaseAuthGuard)
 @Controller('sa/quiz/questions')
 export class QuestionsController {
   constructor(

@@ -44,6 +44,14 @@ export class UsersQueryRepository {
         })
     }
 
+    async checkUserCredential(userId: string): Promise<boolean> {
+        return await this.dataSource
+            .getRepository('sql_credentials')
+            .createQueryBuilder('c')
+            .where('c.userId = : userId', { userId })
+            .getExists()
+    } // TODO new
+
     private getFilter(query: UsersQueryDto): string {
         const { banStatus, searchLoginTerm, searchEmailTerm } = query;
         const banStatusFilter = this.getBanStatusFilter(banStatus)

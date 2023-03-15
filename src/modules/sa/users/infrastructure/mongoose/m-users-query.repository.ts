@@ -16,6 +16,7 @@ export class MUsersQueryRepository {
 
   async getUsers(query: UsersQueryDto): Promise<ViewPage<ViewUser>> {
     const filter = this.getFilter(query)
+    
     const users = await this.usersRepository.aggregate([
       { $match: { $and: filter } },
       { $sort: { [query.sortBy]: query.sortDirection === 'asc' ? 1 : -1 } },

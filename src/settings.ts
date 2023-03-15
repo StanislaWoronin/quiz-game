@@ -4,8 +4,10 @@ export const settings = {
   POSTGRES_URI: process.env.postgresURI,
   local: 'postgresql://telegramBot:admin@localhost:5432',
   JWT_SECRET: process.env.JWT_SECRET || '123',
-  basic: {
-    USER: 'admin',
+  ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET || '456',
+  REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET || '789',
+  su: {
+    LOGIN: 'admin',
     PASS: 'qwerty',
   },
   SALT_GENERATE_ROUND: '10',
