@@ -3,5 +3,5 @@ export enum SortByField {
   Body = 'body',
   Email = 'email',
   Login = 'login',
-  PublishedStatus = 'publishedStatus'
+  PublishedStatus = 'publishedStatus',
 }

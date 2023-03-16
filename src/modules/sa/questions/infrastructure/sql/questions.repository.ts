@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { NewQuestionDto } from "../../applications/dto/new-question.dto";
-import { CreatedQuestions } from "../../api/view/created-questions";
-import { SqlQuestions } from "./entity/questions.entity";
-import { SqlCorrectAnswers } from "./entity/answers.entity";
-import { toCreatedQuestions } from "../../../../../common/data-mapper/to-created-quesions";
-import { CreatedQuestionsDb } from "./pojo/created-questions.db";
-import { UpdateQuestionDto } from "../../api/dto/update-question.dto";
+import { NewQuestionDto } from '../../applications/dto/new-question.dto';
+import { CreatedQuestions } from '../../api/view/created-questions';
+import { SqlQuestions } from './entity/questions.entity';
+import { SqlCorrectAnswers } from './entity/answers.entity';
+import { toCreatedQuestions } from '../../../../../common/data-mapper/to-created-quesions';
+import { CreatedQuestionsDb } from './pojo/created-questions.db';
+import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
 
 @Injectable()
 export class QuestionsRepository {
@@ -15,7 +15,7 @@ export class QuestionsRepository {
 
   async createQuestion(
     newQuestion: NewQuestionDto,
-    answers: string[]
+    answers: string[],
   ): Promise<CreatedQuestions | null> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -25,20 +25,20 @@ export class QuestionsRepository {
     try {
       const createdQuestions: CreatedQuestionsDb = await manager
         .getRepository(SqlQuestions)
-        .save(newQuestion)
+        .save(newQuestion);
 
-      let createdAnswer
+      let createdAnswer;
       for (let i = 0, length = answers.length; i < length; i++) {
         createdAnswer = await manager
           .getRepository(SqlCorrectAnswers)
-          .save({ questionId: createdQuestions.id, correctAnswer: answers[i] })
+          .save({ questionId: createdQuestions.id, correctAnswer: answers[i] });
       }
 
       await queryRunner.commitTransaction();
-      return toCreatedQuestions(createdQuestions, answers)
+      return toCreatedQuestions(createdQuestions, answers);
     } catch (e) {
       await queryRunner.rollbackTransaction();
-      return null
+      return null;
     } finally {
       await queryRunner.release();
     }
@@ -46,7 +46,7 @@ export class QuestionsRepository {
 
   async updateQuestion(
     questionId: string,
-    dto: UpdateQuestionDto
+    dto: UpdateQuestionDto,
   ): Promise<boolean> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -54,26 +54,29 @@ export class QuestionsRepository {
 
     const manager = queryRunner.manager;
     try {
-      await this.dataSource.createQueryBuilder().update(SqlQuestions)
+      await this.dataSource
+        .createQueryBuilder()
+        .update(SqlQuestions)
         .set({
           body: dto.body,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         })
-        .where("id = :id", { id: questionId })
-        .execute()
+        .where('id = :id', { id: questionId })
+        .execute();
 
-      await manager.delete(SqlCorrectAnswers, {questionId})
+      await manager.delete(SqlCorrectAnswers, { questionId });
 
       for (let i = 0, length = dto.correctAnswers.length; i < length; i++) {
-        await manager
-          .getRepository(SqlCorrectAnswers)
-          .save({ questionId: questionId, correctAnswer: dto.correctAnswers[i] })
+        await manager.getRepository(SqlCorrectAnswers).save({
+          questionId: questionId,
+          correctAnswer: dto.correctAnswers[i],
+        });
       }
 
-      return true
+      return true;
     } catch (e) {
       await queryRunner.rollbackTransaction();
-      return false
+      return false;
     } finally {
       await queryRunner.release();
     }
@@ -81,7 +84,7 @@ export class QuestionsRepository {
 
   async updatePublishStatus(
     questionId: string,
-    published: boolean
+    published: boolean,
   ): Promise<boolean> {
     const query = `
       UPDATE sql_questions
@@ -90,8 +93,8 @@ export class QuestionsRepository {
          AND EXISTS(SELECT "questionId"
                       FROM sql_answers
                      WHERE "questionId" = '${questionId}')
-    `
-    const result = await this.dataSource.query(query)
+    `;
+    const result = await this.dataSource.query(query);
 
     if (result[1] !== 1) {
       return false;
@@ -106,17 +109,17 @@ export class QuestionsRepository {
 
     const manager = queryRunner.manager;
     try {
-      const result = await manager.delete(SqlQuestions, {id: questionId})
+      const result = await manager.delete(SqlQuestions, { id: questionId });
       if (result.affected === 0) {
-        return false
+        return false;
       }
 
-      await manager.delete(SqlCorrectAnswers, {questionId})
+      await manager.delete(SqlCorrectAnswers, { questionId });
 
-      return true
+      return true;
     } catch (e) {
       await queryRunner.rollbackTransaction();
-      return false
+      return false;
     } finally {
       await queryRunner.release();
     }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import {SqlTokenBlackList} from "./entity/sql-token-black-list.entity";
+import { SqlTokenBlackList } from './entity/sql-token-black-list.entity';
 
 @Injectable()
 export class JwtRepository {
@@ -18,7 +18,7 @@ export class JwtRepository {
   async addTokenInBlackList(refreshToken: string): Promise<boolean> {
     const result = await this.dataSource
       .getRepository(SqlTokenBlackList)
-      .save({token: refreshToken});
+      .save({ token: refreshToken });
 
     if (!result) {
       return false;

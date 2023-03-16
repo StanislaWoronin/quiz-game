@@ -1,4 +1,4 @@
 export class Questions {
-    id: string
-    body: string
+  id: string;
+  body: string;
 }

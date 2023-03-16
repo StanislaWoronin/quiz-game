@@ -1,5 +1,5 @@
-import {endpoints} from "../routing";
+import { endpoints } from '../routing';
 
 export const getUrlForUpdatePublishStatus = (id: string): string => {
-    return `${endpoints.sa.quiz.questions}/${id}/publish`;
+  return `${endpoints.sa.quiz.questions}/${id}/publish`;
 };

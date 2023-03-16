@@ -1,11 +1,11 @@
 import { CreatedQuestions } from '../api/view/created-questions';
 import { CreateQuestionDto } from '../api/dto/create-question.dto';
 import { NewQuestionDto } from './dto/new-question.dto';
-import {Inject, Injectable} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { IQuestionsRepository } from '../infrastructure/i-questions.repository';
-import { UpdatePublishStatusDto } from "../api/dto/update-publish-status.dto";
-import { IQuestionsQueryRepository } from "../infrastructure/i-questions-query.repository";
-import { UpdateQuestionDto } from "../api/dto/update-question.dto";
+import { UpdatePublishStatusDto } from '../api/dto/update-publish-status.dto';
+import { IQuestionsQueryRepository } from '../infrastructure/i-questions-query.repository';
+import { UpdateQuestionDto } from '../api/dto/update-question.dto';
 
 @Injectable()
 export class QuestionsService {
@@ -27,26 +27,33 @@ export class QuestionsService {
 
   async updateQuestion(
     questionId: string,
-    dto: UpdateQuestionDto
+    dto: UpdateQuestionDto,
   ): Promise<boolean | null> {
-    const isExists = await this.questionsQueryRepository.questionExists(questionId);
-    if(isExists === null) return null
-    if(isExists && !dto.correctAnswers.length) return false // if question "published" and correctAnswers = [] return false
+    const isExists = await this.questionsQueryRepository.questionExists(
+      questionId,
+    );
+    if (isExists === null) return null;
+    if (isExists && !dto.correctAnswers.length) return false; // if question "published" and correctAnswers = [] return false
 
     return await this.questionsRepository.updateQuestion(questionId, dto);
   }
 
   async updatePublishStatus(
     questionId: string,
-    dto: UpdatePublishStatusDto
+    dto: UpdatePublishStatusDto,
   ): Promise<boolean | null> {
-    const isExists = await this.questionsQueryRepository.questionExists(questionId);
-    if(isExists === null) return null
+    const isExists = await this.questionsQueryRepository.questionExists(
+      questionId,
+    );
+    if (isExists === null) return null;
 
-    return await this.questionsRepository.updatePublishStatus(questionId, dto.published);
+    return await this.questionsRepository.updatePublishStatus(
+      questionId,
+      dto.published,
+    );
   }
 
   async deleteQuestion(questionId: string): Promise<boolean> {
-    return await this.questionsRepository.deleteQuestion(questionId)
+    return await this.questionsRepository.deleteQuestion(questionId);
   }
 }

@@ -6,10 +6,10 @@ export const endpoints = {
     quiz: {
       questions: `${saController}/quiz/questions`,
     },
-    users: `${saController}/users`
+    users: `${saController}/users`,
   },
   testing: {
     allData: `${testingController}/all-data`,
-    allRowCount: `${testingController}/all-row-count`
+    allRowCount: `${testingController}/all-row-count`,
   },
 };

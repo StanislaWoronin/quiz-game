@@ -1,6 +1,6 @@
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from "typeorm";
-import { Injectable } from "@nestjs/common";
+import { DataSource } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class TestingRepository {
@@ -9,7 +9,9 @@ export class TestingRepository {
   async deleteAll(): Promise<boolean> {
     try {
       const entities = this.dataSource.entityMetadatas;
-      const tableNames = entities.map((entity) => `"${entity.tableName}"`).join(", ");
+      const tableNames = entities
+        .map((entity) => `"${entity.tableName}"`)
+        .join(', ');
 
       await this.dataSource.query(`TRUNCATE ${tableNames} CASCADE;`);
 
@@ -18,9 +20,9 @@ export class TestingRepository {
       // await queryRunner.dropSchema('public', false, true);
       // await queryRunner.createSchema('public', true);
       // await this.dataSource.manager.synchronize()
-      return true
+      return true;
     } catch (e) {
-      return false
+      return false;
     }
   }
 
@@ -35,10 +37,10 @@ export class TestingRepository {
                 '') as xml_count
                 FROM information_schema.tables
                WHERE table_schema = 'public') t
-    `
-    const result = await this.dataSource.query(query)
-    const allRowCount = result.reduce((acc, el) => acc + el.rowCount , 0)
+    `;
+    const result = await this.dataSource.query(query);
+    const allRowCount = result.reduce((acc, el) => acc + el.rowCount, 0);
 
-    return allRowCount
+    return allRowCount;
   }
 }

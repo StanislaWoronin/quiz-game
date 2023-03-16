@@ -1,8 +1,8 @@
-import {ViewGame} from "../api/view/view-game";
+import { ViewGame } from '../api/view/view-game';
 
 export interface IQuizGameQueryRepository {
-    getMyCurrentGame(userId): Promise<ViewGame>
-    getGameById(gameId): Promise<ViewGame>
+  getMyCurrentGame(userId): Promise<ViewGame>;
+  getGameById(gameId): Promise<ViewGame>;
 }
 
-export const IQuizGameQueryRepository = 'IQuizGameQueryRepository'
+export const IQuizGameQueryRepository = 'IQuizGameQueryRepository';

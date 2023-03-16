@@ -1,8 +1,8 @@
 export class CreatedQuestionsDb {
-    id: string;
-    body: string;
-    correctAnswers: string;
-    published: boolean;
-    createdAt: string;
-    updatedAt: string;
+  id: string;
+  body: string;
+  correctAnswers: string;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -1,12 +1,12 @@
-import { INestApplication } from "@nestjs/common";
-import { QuestionsFactories } from "./helpers/factories/questions-factories";
-import { Questions } from "./helpers/request/questions";
-import { Testing } from "./helpers/request/testing";
-import { Test, TestingModule } from "@nestjs/testing";
-import { AppModule } from "../src/app.module";
-import { createApp } from "../src/config/create-app";
-import {Users} from "./helpers/request/users";
-import { UsersFactory } from "./helpers/factories/users-factory";
+import { INestApplication } from '@nestjs/common';
+import { QuestionsFactories } from './helpers/factories/questions-factories';
+import { Questions } from './helpers/request/questions';
+import { Testing } from './helpers/request/testing';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppModule } from '../src/app.module';
+import { createApp } from '../src/config/create-app';
+import { Users } from './helpers/request/users';
+import { UsersFactory } from './helpers/factories/users-factory';
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -48,24 +48,24 @@ describe('/sa/quiz/questions (e2e)', () => {
 
     it('Create data', async () => {
       // createQuestion contains one row in table Questions and tree row in table Answers -> SUM 4 row
-      await questionsFactory.createQuestions(1)
+      await questionsFactory.createQuestions(1);
       // createAndBanUser contain one row in table Users, one row in Credentials and one row in UserBanInfo -> SUM 3 row
-      await usersFactory.crateAndBanUsers(1)
+      await usersFactory.crateAndBanUsers(1);
 
-      const rowCount = await testing.getAllRowCount()
-      expect(rowCount).toBe(7)
+      const rowCount = await testing.getAllRowCount();
+      expect(rowCount).toBe(7);
 
-      expect.setState({rowCount});
+      expect.setState({ rowCount });
     });
 
     it('Drop all data', async () => {
-      const { rowCount } = expect.getState()
+      const { rowCount } = expect.getState();
       const status = await testing.clearDb();
-      expect(status).toBe(204)
+      expect(status).toBe(204);
 
-      const rowCountAfterClearDb = await testing.getAllRowCount()
-      expect(rowCountAfterClearDb).not.toBe(rowCount)
-      expect(rowCountAfterClearDb).toBe(0)
-    })
+      const rowCountAfterClearDb = await testing.getAllRowCount();
+      expect(rowCountAfterClearDb).not.toBe(rowCount);
+      expect(rowCountAfterClearDb).toBe(0);
+    });
   });
-})
+});

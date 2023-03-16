@@ -1,31 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { EmailConfirmationModel } from '../infrastructure/entity/emailConfirmation.model';
-import { UsersService } from '../application/users.service';
-import { toCreateUserViewModel } from '../../../data-mapper/to-create-user-view.model';
-import { v4 as uuidv4 } from 'uuid';
-import { UserViewModelWithBanInfo } from '../api/dto/user.view.model';
-import { UserDto } from '../api/dto/user.dto';
+import { UsersService } from '../applications/users.service';
+import { CreateUserDto } from '../api/dto/create-user.dto';
+import { SqlEmailConfirmation } from '../../../public/auth/infrastructure/sql/entity/email-confirmation.entity';
+import { CreatedUser } from '../api/view/created-user';
 
 @Injectable()
 export class CreateUserBySaUseCase {
   constructor(protected usersService: UsersService) {}
 
-  async execute(dto: UserDto): Promise<UserViewModelWithBanInfo> {
-    const userId = uuidv4();
-    const emailConfirmation = new EmailConfirmationModel(
-      userId,
-      null,
-      null,
-      true,
-    );
+  async execute(dto: CreateUserDto): Promise<CreatedUser> {
+    const emailConfirmation = new SqlEmailConfirmation(true);
 
-    const createdUser = await this.usersService.createUser(
-      dto,
-      emailConfirmation,
-      userId,
-    );
-    const viewUser = toCreateUserViewModel(createdUser);
-
-    return viewUser;
+    return await this.usersService.createUser(dto, emailConfirmation);
   }
 }

@@ -1,9 +1,8 @@
-import {TestsPaginationType} from "../../type/pagination.type";
-
+import { TestsPaginationType } from '../../type/pagination.type';
 
 export const getUrlWithQuery = (
-    endpoint: string,
-    query: TestsPaginationType
+  endpoint: string,
+  query: TestsPaginationType,
 ): string => {
   let result = `${endpoint}?`;
   if (query.searchLoginTerm) {
@@ -16,10 +15,10 @@ export const getUrlWithQuery = (
     result += `bodySearchTerm=${query.bodySearchTerm}&`;
   }
   if (query.banStatus) {
-    result += `banStatus=${query.banStatus}&`
+    result += `banStatus=${query.banStatus}&`;
   }
   if (query.publishedStatus) {
-    result += `publishedStatus=${query.publishedStatus}&`
+    result += `publishedStatus=${query.publishedStatus}&`;
   }
   result += `sortBy=${query.sortBy}&`;
   result += `sortDirection=${query.sortDirection}&`;
@@ -44,5 +43,3 @@ export const getUrlWithQuery = (
 //
 //   return url.slice(0, -1);
 // };
-
-

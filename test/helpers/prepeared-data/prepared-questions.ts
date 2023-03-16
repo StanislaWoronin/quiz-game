@@ -36,14 +36,14 @@ export const preparedQuestions = {
   },
   update: {
     body: `NewBody ${faker.random.alpha(5)}`,
-    correctAnswers: newArray
+    correctAnswers: newArray,
   },
   updateWithoutAnswers: {
     body: `NewBody ${faker.random.alpha(5)}`,
-    correctAnswers: []
+    correctAnswers: [],
   },
   publishStatus: {
     true: { published: true },
     false: { published: false },
-  }
+  },
 };

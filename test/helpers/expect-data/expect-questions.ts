@@ -1,5 +1,5 @@
 import { preparedQuestions } from '../prepeared-data/prepared-questions';
-import {CreatedQuestions} from "../../../src/modules/sa/questions/api/view/created-questions";
+import { CreatedQuestions } from '../../../src/modules/sa/questions/api/view/created-questions';
 
 export const expectCreatedQuestion = (): CreatedQuestions => {
   return {
@@ -9,7 +9,5 @@ export const expectCreatedQuestion = (): CreatedQuestions => {
     published: preparedQuestions.published.default,
     createdAt: expect.any(String),
     updatedAt: null,
-  }
+  };
 };
-
-

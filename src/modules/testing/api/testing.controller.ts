@@ -1,10 +1,11 @@
 import {
   Controller,
-  Delete, Get,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
-  Inject
-} from "@nestjs/common";
+  Inject,
+} from '@nestjs/common';
 import { ITestingRepository } from '../infrastructure/i-testing.repository';
 
 @Controller('testing')
@@ -21,6 +22,6 @@ export class TestingController {
 
   @Get(`all-row-count`)
   async getAllRowCount(): Promise<number> {
-    return this.testingRepository.getAllRowCount()
+    return this.testingRepository.getAllRowCount();
   }
 }

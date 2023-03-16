@@ -1,8 +1,8 @@
-import {CreatedQuestionsDb} from "../../modules/sa/questions/infrastructure/sql/pojo/questions-dto";
-import {ViewQuestions} from "../../modules/sa/questions/api/view/view-questions";
+import { CreatedQuestionsDb } from '../../modules/sa/questions/infrastructure/sql/pojo/questions-dto';
+import { ViewQuestions } from '../../modules/sa/questions/api/view/view-questions';
 
 export const toViewQuestions = (
-    questions: CreatedQuestionsDb
+  questions: CreatedQuestionsDb,
 ): ViewQuestions => {
-    return
-}
+  return;
+};

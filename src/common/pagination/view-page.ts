@@ -1,5 +1,5 @@
 import { PageDto } from './page.dto';
-import { givePagesCount } from "./helpers";
+import { givePagesCount } from './helpers';
 
 export class ViewPage<I> {
   readonly page: number;

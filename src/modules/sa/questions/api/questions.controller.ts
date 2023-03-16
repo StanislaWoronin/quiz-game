@@ -6,13 +6,14 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Inject, NotFoundException,
+  Inject,
+  NotFoundException,
   Param,
   Post,
   Put,
   Query,
-  UseGuards
-} from "@nestjs/common";
+  UseGuards,
+} from '@nestjs/common';
 import { AuthBasicGuard } from '../../../public/auth/guards/auth-basic.guard';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { CreatedQuestions } from './view/created-questions';
@@ -22,7 +23,7 @@ import { ViewPage } from '../../../../common/pagination/view-page';
 import { QuestionsQueryDto } from './dto/query/questions-query.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { UpdatePublishStatusDto } from './dto/update-publish-status.dto';
-import { ViewQuestion } from "./view/view-question";
+import { ViewQuestion } from './view/view-question';
 
 @UseGuards(AuthBasicGuard)
 @Controller('sa/quiz/questions')
@@ -53,15 +54,18 @@ export class QuestionsController {
     @Param('id') questionId: string,
     @Body() dto: UpdateQuestionDto,
   ) {
-    const isUpdated = await this.questionsService.updateQuestion(questionId, dto);
+    const isUpdated = await this.questionsService.updateQuestion(
+      questionId,
+      dto,
+    );
 
     if (isUpdated === null) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
     if (!isUpdated) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
-    return
+    return;
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -70,15 +74,18 @@ export class QuestionsController {
     @Param('id') questionId: string,
     @Body() dto: UpdatePublishStatusDto,
   ) {
-    const isUpdated = await this.questionsService.updatePublishStatus(questionId, dto);
+    const isUpdated = await this.questionsService.updatePublishStatus(
+      questionId,
+      dto,
+    );
 
     if (isUpdated === null) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
     if (!isUpdated) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
-    return
+    return;
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -87,8 +94,8 @@ export class QuestionsController {
     const isDeleted = await this.questionsService.deleteQuestion(questionId);
 
     if (!isDeleted) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
-    return
+    return;
   }
 }

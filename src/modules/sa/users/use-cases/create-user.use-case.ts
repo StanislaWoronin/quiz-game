@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import add from 'date-fns/add';
-
+import { SqlEmailConfirmation } from '../../../public/auth/infrastructure/sql/entity/email-confirmation.entity';
+import { UsersService } from '../applications/users.service';
+import { RegistrationDto } from '../../../public/auth/api/dto/registration.dto';
+import { EmailManager } from '../../../public/auth/email-transfer/email.manager';
 
 @Injectable()
 export class CreateUserUseCase {
@@ -9,27 +11,15 @@ export class CreateUserUseCase {
     protected usersService: UsersService,
   ) {}
 
-  async execute(dto: UserDto): Promise<boolean> {
-    const userId = uuidv4();
-    const emailConfirmation = new EmailConfirmationModel(
-      userId,
-      uuidv4(),
-      add(new Date(), {
-        hours: Number(settings.timeLife.CONFIRMATION_CODE),
-      }).toISOString(),
-      false,
-    );
+  async execute(dto: RegistrationDto): Promise<boolean> {
+    const emailConfirmation = new SqlEmailConfirmation(false);
 
     await this.emailManager.sendConfirmationEmail(
       dto.email,
       emailConfirmation.confirmationCode,
     );
-    // console.log(
-    //   'confirmationCode:',
-    //   emailConfirmation.confirmationCode,
-    //   'from use-case for registration',
-    // );
-    await this.usersService.createUser(dto, emailConfirmation, userId);
+
+    await this.usersService.createUser(dto, emailConfirmation);
     return true;
   }
 }

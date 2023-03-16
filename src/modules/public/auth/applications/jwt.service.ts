@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { settings } from '../../../../settings';
 import { IJwtRepository } from '../infrastructure/i-jwt.repository';
-import {Tokens} from "../../../../common/dto/tokens";
-import {TokenPayload} from "../../../../common/dto/token-payload";
+import { Tokens } from '../../../../common/dto/tokens';
+import { TokenPayload } from '../../../../common/dto/token-payload';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -33,38 +33,27 @@ export class JwtService {
   async createJWT(
     userId: string,
     deviceId: string,
-    tokenType: string
+    tokenType: string,
   ): Promise<string> {
     try {
-      let tokenSecurity = {secret: null, expiresIn: null}
+      const tokenSecurity = { secret: null, expiresIn: null };
       if (tokenType === 'at') {
-        tokenSecurity.secret = settings.ACCESS_TOKEN_SECRET
-        tokenSecurity.expiresIn = settings.timeLife.ACCESS_TOKEN
+        tokenSecurity.secret = settings.ACCESS_TOKEN_SECRET;
+        tokenSecurity.expiresIn = settings.timeLife.ACCESS_TOKEN;
       } else {
-        tokenSecurity.secret = settings.REFRESH_TOKEN_SECRET
-        tokenSecurity.expiresIn = settings.timeLife.REFRESH_TOKEN
+        tokenSecurity.secret = settings.REFRESH_TOKEN_SECRET;
+        tokenSecurity.expiresIn = settings.timeLife.REFRESH_TOKEN;
       }
 
       return this.jwtService.sign({ userId, deviceId }, tokenSecurity);
     } catch (e) {
-      throw Error('Something went wrong')
+      throw Error('Something went wrong');
     }
   }
 
-  async createTokens(
-    userId: string,
-    deviceId: string,
-  ): Promise<Tokens> {
-    const accessToken = await this.createJWT(
-      userId,
-      deviceId,
-        'at'
-    );
-    const refreshToken = await this.createJWT(
-      userId,
-      deviceId,
-      'rt'
-    );
+  async createTokens(userId: string, deviceId: string): Promise<Tokens> {
+    const accessToken = await this.createJWT(userId, deviceId, 'at');
+    const refreshToken = await this.createJWT(userId, deviceId, 'rt');
 
     return { accessToken, refreshToken };
   }

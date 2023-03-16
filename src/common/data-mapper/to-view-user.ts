@@ -1,5 +1,5 @@
-import { ViewUser } from "../../modules/sa/users/api/view/view-user";
-import { UserWithBanInfoDb } from "../../modules/sa/users/infrastructure/sql/pojo/user-with-ban-info.db";
+import { ViewUser } from '../../modules/sa/users/api/view/view-user';
+import { UserWithBanInfoDb } from '../../modules/sa/users/infrastructure/sql/pojo/user-with-ban-info.db';
 
 export const toViewUser = (user: UserWithBanInfoDb): ViewUser => {
   return {
@@ -11,6 +11,6 @@ export const toViewUser = (user: UserWithBanInfoDb): ViewUser => {
       isBanned: user.isBanned ?? false,
       banDate: user.banDate ?? null,
       banReason: user.banReason ?? null,
-    }
-  }
-}
+    },
+  };
+};

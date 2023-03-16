@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { MongoAnswers } from "./answerSchema";
-import { HydratedDocument } from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { MongoAnswers } from './answerSchema';
+import { HydratedDocument } from 'mongoose';
 
 @Schema({ id: false, versionKey: false })
 export class MongoQuestion {
@@ -23,6 +23,6 @@ export class MongoQuestion {
   correctAnswers: MongoAnswers;
 }
 
-export const QuestionSchema = SchemaFactory.createForClass(MongoQuestion)
+export const QuestionSchema = SchemaFactory.createForClass(MongoQuestion);
 
-export type QuestionsDocument = HydratedDocument<MongoQuestion>
+export type QuestionsDocument = HydratedDocument<MongoQuestion>;

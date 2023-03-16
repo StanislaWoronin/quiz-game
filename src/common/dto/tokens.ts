@@ -1,9 +1,9 @@
 export class Tokens {
-    readonly accessToken: string;
-    readonly refreshToken: string;
+  readonly accessToken: string;
+  readonly refreshToken: string;
 
-    constructor(accessToken: string, refreshToken: string) {
-        this.accessToken = accessToken
-        this.refreshToken = refreshToken
-    }
+  constructor(accessToken: string, refreshToken: string) {
+    this.accessToken = accessToken;
+    this.refreshToken = refreshToken;
+  }
 }

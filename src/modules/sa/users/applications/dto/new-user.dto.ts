@@ -1,4 +1,4 @@
-import {CreateUserDto} from "../../api/dto/create-user.dto";
+import { CreateUserDto } from '../../api/dto/create-user.dto';
 
 export class NewUserDto {
   readonly login: string;
