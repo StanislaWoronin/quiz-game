@@ -14,7 +14,7 @@ import {IUsersRepository} from "./modules/sa/users/infrastructure/i-users.reposi
 import {IUsersQueryRepository} from "./modules/sa/users/infrastructure/i-users-query.repository";
 import {UsersService} from "./modules/sa/users/applications/users.service";
 import {UsersController} from "./modules/sa/users/api/users.controller";
-import { SqlAnswers } from "./modules/sa/questions/infrastructure/sql/entity/answers.entity";
+import { SqlCorrectAnswers } from "./modules/sa/questions/infrastructure/sql/entity/answers.entity";
 import { SqlCredentials } from "./modules/sa/users/infrastructure/sql/entity/credentials.entity";
 import { SqlQuestions } from "./modules/sa/questions/infrastructure/sql/entity/questions.entity";
 import { SqlUserBanInfo } from "./modules/sa/users/infrastructure/sql/entity/ban-info.entity";
@@ -35,11 +35,16 @@ import {IJwtRepository} from "./modules/public/auth/infrastructure/i-jwt.reposit
 import {PairQuizGameController} from "./modules/public/pair-quiz-game/api/pair-quiz-game.controller";
 import {PairQuizGameService} from "./modules/public/pair-quiz-game/applications/pair-quiz-game.service";
 import {IQuizGameRepository} from "./modules/public/pair-quiz-game/infrastructure/i-quiz-game.repository";
-import {set} from "mongoose";
+import {SqlGame} from "./modules/public/pair-quiz-game/infrastructure/sql/entity/sql-game.entity";
+import {SqlGameProgress} from "./modules/public/pair-quiz-game/infrastructure/sql/entity/sql-game-progress.entity";
+import {JwtService} from "./modules/public/auth/applications/jwt.service";
+import {JwtService as NestJwtService} from "@nestjs/jwt/dist/jwt.service";
+import {IQuizGameQueryRepository} from "./modules/public/pair-quiz-game/infrastructure/i-quiz-game-query.repository";
+import {SqlUserAnswer} from "./modules/public/pair-quiz-game/infrastructure/sql/entity/sql-user-answer.entity";
 
 const controllers = [QuestionsController, PairQuizGameController, TestingController, UsersController];
 
-const services = [QuestionsService, PairQuizGameService, UsersService];
+const services = [JwtService, QuestionsService, NestJwtService, PairQuizGameService, UsersService];
 
 const repositories = [
   {
@@ -71,6 +76,13 @@ const repositories = [
     ),
   },
   {
+    provide: IQuizGameQueryRepository,
+    useClass: repositorySwitcher(
+        settings.currentRepository,
+        repositoryName.GameRepository
+    )
+  },
+  {
     provide: ITestingRepository,
     useClass: repositorySwitcher(
       settings.currentRepository,
@@ -94,9 +106,12 @@ const repositories = [
 ];
 
 export const entity = [
-  SqlAnswers,
+  SqlCorrectAnswers,
   SqlCredentials,
+  SqlGame,
+  SqlGameProgress,
   SqlQuestions,
+  SqlUserAnswer,
   SqlUserBanInfo,
   SqlUsers
 ]

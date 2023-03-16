@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import {SqlTokenBlackList} from "./entity/sql-token-black-list.entity";
 
 @Injectable()
-export class OrmJwtRepository {
+export class JwtRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async checkTokenInBlackList(refreshToken: string): Promise<boolean> {

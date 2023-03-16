@@ -11,12 +11,14 @@ import {
 } from "../../modules/sa/questions/infrastructure/mongoose/m-questions-query.repository";
 import { MQuestionsRepository } from "../../modules/sa/questions/infrastructure/mongoose/m-questions.repository";
 import {QuizGameRepository} from "../../modules/public/pair-quiz-game/infrastructure/sql/quiz-game.repository";
+import {JwtRepository} from "../../modules/public/auth/infrastructure/sql/jwt.repository";
 
 export const repositories = {
   sql: {
     gameRepository: QuizGameRepository,
     questionsRepository: QuestionsRepository,
     questionsQueryRepository: QuestionsQueryRepository,
+    jwt: JwtRepository,
     testingRepository: TestingRepository,
     usersRepository: UsersRepository,
     usersQueryRepository: UsersQueryRepository,

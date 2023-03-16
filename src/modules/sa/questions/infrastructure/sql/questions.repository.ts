@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { NewQuestionDto } from "../../applications/dto/new-question.dto";
 import { CreatedQuestions } from "../../api/view/created-questions";
 import { SqlQuestions } from "./entity/questions.entity";
-import { SqlAnswers } from "./entity/answers.entity";
+import { SqlCorrectAnswers } from "./entity/answers.entity";
 import { toCreatedQuestions } from "../../../../../common/data-mapper/to-created-quesions";
 import { CreatedQuestionsDb } from "./pojo/created-questions.db";
 import { UpdateQuestionDto } from "../../api/dto/update-question.dto";
@@ -30,7 +30,7 @@ export class QuestionsRepository {
       let createdAnswer
       for (let i = 0, length = answers.length; i < length; i++) {
         createdAnswer = await manager
-          .getRepository(SqlAnswers)
+          .getRepository(SqlCorrectAnswers)
           .save({ questionId: createdQuestions.id, correctAnswer: answers[i] })
       }
 
@@ -62,11 +62,11 @@ export class QuestionsRepository {
         .where("id = :id", { id: questionId })
         .execute()
 
-      await manager.delete(SqlAnswers, {questionId})
+      await manager.delete(SqlCorrectAnswers, {questionId})
 
       for (let i = 0, length = dto.correctAnswers.length; i < length; i++) {
         await manager
-          .getRepository(SqlAnswers)
+          .getRepository(SqlCorrectAnswers)
           .save({ questionId: questionId, correctAnswer: dto.correctAnswers[i] })
       }
 
@@ -111,7 +111,7 @@ export class QuestionsRepository {
         return false
       }
 
-      await manager.delete(SqlAnswers, {questionId})
+      await manager.delete(SqlCorrectAnswers, {questionId})
 
       return true
     } catch (e) {

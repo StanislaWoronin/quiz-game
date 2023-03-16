@@ -1,5 +1,4 @@
 import {Inject, Injectable} from "@nestjs/common";
-import {ViewGameProgress} from "../api/view/view-game-progress";
 import {ViewGame} from "../api/view/view-game";
 import {IQuizGameRepository} from "../infrastructure/i-quiz-game.repository";
 import {AnswerDto} from "../api/dto/answer.dto";
@@ -13,12 +12,15 @@ export class PairQuizGameService {
     ) {
     }
 
-    async joinGame(userId: string): Promise<ViewGameProgress | ViewGame | null> {
+    async joinGame(userId: string): Promise<ViewGame | null> {
         const isPlaying = await this.gameRepository.checkUserCurrentGame(userId)
         if (isPlaying) {
             return null
         }
-
+        const existsOpenGame = await this.gameRepository.checkOpenGame()
+        if (!existsOpenGame) {
+            return this.gameRepository.createGame(userId)
+        }
         return await this.gameRepository.joinGame(userId)
     }
 

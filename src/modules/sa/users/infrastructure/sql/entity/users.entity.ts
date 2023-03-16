@@ -1,6 +1,8 @@
-import {Column, Entity, OneToOne, PrimaryGeneratedColumn} from "typeorm";
+import {Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn} from "typeorm";
 import {SqlUserBanInfo} from "./ban-info.entity";
 import {SqlCredentials} from "./credentials.entity";
+import {SqlGameProgress} from "../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-game-progress.entity";
+import {SqlUserAnswer} from "../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-user-answer.entity";
 
 @Entity()
 export class SqlUsers {
@@ -41,4 +43,17 @@ export class SqlUsers {
       { cascade: true }
     )
     credentials: SqlCredentials;
+
+    @OneToMany(
+        () => SqlGameProgress,
+        (gp) => gp.user
+    )
+    gameProgress: SqlGameProgress
+
+    @OneToMany(
+        () => SqlUserAnswer,
+        a => a.user,
+        { cascade: true }
+    )
+    answers: SqlUserAnswer
 }

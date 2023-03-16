@@ -20,9 +20,8 @@ import {ViewPage} from "../../../../common/pagination/view-page";
 import {ViewUser} from "./view/view-user";
 import {UsersQueryDto} from "./dto/query/users-query.dto";
 import { UpdateUserBanStatusDto } from "./dto/update-user-ban-status.dto";
-import {BaseAuthGuard} from "../../../public/auth/guards/base-auth-guard";
 
-@UseGuards(BaseAuthGuard)
+@UseGuards(AuthBasicGuard)
 @Controller('sa/users')
 export class UsersController {
     constructor(

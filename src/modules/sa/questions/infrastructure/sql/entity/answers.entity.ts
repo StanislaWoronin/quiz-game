@@ -1,8 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { SqlQuestions } from "./questions.entity";
+import {SqlUsers} from "../../../../users/infrastructure/sql/entity/users.entity";
 
 @Entity()
-export class SqlAnswers {
+export class SqlCorrectAnswers {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

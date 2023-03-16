@@ -1,5 +1,7 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { SqlAnswers } from "./answers.entity";
+import {Column, Entity, JoinTable, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import {SqlGame} from "../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-game.entity";
+import {SqlCorrectAnswers} from "./answers.entity";
+import {SqlUserAnswer} from "../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-user-answer.entity";
 
 @Entity()
 export class SqlQuestions {
@@ -35,9 +37,22 @@ export class SqlQuestions {
   updatedAt: string;
 
   @OneToMany(
-    () => SqlAnswers,
+    () => SqlCorrectAnswers,
     (a) => a.question,
     { cascade: true }
   )
-  correctAnswers: SqlAnswers
+  correctAnswers: SqlCorrectAnswers
+
+  @ManyToOne(
+      () => SqlGame,
+      (g) => g.questions
+  )
+  game: SqlGame
+
+  @OneToMany(
+      () => SqlUserAnswer,
+      (ua) => ua.question,
+      { cascade: true }
+  )
+  userAnswer: SqlUserAnswer
 }
