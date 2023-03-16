@@ -4,7 +4,9 @@ import {ViewUser} from "../api/view/view-user";
 
 export interface IUsersQueryRepository {
     getUsers(query: UsersQueryDto): Promise<ViewPage<ViewUser>>
-    checkUserCredential(userId: string): Promise<boolean>
+    checkUserExists(userId: string): Promise<boolean>
+
+    isLoginOrEmailExist(loginOrEmail: string): Promise<boolean>;
 }
 
 export const IUsersQueryRepository = 'IUsersQueryRepository'

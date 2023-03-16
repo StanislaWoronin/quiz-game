@@ -7,6 +7,7 @@ import {ViewUser} from "../../api/view/view-user";
 import {BanStatus} from "../../api/dto/query/ban-status";
 import {UserWithBanInfoDb} from "./pojo/user-with-ban-info.db";
 import {toViewUser} from "../../../../../common/data-mapper/to-view-user";
+import {SqlUsers} from "./entity/users.entity";
 
 @Injectable()
 export class UsersQueryRepository {
@@ -44,12 +45,19 @@ export class UsersQueryRepository {
         })
     }
 
-    async checkUserCredential(userId: string): Promise<boolean> {
+    async checkUserExists(userId: string): Promise<boolean> {
         return await this.dataSource
-            .getRepository('sql_credentials')
-            .createQueryBuilder('c')
-            .where('c.userId = : userId', { userId })
+            .getRepository('sql_users')
+            .createQueryBuilder('u')
+            .where('u.id = : id', { id: userId })
             .getExists()
+    } // TODO new
+
+    async isLoginOrEmailExist(loginOrEmail: string): Promise<boolean> {
+        const builder = this.dataSource
+            .createQueryBuilder(SqlUsers, 'u')
+            .where([{ login: loginOrEmail }, { email: loginOrEmail }]);
+        return await builder.getExists();
     } // TODO new
 
     private getFilter(query: UsersQueryDto): string {

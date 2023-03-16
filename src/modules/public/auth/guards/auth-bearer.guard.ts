@@ -30,7 +30,7 @@ export class AuthBearerGuard implements CanActivate {
             throw new UnauthorizedException();
         }
 
-        const user = await this.queryUsersRepository.checkUserCredential(
+        const user = await this.queryUsersRepository.checkUserExists(
             tokenPayload.userId,
         );
 
