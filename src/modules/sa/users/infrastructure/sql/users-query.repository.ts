@@ -8,6 +8,7 @@ import { BanStatus } from '../../api/dto/query/ban-status';
 import { UserWithBanInfoDb } from './pojo/user-with-ban-info.db';
 import { toViewUser } from '../../../../../common/data-mapper/to-view-user';
 import { SqlUsers } from './entity/users.entity';
+import {SqlCredentials} from "./entity/credentials.entity";
 
 @Injectable()
 export class UsersQueryRepository {
@@ -45,11 +46,37 @@ export class UsersQueryRepository {
     });
   }
 
+  async getUserByLoginOrEmail(loginOrEmail: string): Promise<SqlUsers | null> {
+    const builder = this.dataSource
+        .createQueryBuilder()
+        .select('u')
+        .from(SqlUsers, 'u')
+        .where([{ login: loginOrEmail }, { email: loginOrEmail }]);
+    const result = await builder.getOne();
+
+    return result;
+  }
+
+  async getUserById(userId: string): Promise<SqlUsers | null> {
+    const builder = this.dataSource
+        .createQueryBuilder()
+        .select('u')
+        .from(SqlUsers, 'u')
+        .leftJoin('u.banInfo', 'bi')
+        .where('u.id = :id', { id: userId })
+        .andWhere('bi.banStatus = :banStatus', { banStatus: false });
+    const result = await builder.getOne();
+
+    return result;
+  } // TODO new
+
   async checkUserExists(userId: string): Promise<boolean> {
     return await this.dataSource
       .getRepository('sql_users')
       .createQueryBuilder('u')
+      .leftJoin('u.banInfo', 'bi')
       .where('u.id = : id', { id: userId })
+      .andWhere('bi.banStatus = :banStatus', { banStatus: false })
       .getExists();
   } // TODO new
 
@@ -58,6 +85,19 @@ export class UsersQueryRepository {
       .createQueryBuilder(SqlUsers, 'u')
       .where([{ login: loginOrEmail }, { email: loginOrEmail }]);
     return await builder.getExists();
+  } // TODO new
+
+  async getCredentialByLoginOrEmail(loginOrEmail: string): Promise<SqlCredentials | null> {
+    const builder = this.dataSource
+        .createQueryBuilder(SqlUsers, 'u')
+        .select('u.id', 'id')
+        .addSelect('c.credentials', 'credentials')
+        .leftJoin(SqlCredentials, 'c')
+        .where('u.login = :login', {login: loginOrEmail})
+        .orWhere('u.email = :email', {email: loginOrEmail})
+    const result = await builder.getOne()
+
+    return result.credentials
   } // TODO new
 
   private getFilter(query: UsersQueryDto): string {

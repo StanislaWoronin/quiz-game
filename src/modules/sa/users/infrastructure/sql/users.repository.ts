@@ -29,23 +29,22 @@ export class UsersRepository {
         .getRepository(SqlUsers)
         .save(newUser);
 
-      await manager.getRepository(SqlCredentials).save({
-        userId: createdUser.id,
-        credentials: hash,
-      });
+      await manager.getRepository(SqlCredentials).save(
+          new SqlCredentials(createdUser.id, hash)
+      );
 
-      await manager.getRepository(SqlEmailConfirmation).save({
-        userId: createdUser.id,
-        confirmationCode: emailConfirmation.confirmationCode,
-        expirationDate: emailConfirmation.expirationDate,
-        isConfirmed: emailConfirmation.isConfirmed,
-      });
+      await manager.getRepository(SqlEmailConfirmation).save(
+        new SqlEmailConfirmation(
+          createdUser.id,
+          emailConfirmation.isConfirmed,
+          emailConfirmation.confirmationCode,
+          emailConfirmation.expirationDate,
+        ))
 
       await queryRunner.commitTransaction();
       return new CreatedUser(createdUser.id, createdUser);
     } catch (e) {
       await queryRunner.rollbackTransaction();
-      console.log(e);
       return null;
     } finally {
       await queryRunner.release();
@@ -72,6 +71,24 @@ export class UsersRepository {
   async removeBanStatus(userId: string): Promise<boolean> {
     await this.dataSource.getRepository(SqlUserBanInfo).delete({ userId });
 
+    return true;
+  }
+
+  async updateUserPassword(
+      userId: string,
+      passwordSalt: string,
+      passwordHash: string,
+  ): Promise<boolean> {
+    const result = await this.dataSource
+        .createQueryBuilder()
+        .update(SqlUsers)
+        .set({passwordHash})
+        .where('id = :id', { id: userId })
+        .execute();
+
+    if (result.affected != 1) {
+      return false;
+    }
     return true;
   }
 

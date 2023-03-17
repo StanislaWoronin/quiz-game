@@ -19,17 +19,10 @@ export class SqlEmailConfirmation {
   @PrimaryColumn()
   userId: string;
 
-  constructor(isAdmin: boolean) {
-    if (isAdmin) {
-      this.confirmationCode = null;
-      this.expirationDate = null;
-      this.isConfirmed = true;
-    } else {
-      this.confirmationCode = randomUUID();
-      this.expirationDate = add(new Date(), {
-        hours: Number(settings.timeLife.CONFIRMATION_CODE),
-      }).toISOString();
-      this.isConfirmed = false;
-    }
+  constructor(id: string, isConfirmed: boolean, confirmationCode?: string, expirationDate?: string, ) {
+    this.userId = id
+    this.confirmationCode = confirmationCode ?? null;
+    this.expirationDate = expirationDate ?? null;
+    this.isConfirmed = isConfirmed;
   }
 }

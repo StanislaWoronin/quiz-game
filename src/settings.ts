@@ -1,5 +1,5 @@
 export const settings = {
-  environment: process.env.NODE_ENV || 'dev',
+  environment: process.env.ENV_TYPE || 'dev',
   MONGO_URI: process.env.mongoURI,
   POSTGRES_URI: process.env.postgresURI,
   local: 'postgresql://telegramBot:admin@localhost:5432',

@@ -58,6 +58,8 @@ import { LoginExistValidator } from './common/validators/login-exist.validator';
 
 import { EmailAdapters } from './modules/public/auth/email-transfer/email.adapter';
 import { EmailManager } from './modules/public/auth/email-transfer/email.manager';
+import {SqlSecurity} from "./modules/public/security/infrastructure/sql/entity/security";
+import {ISecurityRepository} from "./modules/public/security/infrastructure/i-security.repository";
 
 const controllers = [
   QuestionsController,
@@ -124,6 +126,13 @@ const repositories = [
     ),
   },
   {
+    provide: ISecurityRepository,
+    useClass: repositorySwitcher(
+        settings.currentRepository,
+        repositoryName.SecurityRepository
+    )
+  },
+  {
     provide: IUsersRepository,
     useClass: repositorySwitcher(
       settings.currentRepository,
@@ -146,6 +155,7 @@ export const entity = [
   SqlGame,
   SqlGameProgress,
   SqlQuestions,
+  SqlSecurity,
   SqlUserAnswer,
   SqlUserBanInfo,
   SqlUsers,

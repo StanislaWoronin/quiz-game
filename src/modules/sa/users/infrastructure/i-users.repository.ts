@@ -13,6 +13,10 @@ export interface IUsersRepository {
     userId: string,
     dto: UpdateUserBanStatusDto,
   ): Promise<boolean>;
+  updateUserPassword(
+      userId: string,
+      passwordHash: string,
+  ): Promise<boolean>;
   removeBanStatus(userId: string): Promise<boolean>;
   deleteUser(userId: string): Promise<boolean>;
 }

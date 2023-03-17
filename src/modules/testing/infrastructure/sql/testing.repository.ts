@@ -6,6 +6,47 @@ import { Injectable } from '@nestjs/common';
 export class TestingRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
+  async getConfirmationCode(
+      userId: string,
+  ) {
+    const result = await this.dataSource
+        .getRepository('email_confirmation')
+        .createQueryBuilder('ec')
+        .select('ec.confirmationCode')
+        .where('ec.userId = :id', { id: userId })
+        .getOne();
+
+    return result;
+  }
+
+  async checkUserConfirmed(
+      userId: string,
+  ) {
+    const result = await this.dataSource
+        .getRepository('email_confirmation')
+        .createQueryBuilder('ec')
+        .select('ec.isConfirmed')
+        .where('ec.userId = :id', { id: userId })
+        .getOne();
+
+    return result;
+  }
+
+  async makeExpired(userId: string, expirationDate: string): Promise<boolean> {
+    const result = await this.dataSource
+        .getRepository('email_confirmation')
+        .createQueryBuilder('ec')
+        .update()
+        .set({ expirationDate })
+        .where('userId = :id', { id: userId })
+        .execute();
+
+    if (result.affected !== 1) {
+      return false;
+    }
+    return true;
+  }
+
   async deleteAll(): Promise<boolean> {
     try {
       const entities = this.dataSource.entityMetadatas;

@@ -10,6 +10,7 @@ import { SqlCredentials } from './credentials.entity';
 import { SqlGameProgress } from '../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-game-progress.entity';
 import { SqlUserAnswer } from '../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-user-answer.entity';
 import { SqlEmailConfirmation } from '../../../../../public/auth/infrastructure/sql/entity/email-confirmation.entity';
+import {SqlSecurity} from "../../../../../public/security/infrastructure/sql/entity/security";
 
 @Entity()
 export class SqlUsers {
@@ -48,8 +49,11 @@ export class SqlUsers {
   credentials: SqlCredentials;
 
   @OneToMany(() => SqlGameProgress, (gp) => gp.user)
-  gameProgress: SqlGameProgress;
+  gameProgress: SqlGameProgress[];
 
   @OneToMany(() => SqlUserAnswer, (a) => a.user, { cascade: true })
-  answers: SqlUserAnswer;
+  answers: SqlUserAnswer[];
+
+  @OneToMany(() => SqlSecurity, (s) => s.user)
+  security: SqlSecurity[];
 }

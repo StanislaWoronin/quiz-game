@@ -4,6 +4,7 @@ export const repositoryName = {
   QuestionsQueryRepository: 'questionsQueryRepository',
   Jwt: 'jwt',
   TestingRepository: 'testingRepository',
+  SecurityRepository: 'securityRepository',
   UsersRepository: 'usersRepository',
   UsersQueryRepository: 'usersQueryRepository',
 };

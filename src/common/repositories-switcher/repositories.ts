@@ -10,6 +10,7 @@ import { MQuestionsQueryRepository } from '../../modules/sa/questions/infrastruc
 import { MQuestionsRepository } from '../../modules/sa/questions/infrastructure/mongoose/m-questions.repository';
 import { QuizGameRepository } from '../../modules/public/pair-quiz-game/infrastructure/sql/quiz-game.repository';
 import { JwtRepository } from '../../modules/public/auth/infrastructure/sql/jwt.repository';
+import {SecurityRepository} from "../../modules/public/security/infrastructure/sql/security.repository";
 
 export const repositories = {
   sql: {
@@ -18,6 +19,7 @@ export const repositories = {
     questionsQueryRepository: QuestionsQueryRepository,
     jwt: JwtRepository,
     testingRepository: TestingRepository,
+    securityRepository: SecurityRepository,
     usersRepository: UsersRepository,
     usersQueryRepository: UsersQueryRepository,
   },

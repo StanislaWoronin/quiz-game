@@ -48,6 +48,23 @@ export class UsersService {
     return true;
   }
 
+  async updateUserPassword(
+      userId: string,
+      newPassword: string,
+  ): Promise<boolean> {
+    try {
+      const salt = await bcrypt.genSalt(Number(settings.SALT_GENERATE_ROUND));
+      const hash = await bcrypt.hash(newPassword, salt);
+
+      return await this.usersRepository.updateUserPassword(
+          userId,
+          hash,
+      );
+    } catch (e) {
+      // Error try again
+    }
+  }
+
   async deleteUser(userId: string): Promise<boolean> {
     return await this.usersRepository.deleteUser(userId);
   }
