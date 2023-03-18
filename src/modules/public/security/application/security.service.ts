@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ISecurityRepository } from '../infrastructure/i-security.repository';
-import { IQuerySecurityRepository } from '../infrastructure/i-query-security.repository';
+import { ISecurityQueryRepository } from '../infrastructure/i-security-query.repository';
 import {JwtService} from "../../auth/applications/jwt.service";
 import {Tokens} from "../../../../common/dto/tokens";
 import {TokenPayload} from "../../../../common/dto/token-payload";
@@ -13,8 +13,8 @@ export class SecurityService {
     protected jwtService: JwtService,
     @Inject(ISecurityRepository)
     protected securityRepository: ISecurityRepository,
-    @Inject(IQuerySecurityRepository)
-    protected querySecurityRepository: IQuerySecurityRepository,
+    @Inject(ISecurityQueryRepository)
+    protected querySecurityRepository: ISecurityQueryRepository,
   ) {}
 
   async getDeviceById(deviceId: string): Promise<SqlSecurity | null> {

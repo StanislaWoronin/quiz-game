@@ -11,15 +11,21 @@ import { MQuestionsRepository } from '../../modules/sa/questions/infrastructure/
 import { QuizGameRepository } from '../../modules/public/pair-quiz-game/infrastructure/sql/quiz-game.repository';
 import { JwtRepository } from '../../modules/public/auth/infrastructure/sql/jwt.repository';
 import {SecurityRepository} from "../../modules/public/security/infrastructure/sql/security.repository";
+import { EmailConfirmationRepository } from "../../modules/sa/users/infrastructure/sql/email-confirmation.repository";
+import { UserBanInfoRepository } from "../../modules/sa/users/infrastructure/sql/ban-info.repository";
+import { SecurityQueryRepository } from "../../modules/public/security/infrastructure/sql/security-query-repository.service";
 
 export const repositories = {
   sql: {
+    banInfoRepository: UserBanInfoRepository,
+    emailConfirmation: EmailConfirmationRepository,
     gameRepository: QuizGameRepository,
     questionsRepository: QuestionsRepository,
     questionsQueryRepository: QuestionsQueryRepository,
     jwt: JwtRepository,
     testingRepository: TestingRepository,
     securityRepository: SecurityRepository,
+    securityQueryRepository: SecurityQueryRepository,
     usersRepository: UsersRepository,
     usersQueryRepository: UsersQueryRepository,
   },

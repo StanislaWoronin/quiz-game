@@ -36,25 +36,6 @@ export class EmailConfirmationRepository {
     return status.isConfirmed;
   }
 
-  async createEmailConfirmation(
-    emailConfirmation: SqlEmailConfirmation,
-  ): Promise<SqlEmailConfirmation | null> {
-    try {
-      const result = await this.dataSource
-        .getRepository(SqlEmailConfirmation)
-        .save(emailConfirmation);
-
-      return {
-        userId: result.userId,
-        confirmationCode: result.confirmationCode,
-        expirationDate: result.expirationDate,
-        isConfirmed: result.isConfirmed,
-      };
-    } catch (e) {
-      return null;
-    }
-  }
-
   async updateConfirmationInfo(confirmationCode: string): Promise<boolean> {
     const result = await this.dataSource
       .createQueryBuilder()
@@ -76,7 +57,7 @@ export class EmailConfirmationRepository {
     confirmationCode: string,
     expirationDate: string,
   ): Promise<boolean> {
-    const result = await this.dataSource
+    const builder = this.dataSource
       .createQueryBuilder()
       .update(SqlEmailConfirmation)
       .set({
@@ -84,8 +65,10 @@ export class EmailConfirmationRepository {
         expirationDate,
       })
       .where('userId = :id', { id: userId })
-      .execute();
-
+    const q = builder.getSql()
+    console.log(q);
+    const result = await builder.execute();
+    console.log('ok');
     if (result.affected != 1) {
       return false;
     }

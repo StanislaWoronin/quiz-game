@@ -24,22 +24,28 @@ export class Testing {
   async getConfirmationCode(userId: string): Promise<string> {
     const url = getUrlWithId(endpoints.testing.confirmationCode, userId)
     const response = await request(this.server).get(url)
-    console.log(response.body)
+    console.log(response.body, 'getConfirmationCode')
+    return response.body
+  }
+
+  async getUserPassword(userId: string): Promise<string> {
+    const url = getUrlWithId(endpoints.testing.userPassword, userId)
+    const response = await request(this.server).get(url)
+    console.log(response.body, ' getUserPassword')
     return response.body
   }
 
   async checkConfirmationStatus(userId: string): Promise<boolean> {
     const url = getUrlWithId(endpoints.testing.isConfirmed, userId)
     const response = await request(this.server).get(url)
-    console.log(response.body)
+    console.log(response.body, 'checkConfirmationStatus')
     return response.body
   }
 
-  async makeExpired(userId: string) {
+  async makeExpired(userId: string): Promise<string> {
     const url = getUrlWithId(endpoints.testing.setExpirationDate, userId)
     const response = await request(this.server).put(url)
-    return
+    console.log(response, 'makeExpired');
+    return response.body
   }
-
-
 }

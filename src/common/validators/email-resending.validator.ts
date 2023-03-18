@@ -15,12 +15,12 @@ export class EmailResendingValidator implements ValidatorConstraintInterface {
     @Inject(IEmailConfirmationRepository)
     protected emailConfirmationRepository: IEmailConfirmationRepository,
     @Inject(IUsersQueryRepository)
-    protected queryUsersRepository: IUsersQueryRepository,
+    protected usersQueryRepository: IUsersQueryRepository,
   ) {}
 
   async validate(email) {
-    const user = await this.queryUsersRepository.getUserByLoginOrEmail(email);
-
+    const user = await this.usersQueryRepository.getUserByLoginOrEmail(email);
+    console.log(user, 'validator');
     if (!user) {
       return false;
     }
@@ -32,6 +32,7 @@ export class EmailResendingValidator implements ValidatorConstraintInterface {
       return false;
     }
 
+    request.userId = user.id
     request.email = user.email;
     return true;
   }

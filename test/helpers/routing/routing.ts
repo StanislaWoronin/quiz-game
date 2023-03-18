@@ -25,6 +25,7 @@ export const endpoints = {
     allRowCount: `${testingController}/all-row-count`,
     confirmationCode: `${testingController}/confirmation-code`,
     isConfirmed: `${testingController}/is-confirmed`,
-    setExpirationDate: `${testingController}/set-expiration-date`
+    setExpirationDate: `${testingController}/set-expiration-date`,
+    userPassword: `${testingController}/user-password`
   },
 };

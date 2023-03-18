@@ -1,8 +1,5 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
 import { SqlUsers } from '../../../../../sa/users/infrastructure/sql/entity/users.entity';
-import { randomUUID } from 'crypto';
-import add from 'date-fns/add';
-import { settings } from '../../../../../../settings';
 
 @Entity()
 export class SqlEmailConfirmation {

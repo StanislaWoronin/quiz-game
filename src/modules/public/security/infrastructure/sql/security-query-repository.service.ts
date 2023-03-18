@@ -5,7 +5,7 @@ import { ViewSecurity } from '../../api/view/view-security';
 import {SqlSecurity} from "./entity/security";
 
 @Injectable()
-export class QuerySecurityRepository {
+export class SecurityQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getAllActiveSessions(

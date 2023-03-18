@@ -12,7 +12,8 @@ import {SqlCredentials} from "./entity/credentials.entity";
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {
+  }
 
   async getUsers(queryDto: UsersQueryDto): Promise<ViewPage<ViewUser>> {
     const filter = this.getFilter(queryDto);
@@ -52,6 +53,8 @@ export class UsersQueryRepository {
         .select('u')
         .from(SqlUsers, 'u')
         .where([{ login: loginOrEmail }, { email: loginOrEmail }]);
+    const q = builder.getSql()
+    console.log(q);
     const result = await builder.getOne();
 
     return result;

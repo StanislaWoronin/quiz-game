@@ -14,6 +14,7 @@ import { SortDirection } from '../../../src/common/pagination/query-parameters/s
 import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
 import { TestsPaginationType } from '../type/pagination.type';
 import { BanStatus } from '../../../src/modules/sa/users/api/dto/query/ban-status';
+import { TestingRequestDto } from "../testing-request.dto";
 
 export class Users {
   constructor(private readonly server: any) {}
@@ -21,7 +22,7 @@ export class Users {
   async createUser(
     superUser: { login: string; password: string },
     dto: CreateUserDto,
-  ): Promise<{ body: CreatedUser; status: number }> {
+  ): Promise<TestingRequestDto<CreatedUser>> {
     const response = await request(this.server)
       .post(endpoints.sa.users)
       .auth(superUser.login, superUser.password, {
@@ -44,7 +45,7 @@ export class Users {
       pageNumber = 1,
       pageSize = 10,
     }: TestsPaginationType,
-  ): Promise<{ body: ViewPage<ViewUser>; status: number }> {
+  ): Promise<TestingRequestDto<ViewPage<ViewUser>>> {
     const query = {
       searchLoginTerm,
       searchEmailTerm,
@@ -71,7 +72,7 @@ export class Users {
     superUser: { login: string; password: string },
     dto: UpdateUserBanStatusDto,
     userId: string,
-  ): Promise<{ body: ErrorsMessages; status: number }> {
+  ): Promise<TestingRequestDto<ErrorsMessages>> {
     const url = getUrlForUpdateBanStatus(userId);
 
     const response = await request(this.server)

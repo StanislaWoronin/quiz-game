@@ -92,6 +92,7 @@ export class AuthController {
       @Body() email: ResendingDto,
       @UserId() userId: string,
   ) {
+    console.log('controller', userId);
     const newConfirmationCode = await this.authService.updateConfirmationCode(
         userId
     );

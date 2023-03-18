@@ -13,7 +13,7 @@ import {
 import { Request } from 'express';
 import { SecurityService } from '../application/security.service';
 import { ViewSecurity } from './view/view-security';
-import { IQuerySecurityRepository } from '../infrastructure/i-query-security.repository';
+import { ISecurityQueryRepository } from '../infrastructure/i-security-query.repository';
 import {RefreshTokenValidationGuard} from "../../auth/guards/refresh-token-validation.guard";
 import {UserId} from "../../../../common/decorators/user.decorator";
 import {DeviceId} from "../../../../common/decorators/device.decorator";
@@ -23,8 +23,8 @@ import {DeviceId} from "../../../../common/decorators/device.decorator";
 export class SecurityController {
   constructor(
     protected securityService: SecurityService,
-    @Inject(IQuerySecurityRepository)
-    protected querySecurityRepository: IQuerySecurityRepository,
+    @Inject(ISecurityQueryRepository)
+    protected querySecurityRepository: ISecurityQueryRepository,
   ) {}
 
   @Get()

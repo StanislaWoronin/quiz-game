@@ -45,6 +45,7 @@ export class UsersRepository {
       return new CreatedUser(createdUser.id, createdUser);
     } catch (e) {
       await queryRunner.rollbackTransaction();
+
       return null;
     } finally {
       await queryRunner.release();

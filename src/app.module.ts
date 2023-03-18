@@ -1,6 +1,5 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { QuestionsController } from './modules/sa/questions/api/questions.controller';
 import { QuestionsService } from './modules/sa/questions/applications/questions.servise';
 import { IQuestionsQueryRepository } from './modules/sa/questions/infrastructure/i-questions-query.repository';
@@ -55,13 +54,21 @@ import { CreateUserUseCase } from './modules/sa/users/use-cases/create-user.use-
 import { CreateUserBySaUseCase } from './modules/sa/users/use-cases/create-user-by-sa.use-case';
 import { EmailExistValidator } from './common/validators/email-exists.validator';
 import { LoginExistValidator } from './common/validators/login-exist.validator';
-
 import { EmailAdapters } from './modules/public/auth/email-transfer/email.adapter';
 import { EmailManager } from './modules/public/auth/email-transfer/email.manager';
 import {SqlSecurity} from "./modules/public/security/infrastructure/sql/entity/security";
 import {ISecurityRepository} from "./modules/public/security/infrastructure/i-security.repository";
+import { AuthController } from "./modules/public/auth/api/auth.controller";
+import { AuthService } from "./modules/public/auth/applications/auth.service";
+import { IEmailConfirmationRepository } from "./modules/sa/users/infrastructure/i-email-confirmation.repository";
+import { IUserBanInfoRepository } from "./modules/sa/users/infrastructure/i-user-ban-info.repository";
+import { SecurityService } from "./modules/public/security/application/security.service";
+import { ISecurityQueryRepository } from "./modules/public/security/infrastructure/i-security-query.repository";
+import { EmailResendingValidator } from "./common/validators/email-resending.validator";
+import { ConfirmationCodeValidator } from "./common/validators/confirmation-code.validator";
 
 const controllers = [
+  AuthController,
   QuestionsController,
   PairQuizGameController,
   TestingController,
@@ -69,20 +76,36 @@ const controllers = [
 ];
 
 const services = [
+  AuthService,
   EmailAdapters,
   EmailManager,
   JwtService,
   QuestionsService,
   NestJwtService,
   PairQuizGameService,
+  SecurityService,
   UsersService,
 ];
 
-const validators = [EmailExistValidator, LoginExistValidator];
+const validators = [ConfirmationCodeValidator, EmailExistValidator, EmailResendingValidator, LoginExistValidator,];
 
 const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
 
 const repositories = [
+  {
+    provide: IUserBanInfoRepository,
+    useClass: repositorySwitcher(
+      settings.currentRepository,
+      repositoryName.BanInfoRepository
+    )
+  },
+  {
+    provide: IEmailConfirmationRepository,
+    useClass: repositorySwitcher(
+      settings.currentRepository,
+      repositoryName.EmailConfirmation
+    )
+  },
   {
     provide: IQuestionsRepository,
     useClass: repositorySwitcher(
@@ -130,6 +153,13 @@ const repositories = [
     useClass: repositorySwitcher(
         settings.currentRepository,
         repositoryName.SecurityRepository
+    )
+  },
+  {
+    provide: ISecurityQueryRepository,
+    useClass: repositorySwitcher(
+      settings.currentRepository,
+      repositoryName.SecurityQueryRepository
     )
   },
   {

@@ -19,6 +19,17 @@ export class TestingRepository {
     return result;
   }
 
+  async getUserPassword(userId: string) {
+    const result = await this.dataSource
+      .getRepository('users')
+      .createQueryBuilder('u')
+      .select('u.passwordHash')
+      .where('u.id = :id', { id: userId })
+      .getOne();
+
+    return result;
+  }
+
   async checkUserConfirmed(
       userId: string,
   ) {

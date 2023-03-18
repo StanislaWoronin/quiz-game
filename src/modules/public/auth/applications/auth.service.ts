@@ -31,12 +31,12 @@ export class AuthService {
 
   async updateConfirmationCode(userId: string): Promise<string | null> {
     const newConfirmationCode = randomUUID();
-    const newExpirationDate = add(new Date(), { hours: 24 }).toISOString();
+
     const result =
       await this.emailConfirmationRepository.updateConfirmationCode(
         userId,
         newConfirmationCode,
-        newExpirationDate,
+        add(new Date(), { hours: 24 }).toISOString()
       );
 
     if (!result) {

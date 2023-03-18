@@ -12,6 +12,7 @@ import { SortByField } from '../../../src/common/pagination/query-parameters/sor
 import { SortDirection } from '../../../src/common/pagination/query-parameters/sort-direction';
 import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
 import { TestsPaginationType } from '../type/pagination.type';
+import { TestingRequestDto } from "../testing-request";
 
 export class Questions {
   constructor(private readonly server: any) {}
@@ -19,7 +20,7 @@ export class Questions {
   async createQuestion(
     superUser: { login: string; password: string },
     dto: { body: string; correctAnswers: string[] },
-  ): Promise<{ body: CreatedQuestions; status: number }> {
+  ): Promise<TestingRequestDto<CreatedQuestions>> {
     const response = await request(this.server)
       .post(endpoints.sa.quiz.questions)
       .auth(superUser.login, superUser.password, {
@@ -64,7 +65,7 @@ export class Questions {
     superUser: { login: string; password: string },
     questionId: string,
     dto: UpdateQuestionDto,
-  ): Promise<{ body: ErrorsMessages; status: number }> {
+  ): Promise<TestingRequestDto<ErrorsMessages>> {
     const url = getUrlWithId(endpoints.sa.quiz.questions, questionId);
 
     const response = await request(this.server)
@@ -81,7 +82,7 @@ export class Questions {
     superUser: { login: string; password: string },
     questionId: string,
     dto: UpdatePublishStatusDto,
-  ): Promise<{ body: ErrorsMessages; status: number }> {
+  ): Promise<TestingRequestDto<ErrorsMessages>> {
     const url = getUrlForUpdatePublishStatus(questionId);
 
     const response = await request(this.server)

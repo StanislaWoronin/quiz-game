@@ -30,6 +30,11 @@ export class TestingController {
     return await this.testingRepository.getConfirmationCode(userId);
   }
 
+  @Get('user-password/:userId')
+  async getUserPassword(@Param('userId') userId: string) {
+    return await this.testingRepository.getUserPassword(userId)
+  }
+
   @Get('is-confirmed/:userId')
   async checkUserConfirmed(@Param('userId') userId: string) {
     return await this.testingRepository.checkUserConfirmed(userId);
