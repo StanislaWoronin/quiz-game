@@ -7,7 +7,6 @@ import {
 import { request } from 'express';
 import {IEmailConfirmationRepository} from "../../../sa/users/infrastructure/i-email-confirmation.repository";
 
-
 @ValidatorConstraint({ name: 'ConfirmationCodeValidator', async: true })
 @Injectable()
 export class PasswordRecoveryValidator implements ValidatorConstraintInterface {

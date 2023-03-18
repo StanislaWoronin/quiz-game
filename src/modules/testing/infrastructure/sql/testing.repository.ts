@@ -1,6 +1,7 @@
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
+import { SqlCredentials } from "../../../sa/users/infrastructure/sql/entity/credentials.entity";
 
 @Injectable()
 export class TestingRepository {
@@ -8,26 +9,24 @@ export class TestingRepository {
 
   async getConfirmationCode(
       userId: string,
-  ) {
-    const result = await this.dataSource
-        .getRepository('email_confirmation')
-        .createQueryBuilder('ec')
-        .select('ec.confirmationCode')
-        .where('ec.userId = :id', { id: userId })
-        .getOne();
+  ): Promise<string> {
+    const builder = this.dataSource
+      .getRepository("sql_email_confirmation")
+      .createQueryBuilder("ec")
+      .where("ec.userId = :id", { id: userId });
+    const result = await builder.getOne();
 
-    return result;
+    return result.confirmationCode;
   }
 
-  async getUserPassword(userId: string) {
+  async getUserPassword(userId: string): Promise<string> {
     const result = await this.dataSource
-      .getRepository('users')
-      .createQueryBuilder('u')
-      .select('u.passwordHash')
-      .where('u.id = :id', { id: userId })
+      .getRepository(SqlCredentials)
+      .createQueryBuilder('c')
+      .where('c.userId = :id', { id: userId })
       .getOne();
 
-    return result;
+    return result.credentials;
   }
 
   async checkUserConfirmed(
@@ -44,13 +43,13 @@ export class TestingRepository {
   }
 
   async makeExpired(userId: string, expirationDate: string): Promise<boolean> {
-    const result = await this.dataSource
-        .getRepository('email_confirmation')
+    const builder = this.dataSource
+        .getRepository('sql_email_confirmation')
         .createQueryBuilder('ec')
         .update()
         .set({ expirationDate })
         .where('userId = :id', { id: userId })
-        .execute();
+      const result = await builder.execute();
 
     if (result.affected !== 1) {
       return false;

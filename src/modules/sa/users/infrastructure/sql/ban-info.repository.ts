@@ -8,11 +8,11 @@ export class UserBanInfoRepository {
   async checkBanStatus(userId: string): Promise<boolean> {
     const builder = this.dataSource
       .createQueryBuilder()
-      .select('bi.banStatus', 'isBanned')
+      .select('bi."isBanned"', 'isBanned')
       .from(SqlUserBanInfo, 'bi')
       .where('bi.userId = :id', { id: userId });
-    const result = await builder.getOne()
+    const result = await builder.getExists()
 
-    return result.isBanned
+    return result
   }
 }

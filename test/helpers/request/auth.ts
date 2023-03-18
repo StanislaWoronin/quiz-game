@@ -65,10 +65,15 @@ export class Auth {
     
     async loginUser(
       dto: AuthDto
-    ): Promise<TokensDto> {
+    ) {
         const response = await request(this.server)
           .post(endpoints.auth.login)
           .set('User-Agent', faker.internet.userAgent())
+          .send(dto)
+
+        if (!response.body.accessToken) {
+            return { status: response.status }
+        }
 
         return {
             accessToken: response.body,
@@ -77,10 +82,14 @@ export class Auth {
         };
     }
 
-    async generateToken(refreshToken?: string): Promise<TokensDto> {
+    async generateToken(refreshToken?: string) {
         const response = await request(this.server)
           .post(endpoints.auth.refreshToken)
           .auth(refreshToken, {type: "bearer"})
+
+        if (!response.body.accessToken) {
+            return { status: response.status }
+        }
 
         return {
             accessToken: response.body,

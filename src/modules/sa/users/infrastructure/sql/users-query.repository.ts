@@ -53,8 +53,6 @@ export class UsersQueryRepository {
         .select('u')
         .from(SqlUsers, 'u')
         .where([{ login: loginOrEmail }, { email: loginOrEmail }]);
-    const q = builder.getSql()
-    console.log(q);
     const result = await builder.getOne();
 
     return result;
@@ -91,17 +89,25 @@ export class UsersQueryRepository {
   } // TODO new
 
   async getCredentialByLoginOrEmail(loginOrEmail: string): Promise<SqlCredentials | null> {
-    const builder = this.dataSource
-        .createQueryBuilder(SqlUsers, 'u')
-        .select('u.id', 'id')
-        .addSelect('c.credentials', 'credentials')
-        .leftJoin(SqlCredentials, 'c')
-        .where('u.login = :login', {login: loginOrEmail})
-        .orWhere('u.email = :email', {email: loginOrEmail})
-    const result = await builder.getOne()
+    // const builder = this.dataSource
+    //     .createQueryBuilder(SqlCredentials, 'c')
+    //     .leftJoin(SqlUsers, 'u')
+    //     .where('u.login = :loginOrEmail', {loginOrEmail: loginOrEmail})
+    //     .orWhere('u.email = :loginOrEmail', {loginOrEmail: loginOrEmail})
+    // console.log(builder.getSql()); // TODO не подтягивает зависимость
+    // const result = await builder.getOne()
+    const query = `
+      SELECT c."userId", c.credentials
+        FROM sql_users u
+        LEFT JOIN sql_credentials c
+          ON c."userId" = u.id
+       WHERE u.login = $1
+          OR u.email = $1
+    `
+    const result = await this.dataSource.query(query, [loginOrEmail])
 
-    return result.credentials
-  } // TODO new
+    return result[0]
+  }
 
   private getFilter(query: UsersQueryDto): string {
     const { banStatus, searchLoginTerm, searchEmailTerm } = query;

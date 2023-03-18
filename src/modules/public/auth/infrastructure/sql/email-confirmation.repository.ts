@@ -18,7 +18,7 @@ export class EmailConfirmationRepository {
       .addSelect('ec.isConfirmed', 'isConfirmed')
       .from(SqlEmailConfirmation, 'ec')
       .where('ec.confirmationCode = :code', { code: code });
-
+    console.log(builder.getSql());
     return await builder.getRawOne();
   }
 
@@ -65,10 +65,8 @@ export class EmailConfirmationRepository {
         expirationDate,
       })
       .where('userId = :id', { id: userId })
-    const q = builder.getSql()
-    console.log(q);
     const result = await builder.execute();
-    console.log('ok');
+
     if (result.affected != 1) {
       return false;
     }

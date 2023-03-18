@@ -1,5 +1,5 @@
 export class TokensDto {
-  accessToken: string
-  refreshToken: string
+  accessToken: string | null
+  refreshToken: string | null
   status: number
 }

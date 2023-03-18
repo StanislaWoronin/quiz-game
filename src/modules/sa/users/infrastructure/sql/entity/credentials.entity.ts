@@ -11,7 +11,7 @@ export class SqlCredentials {
 
   @OneToOne(() => SqlUsers, (u) => u.credentials, { onDelete: 'CASCADE' })
   user: SqlUsers;
-  @PrimaryColumn() userId: string;
+  @PrimaryColumn("uuid") userId: string;
 
   constructor(userId: string, credentials: string) {
     this.userId = userId

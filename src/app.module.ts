@@ -66,6 +66,7 @@ import { SecurityService } from "./modules/public/security/application/security.
 import { ISecurityQueryRepository } from "./modules/public/security/infrastructure/i-security-query.repository";
 import { EmailResendingValidator } from "./common/validators/email-resending.validator";
 import { ConfirmationCodeValidator } from "./common/validators/confirmation-code.validator";
+import { PasswordRecoveryValidator } from "./modules/public/auth/guards/password-recovery.validator";
 
 const controllers = [
   AuthController,
@@ -87,7 +88,7 @@ const services = [
   UsersService,
 ];
 
-const validators = [ConfirmationCodeValidator, EmailExistValidator, EmailResendingValidator, LoginExistValidator,];
+const validators = [ConfirmationCodeValidator, EmailExistValidator, EmailResendingValidator, LoginExistValidator, PasswordRecoveryValidator];
 
 const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
 

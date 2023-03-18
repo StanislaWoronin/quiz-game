@@ -34,7 +34,11 @@ export const preparedUser = {
 
 export const prepareLogin = {
   valid: {
-    loginOrEmail: 'MyLogin',
+    loginOrEmail: 'UserLogin',
+    password: 'qwerty123',
+  },
+  newValid: {
+    loginOrEmail: 'UserLogin',
     password: 'newpassword',
   },
   notValid: {

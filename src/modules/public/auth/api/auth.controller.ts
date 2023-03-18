@@ -31,6 +31,7 @@ import { EmailManager } from "../email-transfer/email.manager";
 import { IEmailConfirmationRepository } from "../../../sa/users/infrastructure/i-email-confirmation.repository";
 import { IUsersQueryRepository } from "../../../sa/users/infrastructure/i-users-query.repository";
 import { ViewAboutMe } from "./view/view-about-me";
+import { AccessToken } from "../../security/api/view/access-token";
 
 @Controller('auth')
 export class AuthController {
@@ -68,20 +69,28 @@ export class AuthController {
       @UserId() userId: string,
       @Headers('user-agent') title: string,
       @Res() res: Response,
-  ): Promise<{ accessToken: string }> {
+  )/*: Promise<AccessToken>*/ {
+    console.log('welcome to the controller');
     const token = await this.securityService.createUserDevice(
         userId,
         title,
         ipAddress,
     );
 
-    res.cookie('refreshToken', token.refreshToken, {
-        httpOnly: !this.isDev,
-        secure: !this.isDev,
-        maxAge: 24 * 60 * 60 * 1000,
-    })
+    // res.cookie('refreshToken', token.refreshToken, {
+    //     httpOnly: !this.isDev,
+    //     secure: !this.isDev,
+    //     maxAge: 24 * 60 * 60 * 1000,
+    // })
+    //
+    // return { accessToken: token.accessToken }
 
-    return { accessToken: token.accessToken }
+    return res.cookie('refreshToken', token.refreshToken, {
+      httpOnly: !this.isDev,
+      secure: !this.isDev,
+      maxAge: 24 * 60 * 60 * 1000,
+    })
+      .send({ accessToken: token.accessToken });
   }
 
   // @Throttle(5, 10)
@@ -92,7 +101,6 @@ export class AuthController {
       @Body() email: ResendingDto,
       @UserId() userId: string,
   ) {
-    console.log('controller', userId);
     const newConfirmationCode = await this.authService.updateConfirmationCode(
         userId
     );
@@ -137,7 +145,7 @@ export class AuthController {
       @UserId() userId: string
   ) {
     const user = await this.queryUsersRepository.checkUserExists(userId);
-
+    console.log(user);
     if (!user) {
       throw new NotFoundException();
     }

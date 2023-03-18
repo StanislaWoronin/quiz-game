@@ -20,7 +20,7 @@ export class EmailResendingValidator implements ValidatorConstraintInterface {
 
   async validate(email) {
     const user = await this.usersQueryRepository.getUserByLoginOrEmail(email);
-    console.log(user, 'validator');
+
     if (!user) {
       return false;
     }
