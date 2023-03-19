@@ -28,13 +28,14 @@ export class SqlQuestions {
     nullable: false,
     default: false,
   })
-  published: boolean;
+  published: boolean = false;
 
   @Column({
     type: 'character varying',
     nullable: false,
+    // default: new Date().toISOString()
   })
-  createdAt: string;
+  createdAt: string = new Date().toISOString();
 
   @Column({
     type: 'character varying',
@@ -44,11 +45,11 @@ export class SqlQuestions {
   updatedAt: string;
 
   @OneToMany(() => SqlCorrectAnswers, (a) => a.question, { cascade: true })
-  correctAnswers: SqlCorrectAnswers;
+  correctAnswers: SqlCorrectAnswers[];
 
   @ManyToOne(() => SqlGame, (g) => g.questions)
   game: SqlGame;
 
   @OneToMany(() => SqlUserAnswer, (ua) => ua.question, { cascade: true })
-  userAnswer: SqlUserAnswer;
+  userAnswer: SqlUserAnswer[];
 }

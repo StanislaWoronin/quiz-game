@@ -12,7 +12,7 @@ import { SortByField } from '../../../src/common/pagination/query-parameters/sor
 import { SortDirection } from '../../../src/common/pagination/query-parameters/sort-direction';
 import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
 import { TestsPaginationType } from '../type/pagination.type';
-import { TestingRequestDto } from "../testing-request";
+import { TestingRequestDto } from "../testing-request.dto";
 
 export class Questions {
   constructor(private readonly server: any) {}

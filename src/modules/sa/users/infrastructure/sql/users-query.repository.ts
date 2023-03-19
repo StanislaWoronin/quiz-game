@@ -9,6 +9,7 @@ import { UserWithBanInfoDb } from './pojo/user-with-ban-info.db';
 import { toViewUser } from '../../../../../common/data-mapper/to-view-user';
 import { SqlUsers } from './entity/users.entity';
 import {SqlCredentials} from "./entity/credentials.entity";
+import { SqlUserBanInfo } from "./entity/ban-info.entity";
 
 @Injectable()
 export class UsersQueryRepository {
@@ -20,7 +21,7 @@ export class UsersQueryRepository {
 
     const query = `
             SELECT u.id, u.login, u.email, u."createdAt",
-                   bi."isBanned", bi."banDate", bi."banReason"
+                   bi."banDate", bi."banReason"
               FROM sql_users u
               LEFT JOIN sql_user_ban_info bi
                 ON u.id = bi."userId"
@@ -59,26 +60,50 @@ export class UsersQueryRepository {
   }
 
   async getUserById(userId: string): Promise<SqlUsers | null> {
-    const builder = this.dataSource
-        .createQueryBuilder()
-        .select('u')
-        .from(SqlUsers, 'u')
-        .leftJoin('u.banInfo', 'bi')
-        .where('u.id = :id', { id: userId })
-        .andWhere('bi.banStatus = :banStatus', { banStatus: false });
-    const result = await builder.getOne();
+    // const builder = this.dataSource
+    //     .createQueryBuilder()
+    //     .select('u')
+    //     .from(SqlUsers, 'u')
+    //     .leftJoin('u.banInfo', 'bi')
+    //     .where('u.id = :id', { id: userId })
+    //     .andWhere('bi.banStatus = :banStatus', { banStatus: false });
+    // console.log(builder.getSql());
+    // console.log(userId);
+    // const result = await builder.getOne();
 
-    return result;
+    const query = `
+      SELECT * 
+        FROM sql_users u
+       WHERE u.id = $1
+         AND (NOT EXISTS (SELECT * 
+                            FROM sql_user_ban_info bi
+                           WHERE bi."userId" = $1));
+    `;
+    const result = await this.dataSource.query(query, [userId])
+
+    return result[0];
   } // TODO new
 
   async checkUserExists(userId: string): Promise<boolean> {
-    return await this.dataSource
-      .getRepository('sql_users')
-      .createQueryBuilder('u')
-      .leftJoin('u.banInfo', 'bi')
-      .where('u.id = : id', { id: userId })
-      .andWhere('bi.banStatus = :banStatus', { banStatus: false })
-      .getExists();
+    // const builder = this.dataSource
+    //   .getRepository('sql_users')
+    //   .createQueryBuilder('u')
+    //   .leftJoin(SqlUserBanInfo, 'bi')
+    //   .where('u.id = : id', { id: userId })
+    //   .andWhere('bi.banStatus = :banStatus', { banStatus: false })
+    // console.log(builder.getSql());
+    // return await builder.getExists();
+    const query = `
+      SELECT (EXISTS (SELECT * 
+                        FROM sql_users u
+                       WHERE u.id = $1
+                         AND (NOT EXISTS (SELECT * 
+                                            FROM sql_user_ban_info bi
+                                           WHERE bi."userId" = $1)))) AS exists;
+    `
+    const result = await this.dataSource.query(query, [userId])
+
+    return result[0].exists
   } // TODO new
 
   async isLoginOrEmailExist(loginOrEmail: string): Promise<boolean> {

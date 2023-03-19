@@ -6,7 +6,7 @@ import { NewUserDto } from './dto/new-user.dto';
 import * as bcrypt from 'bcrypt';
 import { settings } from '../../../../settings';
 import { UpdateUserBanStatusDto } from '../api/dto/update-user-ban-status.dto';
-import { SqlEmailConfirmation } from '../../../public/auth/infrastructure/sql/entity/email-confirmation.entity';
+import { SqlEmailConfirmation } from "../infrastructure/sql/entity/sql-email-confirmation.entity";
 
 @Injectable()
 export class UsersService {

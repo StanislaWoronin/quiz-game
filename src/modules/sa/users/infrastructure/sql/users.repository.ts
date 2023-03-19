@@ -8,7 +8,7 @@ import { SqlCredentials } from './entity/credentials.entity';
 import { CreatedUserDb } from './pojo/created-user.db';
 import { SqlUserBanInfo } from './entity/ban-info.entity';
 import { UpdateUserBanStatusDto } from '../../api/dto/update-user-ban-status.dto';
-import { SqlEmailConfirmation } from '../../../../public/auth/infrastructure/sql/entity/email-confirmation.entity';
+import { SqlEmailConfirmation } from "./entity/sql-email-confirmation.entity";
 
 @Injectable()
 export class UsersRepository {
@@ -59,7 +59,6 @@ export class UsersRepository {
     const a = await this.dataSource.getRepository(SqlUserBanInfo).upsert(
       {
         userId: id,
-        isBanned: dto.isBanned,
         banReason: dto.banReason,
         banDate: new Date().toISOString(),
       },

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { DataSource, Repository } from "typeorm";
 import { NewQuestionDto } from '../../applications/dto/new-question.dto';
 import { CreatedQuestions } from '../../api/view/created-questions';
 import { SqlQuestions } from './entity/questions.entity';
@@ -8,10 +8,13 @@ import { SqlCorrectAnswers } from './entity/answers.entity';
 import { toCreatedQuestions } from '../../../../../common/data-mapper/to-created-quesions';
 import { CreatedQuestionsDb } from './pojo/created-questions.db';
 import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
+import { IQuestionsRepository } from "../i-questions.repository";
 
 @Injectable()
-export class QuestionsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+export class QuestionsRepository implements IQuestionsRepository {
+  constructor(@InjectDataSource() private dataSource: DataSource,
+  ) {
+  }
 
   async createQuestion(
     newQuestion: NewQuestionDto,
@@ -21,19 +24,41 @@ export class QuestionsRepository {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const manager = queryRunner.manager;
+    const manager = queryRunner.manager
+    const questionManager = manager.getRepository(SqlQuestions)
+    const answerManager = manager.getRepository(SqlQuestions)
+
+
     try {
-      const createdQuestions: CreatedQuestionsDb = await manager
-        .getRepository(SqlQuestions)
-        .save(newQuestion);
+      // const question = new NewQuestionDto()
+      // question.correctAnswers = [{ id: null, question, correctAnswer:  '1'}, { id: null, question, correctAnswer:  '2'}]
+       const createdQuestions: CreatedQuestionsDb = await questionManager.save(newQuestion);
 
-      let createdAnswer;
-      for (let i = 0, length = answers.length; i < length; i++) {
-        createdAnswer = await manager
-          .getRepository(SqlCorrectAnswers)
-          .save({ questionId: createdQuestions.id, correctAnswer: answers[i] });
-      }
+      const mappedAnswers = answers.map(el => new SqlCorrectAnswers(createdQuestions.id, el))
+      // const mappedAnswers = answers.map(el => {
+      //   return {
+      //     questionId: createdQuestions.id,
+      //     correctAnswer: el
+      //   };
+      // })
+      // const builder =  this.dataSource
+      //   .createQueryBuilder()
+      //   .insert()
+      //   .into(SqlCorrectAnswers)
+      //   .values(mappedAnswers)
+      //   // .returning('correctAnswer')
+      // console.log(builder.getSql(), 'sql')
+      // const createdAnswers = await builder.execute()
 
+      //console.log(createdAnswers);
+      // for (let i = 0, length = answers.length; i < length; i++) {
+      //   await manager
+      //     .getRepository(SqlCorrectAnswers)
+      //     .save({ questionId: createdQuestions.id, correctAnswer: answers[i] });
+      // }
+
+      const q = await answerManager.save(mappedAnswers)
+      console.log(createdQuestions);
       await queryRunner.commitTransaction();
       return toCreatedQuestions(createdQuestions, answers);
     } catch (e) {
@@ -92,10 +117,11 @@ export class QuestionsRepository {
        WHERE id = '${questionId}'
          AND EXISTS(SELECT "questionId"
                       FROM sql_answers
-                     WHERE "questionId" = '${questionId}')
+                     WHERE "questionId" = '${questionId}');
     `;
+    console.log(query);
     const result = await this.dataSource.query(query);
-
+    console.log(result);
     if (result[1] !== 1) {
       return false;
     }

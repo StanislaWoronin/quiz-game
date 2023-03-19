@@ -70,8 +70,7 @@ export class AuthController {
       @Headers('user-agent') title: string,
       @Res() res: Response,
   )/*: Promise<AccessToken>*/ {
-    console.log('welcome to the controller');
-    const token = await this.securityService.createUserDevice(
+    const tokens = await this.securityService.createUserDevice(
         userId,
         title,
         ipAddress,
@@ -83,14 +82,14 @@ export class AuthController {
     //     maxAge: 24 * 60 * 60 * 1000,
     // })
     //
-    // return { accessToken: token.accessToken }
+    // return { accessToken: token.accessToken } // TODO trabl
 
-    return res.cookie('refreshToken', token.refreshToken, {
+    return res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: !this.isDev,
       secure: !this.isDev,
       maxAge: 24 * 60 * 60 * 1000,
     })
-      .send({ accessToken: token.accessToken });
+      .send({ accessToken: tokens.accessToken });
   }
 
   // @Throttle(5, 10)
@@ -145,7 +144,7 @@ export class AuthController {
       @UserId() userId: string
   ) {
     const user = await this.queryUsersRepository.checkUserExists(userId);
-    console.log(user);
+
     if (!user) {
       throw new NotFoundException();
     }
@@ -158,6 +157,7 @@ export class AuthController {
     return;
   }
 
+  @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenValidationGuard)
   @Post('refresh-token')
   async createRefreshToken(
@@ -168,11 +168,12 @@ export class AuthController {
         req.cookies.refreshToken,
     );
 
-    res.cookie('refreshToken', tokens.refreshToken, {
+    return res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: !this.isDev,
       secure: !this.isDev,
-    });
-    return { accessToken: tokens.accessToken };
+      maxAge: 24 * 60 * 60 * 1000,
+    })
+      .send({ accessToken: tokens.accessToken });
   }
 
   @UseGuards(RefreshTokenValidationGuard)

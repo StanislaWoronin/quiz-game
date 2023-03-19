@@ -1,4 +1,4 @@
-import {SqlEmailConfirmation} from "../../../public/auth/infrastructure/sql/entity/email-confirmation.entity";
+import { SqlEmailConfirmation } from "./sql/entity/sql-email-confirmation.entity";
 
 export interface IEmailConfirmationRepository {
     getEmailConfirmationByCode(

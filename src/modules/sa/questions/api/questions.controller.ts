@@ -78,7 +78,7 @@ export class QuestionsController {
       questionId,
       dto,
     );
-
+    console.log(isUpdated);
     if (isUpdated === null) {
       throw new NotFoundException();
     }

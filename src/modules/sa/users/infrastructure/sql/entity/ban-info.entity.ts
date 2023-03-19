@@ -11,11 +11,6 @@ import { SqlUsers } from './users.entity';
 @Entity()
 export class SqlUserBanInfo {
   @Column({
-    type: 'boolean',
-  })
-  isBanned: boolean;
-
-  @Column({
     type: 'character varying',
     nullable: true,
     collation: 'C',

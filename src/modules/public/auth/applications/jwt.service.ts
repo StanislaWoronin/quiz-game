@@ -17,7 +17,7 @@ export class JwtService {
       const result: any = this.jwtService.decode(token) as TokenPayload;
 
       return new TokenPayload(result);
-    } catch (error) {
+    } catch (e) {
       return null;
     }
   }

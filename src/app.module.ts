@@ -49,7 +49,6 @@ import { JwtService } from './modules/public/auth/applications/jwt.service';
 import { IQuizGameQueryRepository } from './modules/public/pair-quiz-game/infrastructure/i-quiz-game-query.repository';
 import { SqlUserAnswer } from './modules/public/pair-quiz-game/infrastructure/sql/entity/sql-user-answer.entity';
 import { JwtService as NestJwtService } from '@nestjs/jwt/dist/jwt.service';
-import { SqlEmailConfirmation } from './modules/public/auth/infrastructure/sql/entity/email-confirmation.entity';
 import { CreateUserUseCase } from './modules/sa/users/use-cases/create-user.use-case';
 import { CreateUserBySaUseCase } from './modules/sa/users/use-cases/create-user-by-sa.use-case';
 import { EmailExistValidator } from './common/validators/email-exists.validator';
@@ -67,6 +66,8 @@ import { ISecurityQueryRepository } from "./modules/public/security/infrastructu
 import { EmailResendingValidator } from "./common/validators/email-resending.validator";
 import { ConfirmationCodeValidator } from "./common/validators/confirmation-code.validator";
 import { PasswordRecoveryValidator } from "./modules/public/auth/guards/password-recovery.validator";
+import { SqlTokenBlackList } from "./modules/public/auth/infrastructure/sql/entity/sql-token-black-list.entity";
+import { SqlEmailConfirmation } from "./modules/sa/users/infrastructure/sql/entity/sql-email-confirmation.entity";
 
 const controllers = [
   AuthController,
@@ -187,6 +188,7 @@ export const entity = [
   SqlGameProgress,
   SqlQuestions,
   SqlSecurity,
+  SqlTokenBlackList,
   SqlUserAnswer,
   SqlUserBanInfo,
   SqlUsers,

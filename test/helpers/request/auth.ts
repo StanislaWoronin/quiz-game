@@ -76,8 +76,8 @@ export class Auth {
         }
 
         return {
-            accessToken: response.body,
-            refreshToken: response.headers['set-cookie'][0].split(';')[0],
+            accessToken: response.body.accessToken,
+            refreshToken: response.headers['set-cookie'][0].split(';')[0].split('=')[1],
             status: response.status
         };
     }
@@ -85,7 +85,7 @@ export class Auth {
     async generateToken(refreshToken?: string) {
         const response = await request(this.server)
           .post(endpoints.auth.refreshToken)
-          .auth(refreshToken, {type: "bearer"})
+          .set('Cookie', `refreshToken=${refreshToken}`)
 
         if (!response.body.accessToken) {
             return { status: response.status }
@@ -93,7 +93,7 @@ export class Auth {
 
         return {
             accessToken: response.body,
-            refreshToken: response.headers['set-cookie'][0].split(';')[0],
+            refreshToken: response.headers['set-cookie'][0].split(';')[0].split('=')[1],
             status: response.status
         };
     }
@@ -109,7 +109,7 @@ export class Auth {
     async logout(refreshToken?: string): Promise<number> {
         const response = await request(this.server)
           .post(endpoints.auth.logout)
-          .auth(refreshToken, {type: "bearer"})
+          .set('Cookie', `refreshToken=${refreshToken}`)
 
         return response.status
     }

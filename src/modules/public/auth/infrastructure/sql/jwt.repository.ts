@@ -8,11 +8,11 @@ export class JwtRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async checkTokenInBlackList(refreshToken: string): Promise<boolean> {
-    return await this.dataSource
-      .getRepository('token_black_list')
-      .createQueryBuilder('bl')
-      .where('bl.token = :token', { token: refreshToken })
-      .getExists();
+    const builder = this.dataSource
+      .getRepository("sql_token_black_list")
+      .createQueryBuilder("bl")
+      .where("bl.token = :token", { token: refreshToken });
+    return await builder.getExists();
   }
 
   async addTokenInBlackList(refreshToken: string): Promise<boolean> {

@@ -12,7 +12,7 @@ import { SqlUsers } from '../../../../users/infrastructure/sql/entity/users.enti
 @Entity()
 export class SqlCorrectAnswers {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: string | null;
 
   @Column({
     type: 'character varying',
@@ -24,8 +24,14 @@ export class SqlCorrectAnswers {
     onDelete: 'CASCADE',
   })
   question: SqlQuestions;
-  @Column({
-    nullable: false,
-  })
-  questionId: string;
+
+  // @Column({
+  //   nullable: false,
+  // })
+  // questionId: string;
+
+  constructor(questionId: string, answer: string) {
+    // this.questionId = questionId
+    this.correctAnswer = answer
+  }
 }

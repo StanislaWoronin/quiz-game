@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import {SqlEmailConfirmation} from "../../../../public/auth/infrastructure/sql/entity/email-confirmation.entity";
+import { SqlEmailConfirmation } from "./entity/sql-email-confirmation.entity";
 
 @Injectable()
 export class EmailConfirmationRepository {

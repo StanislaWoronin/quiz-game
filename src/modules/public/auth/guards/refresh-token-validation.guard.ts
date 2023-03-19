@@ -29,7 +29,7 @@ export class RefreshTokenValidationGuard implements CanActivate {
     );
 
     if (tokenInBlackList) {
-      // console.log('Токен в чернм списке')
+      // console.log('Токен в черном списке')
       throw new UnauthorizedException();
     }
 

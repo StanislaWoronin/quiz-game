@@ -2,7 +2,7 @@ import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
 import {SqlUsers} from "./users.entity";
 
 @Entity()
-export class EmailConfirmation {
+export class SqlEmailConfirmation {
   @Column({ default: null }) confirmationCode: string | null;
 
   @Column({ default: null }) expirationDate: string | null;
@@ -13,6 +13,10 @@ export class EmailConfirmation {
   user: SqlUsers;
   @PrimaryColumn() userId: string;
 
-  constructor() {
+  constructor(userId: string, isConfirmed: boolean, confirmationCode?: string, expirationDate?: string) {
+    this.userId = userId
+    this.isConfirmed = isConfirmed
+    this.confirmationCode = confirmationCode
+    this.expirationDate = expirationDate
   }
 }

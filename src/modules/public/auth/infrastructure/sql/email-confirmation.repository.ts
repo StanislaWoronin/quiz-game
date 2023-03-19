@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { SqlEmailConfirmation } from './entity/email-confirmation.entity';
+import { SqlEmailConfirmation } from "../../../../sa/users/infrastructure/sql/entity/sql-email-confirmation.entity";
 
 @Injectable()
 export class EmailConfirmationRepository {
@@ -18,7 +18,6 @@ export class EmailConfirmationRepository {
       .addSelect('ec.isConfirmed', 'isConfirmed')
       .from(SqlEmailConfirmation, 'ec')
       .where('ec.confirmationCode = :code', { code: code });
-    console.log(builder.getSql());
     return await builder.getRawOne();
   }
 

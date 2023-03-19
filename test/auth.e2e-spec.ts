@@ -14,7 +14,6 @@ import { preparedSecurity } from "./helpers/prepeared-data/prepared-security";
 import { getErrorMessage } from "./helpers/routing/errors-messages";
 import { randomUUID } from "crypto";
 import { preparedPassword } from "./helpers/prepeared-data/prepared-password";
-import { schedule } from 'node-cron'
 import { ViewAboutMe } from "../src/modules/public/auth/api/view/view-about-me";
 import { faker } from "@faker-js/faker";
 
@@ -250,7 +249,7 @@ describe('/auth', () => {
           'inside cookie is incorrect', async () => {
             const { refreshToken } = expect.getState()
 
-            const response = await auth.generateToken(`${refreshToken}-1`)
+            const response = await auth.generateToken(`a1-${refreshToken}-1a`)
             expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
         })
 
@@ -268,7 +267,7 @@ describe('/auth', () => {
             expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
         })
 
-        it('Shouldn return new pair of access and refresh token', async () => {
+        it('Should return new pair of access and refresh token', async () => {
             const { refreshToken } = expect.getState()
 
             const response = await auth.generateToken(refreshToken)
@@ -282,52 +281,56 @@ describe('/auth', () => {
             })
         })
     })
-    //
-    // describe('POST -> "/auth/me"', () => {
-    //     const { user, refreshToken } = expect.getState()
-    //
-    //     it('Shouldn`t return info about user if unauthorized', async () => {
-    //         const response = await auth.getInfoAboutMe()
-    //         expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
-    //     })
-    //
-    //     it('Return info about user', async () => {
-    //         const response = await auth.getInfoAboutMe(refreshToken)
-    //         expect(response.status).toBe(HttpStatus.OK)
-    //         expect(response.body).toStrictEqual(new ViewAboutMe(user))
-    //     })
-    // })
-    //
-    // describe('POST -> "/auth/logout"', () => {
-    //     const { refreshToken } = expect.getState();
-    //
-    //     it('Shouldn`t logout if refresh token missing', async () => {
-    //         const response = await auth.logout()
-    //         expect(response).toBe(HttpStatus.UNAUTHORIZED)
-    //     })
-    //
-    //     it('Shouldn`t logout if refresh token is incorrect', async () => {
-    //         const response = await auth.logout(`${refreshToken}-1`)
-    //         expect(response).toBe(HttpStatus.UNAUTHORIZED)
-    //     })
-    //
-    //     it('Shouldn`t logout if refresh token is expired', async () => {
-    //         const expiredToken = await testing.makeExpired(refreshToken)
-    //
-    //         schedule('1,*,*,*,*,*', () => {})
-    //
-    //         const response = await auth.logout(expiredToken)
-    //         expect(response).toBe(HttpStatus.UNAUTHORIZED)
-    //     })
-    //
-    //     it('Should logout from sistem', async () => {
-    //         const newTokens = await auth.loginUser(prepareLogin.valid)
-    //
-    //         const response = await auth.logout(newTokens.refreshToken)
-    //         expect(response).toBe(HttpStatus.NO_CONTENT)
-    //
-    //         const tryLoginAfterLogout = await auth.logout(newTokens.refreshToken)
-    //         expect(response).toBe(HttpStatus.UNAUTHORIZED)
-    //     })
-    // })
+
+    describe('POST -> "/auth/me"', () => {
+        // it('Shouldn`t return info about user if unauthorized', async () => {
+        //     const response = await auth.getInfoAboutMe()
+        //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
+        // })
+
+        it('Return info about user', async () => {
+            const { user, refreshToken } = expect.getState()
+
+            const response = await auth.getInfoAboutMe(refreshToken)
+            expect(response.status).toBe(HttpStatus.OK)
+            expect(response.body).toEqual(new ViewAboutMe(user))
+        })
+    })
+
+    describe('POST -> "/auth/logout"', () => {
+        it('Shouldn`t logout if refresh token missing', async () => {
+            const response = await auth.logout()
+            expect(response).toBe(HttpStatus.UNAUTHORIZED)
+        })
+
+        it('Shouldn`t logout if refresh token is incorrect', async () => {
+            const { refreshToken } = expect.getState();
+
+            const response = await auth.logout(`a1-${refreshToken}-1a`)
+            expect(response).toBe(HttpStatus.UNAUTHORIZED)
+        })
+
+        it('Shouldn`t logout if refresh token is expired', async () => {
+            const { refreshToken } = expect.getState();
+
+            const expiredToken = await testing.makeExpired(refreshToken)
+
+            const second = 1000;
+            jest.setTimeout(second);
+            //schedule('1,*,*,*,*,*', () => {})
+
+            const response = await auth.logout(expiredToken)
+            expect(response).toBe(HttpStatus.UNAUTHORIZED)
+        })
+
+        it('Should logout from sistem', async () => {
+            const newTokens = await auth.loginUser(prepareLogin.valid)
+
+            const response = await auth.logout(newTokens.refreshToken)
+            expect(response).toBe(HttpStatus.NO_CONTENT)
+
+            const tryLoginAfterLogout = await auth.logout(newTokens.refreshToken)
+            expect(tryLoginAfterLogout).toBe(HttpStatus.UNAUTHORIZED)
+        })
+    })
 })
