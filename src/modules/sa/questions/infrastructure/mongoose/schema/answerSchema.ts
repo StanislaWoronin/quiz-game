@@ -8,6 +8,10 @@ export class MongoAnswers {
 
   @Prop({ required: true, type: String })
   correctAnswer: string;
+
+  constructor(answers: string) {
+    this.correctAnswer = answers
+  }
 }
 
 export const AnswerSchema = SchemaFactory.createForClass(MongoAnswers);

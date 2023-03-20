@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { MongoQuestion, QuestionsDocument } from './schema/question.schema';
-import { ClientSession, Connection, Model } from 'mongoose';
-import { NewQuestionDto } from '../../applications/dto/new-question.dto';
+import { Connection, Model } from 'mongoose';
 import { CreatedQuestions } from '../../api/view/created-questions';
-import { randomUUID } from 'crypto';
 import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
+import { CreateQuestionDto } from "../../api/dto/create-question.dto";
+import { MongoAnswers } from "./schema/answerSchema";
 
 @Injectable()
 export class MQuestionsRepository {
@@ -16,12 +16,13 @@ export class MQuestionsRepository {
   ) {}
 
   async createQuestion(
-    newQuestion: NewQuestionDto,
-    answers: string[],
+    dto: CreateQuestionDto,
   ): Promise<CreatedQuestions | null> {
-    const question = { id: randomUUID(), ...newQuestion, answers };
-    console.log(question);
-    return new CreatedQuestions(question.id, newQuestion, answers);
+    const answers = dto.correctAnswers.map(el => new MongoAnswers(el))
+    const question = new MongoQuestion(dto, answers)
+    await this.questionsRepository.create(question)
+
+    return new CreatedQuestions(question);
   }
 
   async updateQuestion(

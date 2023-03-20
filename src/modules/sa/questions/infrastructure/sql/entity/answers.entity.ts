@@ -8,11 +8,12 @@ import {
 } from 'typeorm';
 import { SqlQuestions } from './questions.entity';
 import { SqlUsers } from '../../../../users/infrastructure/sql/entity/users.entity';
+import { CreateQuestionDto } from "../../../api/dto/create-question.dto";
 
 @Entity()
 export class SqlCorrectAnswers {
   @PrimaryGeneratedColumn('uuid')
-  id: string | null;
+  id: string;
 
   @Column({
     type: 'character varying',
@@ -20,18 +21,10 @@ export class SqlCorrectAnswers {
   })
   correctAnswer: string;
 
-  @ManyToOne(() => SqlQuestions, (q) => q.correctAnswers, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => SqlQuestions, (q) => q.correctAnswers)
   question: SqlQuestions;
 
-  // @Column({
-  //   nullable: false,
-  // })
-  // questionId: string;
-
-  constructor(questionId: string, answer: string) {
-    // this.questionId = questionId
-    this.correctAnswer = answer
+  constructor(el: string) {
+    this.correctAnswer = el
   }
 }

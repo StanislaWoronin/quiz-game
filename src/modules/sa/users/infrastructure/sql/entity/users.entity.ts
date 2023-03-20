@@ -3,8 +3,8 @@ import {
   Entity,
   OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+  PrimaryGeneratedColumn
+} from "typeorm";
 import { SqlUserBanInfo } from './ban-info.entity';
 import { SqlCredentials } from './credentials.entity';
 import { SqlGameProgress } from '../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-game-progress.entity';

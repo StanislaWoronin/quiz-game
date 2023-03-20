@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
-import { DataSource, Repository } from "typeorm";
-import { NewQuestionDto } from '../../applications/dto/new-question.dto';
+import { InjectDataSource } from "@nestjs/typeorm";
+import { DataSource } from "typeorm";
 import { CreatedQuestions } from '../../api/view/created-questions';
 import { SqlQuestions } from './entity/questions.entity';
 import { SqlCorrectAnswers } from './entity/answers.entity';
 import { toCreatedQuestions } from '../../../../../common/data-mapper/to-created-quesions';
-import { CreatedQuestionsDb } from './pojo/created-questions.db';
 import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
 import { IQuestionsRepository } from "../i-questions.repository";
+import { CreateQuestionDto } from "../../api/dto/create-question.dto";
+import { SqlUserBanInfo } from "../../../users/infrastructure/sql/entity/ban-info.entity";
 
 @Injectable()
 export class QuestionsRepository implements IQuestionsRepository {
@@ -17,51 +17,29 @@ export class QuestionsRepository implements IQuestionsRepository {
   }
 
   async createQuestion(
-    newQuestion: NewQuestionDto,
-    answers: string[],
+    dto: CreateQuestionDto,
   ): Promise<CreatedQuestions | null> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     const manager = queryRunner.manager
-    const questionManager = manager.getRepository(SqlQuestions)
-    const answerManager = manager.getRepository(SqlQuestions)
-
-
     try {
-      // const question = new NewQuestionDto()
-      // question.correctAnswers = [{ id: null, question, correctAnswer:  '1'}, { id: null, question, correctAnswer:  '2'}]
-       const createdQuestions: CreatedQuestionsDb = await questionManager.save(newQuestion);
+      const createdQuestions = await manager.getRepository(SqlQuestions).create(new SqlQuestions(dto.body));
 
-      const mappedAnswers = answers.map(el => new SqlCorrectAnswers(createdQuestions.id, el))
-      // const mappedAnswers = answers.map(el => {
-      //   return {
-      //     questionId: createdQuestions.id,
-      //     correctAnswer: el
-      //   };
-      // })
-      // const builder =  this.dataSource
-      //   .createQueryBuilder()
-      //   .insert()
-      //   .into(SqlCorrectAnswers)
-      //   .values(mappedAnswers)
-      //   // .returning('correctAnswer')
-      // console.log(builder.getSql(), 'sql')
-      // const createdAnswers = await builder.execute()
+      const mappedAnswers = dto.correctAnswers.map(el => new SqlCorrectAnswers(el));
+      const builder = manager
+        .createQueryBuilder()
+        .insert()
+        .into(SqlCorrectAnswers)
+        .values(mappedAnswers);
+      await builder.execute();
 
-      //console.log(createdAnswers);
-      // for (let i = 0, length = answers.length; i < length; i++) {
-      //   await manager
-      //     .getRepository(SqlCorrectAnswers)
-      //     .save({ questionId: createdQuestions.id, correctAnswer: answers[i] });
-      // }
-
-      const q = await answerManager.save(mappedAnswers)
-      console.log(createdQuestions);
       await queryRunner.commitTransaction();
-      return toCreatedQuestions(createdQuestions, answers);
+      return toCreatedQuestions(createdQuestions, dto.correctAnswers);
     } catch (e) {
+      console.log(e);
+      console.log('ya slovil oshibky');
       await queryRunner.rollbackTransaction();
       return null;
     } finally {
@@ -150,4 +128,21 @@ export class QuestionsRepository implements IQuestionsRepository {
       await queryRunner.release();
     }
   }
+
+  private async createAnswer(answers: string[]) {
+    try {
+      const mappedAnswers = answers.map(el => new SqlCorrectAnswers(el));
+      const builder = this.dataSource
+        .createQueryBuilder()
+        .insert()
+        .into(SqlCorrectAnswers)
+        .values(mappedAnswers);
+      const createdAnswers = await builder.execute();
+
+      console.log(createdAnswers, "created answer");
+      return
+    } catch (e) {
+      throw new Error()
+    }
+  } // TODO refactoring
 }

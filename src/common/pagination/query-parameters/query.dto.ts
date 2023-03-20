@@ -39,5 +39,9 @@ export class QueryDto {
   /**
    * Property "skip" are only getter. Don\'t set value
    */
-  skip?: number = 0;
+  skip: number = 0
+
+  // skip1() {
+  //   return giveSkipNumber(this.pageNumber, this.pageSize)
+  // }
 }

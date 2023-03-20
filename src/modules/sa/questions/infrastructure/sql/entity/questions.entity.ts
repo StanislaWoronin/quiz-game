@@ -1,14 +1,7 @@
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { SqlGame } from '../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-game.entity';
-import { SqlCorrectAnswers } from './answers.entity';
-import { SqlUserAnswer } from '../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-user-answer.entity';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { SqlGame } from "../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-game.entity";
+import { SqlCorrectAnswers } from "./answers.entity";
+import { SqlUserAnswer } from "../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-user-answer.entity";
 
 @Entity()
 export class SqlQuestions {
@@ -52,4 +45,8 @@ export class SqlQuestions {
 
   @OneToMany(() => SqlUserAnswer, (ua) => ua.question, { cascade: true })
   userAnswer: SqlUserAnswer[];
+
+  constructor(body: string) {
+    this.body = body
+  }
 }

@@ -1,11 +1,10 @@
-import { NewQuestionDto } from '../applications/dto/new-question.dto';
 import { CreatedQuestions } from '../api/view/created-questions';
 import { UpdateQuestionDto } from '../api/dto/update-question.dto';
+import { CreateQuestionDto } from "../api/dto/create-question.dto";
 
 export interface IQuestionsRepository {
   createQuestion(
-    newQuestion: NewQuestionDto,
-    answers: string[],
+    dto: CreateQuestionDto
   ): Promise<CreatedQuestions | null>;
   updateQuestion(questionId: string, dto: UpdateQuestionDto): Promise<boolean>;
   updatePublishStatus(questionId: string, published: boolean): Promise<boolean>;

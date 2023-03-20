@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
 import {SqlUsers} from "./users.entity";
 
 @Entity()
@@ -10,13 +10,14 @@ export class SqlEmailConfirmation {
   @Column({ default: false }) isConfirmed: boolean;
 
   @OneToOne(() => SqlUsers, (u) => u.emailConfirmation)
+  @JoinColumn()
   user: SqlUsers;
-  @PrimaryColumn() userId: string;
+  @PrimaryColumn('uuid') userId: string;
 
   constructor(userId: string, isConfirmed: boolean, confirmationCode?: string, expirationDate?: string) {
     this.userId = userId
     this.isConfirmed = isConfirmed
     this.confirmationCode = confirmationCode
     this.expirationDate = expirationDate
-  }
+  } // TODO userId подтянет автоматически
 }

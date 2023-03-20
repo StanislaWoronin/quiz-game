@@ -29,11 +29,9 @@ export class UsersQueryRepository {
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};         
         `;
-    console.log(query)
     const users: UserWithBanInfoDb[] = await this.dataSource.query(query);
-    console.log('1', users)
     const items = users.map((u) => toViewUser(u));
-    console.log('2', items)
+
     const countQuery = `
             SELECT COUNT(*)
               FROM sql_users u
@@ -42,7 +40,7 @@ export class UsersQueryRepository {
              ${filter}
         `;
     const totalCount = await this.dataSource.query(countQuery);
-    console.log('3', totalCount)
+
     return new ViewPage<ViewUser>({
       items: items ?? [],
       query: queryDto,
