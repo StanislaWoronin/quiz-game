@@ -99,29 +99,29 @@ describe('/sa/users (e2e)', () => {
       });
     });
 
-    // it('User without permissions try set ban status', async () => {
-    //     const { userId } = expect.getState()
-    //
-    //     const response = await users.setBanStatus(
-    //         preparedSuperUser.notValid,
-    //         preparedUser.updateBanStatus.banned,
-    //         userId
-    //     );
-    //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
-    // })
-    //
-    // it('Should update if input model is incorrect', async () => {
-    //     const { userId } = expect.getState()
-    //     const errorsMessages = getErrorsMessage(['banReason'])
-    //
-    //     const response = await users.setBanStatus(
-    //         preparedSuperUser.valid,
-    //         preparedUser.updateBanStatus.notValid,
-    //         userId
-    //     );
-    //     expect(response.status).toBe(HttpStatus.BAD_REQUEST)
-    //     expect(response.body).toStrictEqual({ errorsMessages })
-    // })
+    it('User without permissions try set ban status', async () => {
+        const { userId } = expect.getState()
+
+        const response = await users.setBanStatus(
+            preparedSuperUser.notValid,
+            preparedUser.updateBanStatus.banned,
+            userId
+        );
+        expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+    })
+
+    it('Should update if input model is incorrect', async () => {
+        const { userId } = expect.getState()
+        const errorsMessages = getErrorsMessage(['banReason'])
+
+        const response = await users.setBanStatus(
+            preparedSuperUser.valid,
+            preparedUser.updateBanStatus.notValid,
+            userId
+        );
+        expect(response.status).toBe(HttpStatus.BAD_REQUEST)
+        expect(response.body).toStrictEqual({ errorsMessages })
+    })
 
     it('Should update ban status. Set status "true"', async () => {
       const { userId } = expect.getState();

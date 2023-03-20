@@ -48,7 +48,7 @@ export class UsersFactory {
       const users = await this.users.getUsers(preparedSuperUser.valid, {
         banStatus: BanStatus.Banned,
       });
-
+      console.log(users)
       result.push({
         id: createdUsers[i].id,
         login: createdUsers[i].login,
