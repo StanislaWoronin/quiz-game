@@ -4,14 +4,17 @@ import { SqlQuestions } from '../../../../../sa/questions/infrastructure/sql/ent
 
 @Entity()
 export class SqlUserAnswer {
-  @ManyToOne(() => SqlUsers, (u) => u.answers, { onDelete: 'CASCADE' })
+  @ManyToOne(() => SqlUsers, (u) => u.answers)
   @JoinColumn()
   user: SqlUsers;
   @PrimaryColumn() userId: string;
 
-  @ManyToOne(() => SqlQuestions, (q) => q.userAnswer, { onDelete: 'CASCADE' })
+  @ManyToOne(() => SqlQuestions, (q) => q.userAnswer)
   @JoinColumn()
   question: SqlQuestions;
   @Column()
   questionId: string;
+
+  @Column()
+  userAnswer: string;
 }

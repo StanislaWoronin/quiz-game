@@ -9,7 +9,8 @@ export class SqlCredentials {
   })
   credentials: string;
 
-  @OneToOne(() => SqlUsers, (u) => u.credentials, { onDelete: 'CASCADE' })
+  @OneToOne(() => SqlUsers, (u) => u.credentials)
+  @JoinColumn()
   user: SqlUsers;
   @PrimaryColumn("uuid") userId: string;
 

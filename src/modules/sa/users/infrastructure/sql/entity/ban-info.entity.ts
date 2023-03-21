@@ -24,7 +24,7 @@ export class SqlUserBanInfo {
   })
   banReason: string;
 
-  @OneToOne(() => SqlUsers, (u) => u.banInfo, { onDelete: 'CASCADE' })
+  @OneToOne(() => SqlUsers, (u) => u.banInfo)
   @JoinColumn()
   user: SqlUsers;
   @PrimaryColumn() userId: string;

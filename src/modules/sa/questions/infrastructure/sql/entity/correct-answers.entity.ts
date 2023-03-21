@@ -23,8 +23,12 @@ export class SqlCorrectAnswers {
 
   @ManyToOne(() => SqlQuestions, (q) => q.correctAnswers)
   question: SqlQuestions;
+  @Column()
+  questionId: string
 
-  constructor(el: string) {
+
+  constructor(questionId: string, el: string) {
+    this.questionId = questionId
     this.correctAnswer = el
   }
 }

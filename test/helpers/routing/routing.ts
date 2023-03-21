@@ -1,4 +1,5 @@
 const authController = `/auth`;
+const pairGameQuiz = '/pair-game-quiz'
 const saController = `/sa`;
 const testingController = `/testing`;
 
@@ -13,6 +14,14 @@ export const endpoints = {
     registrationConfirmation: `${authController}/registration-confirmation`,
     registrationEmailResending: `${authController}/registration-email-resending`,
     refreshToken: `${authController}/refresh-token`,
+  },
+  pairGameQuiz: {
+    pairs: {
+      answers: `${pairGameQuiz}/pair/answers`,
+      connection: `${pairGameQuiz}/pair/connection`,
+      myCurrent: `${pairGameQuiz}/pair/my-current`,
+      pairs: `${pairGameQuiz}/pair`,
+    }
   },
   sa: {
     quiz: {

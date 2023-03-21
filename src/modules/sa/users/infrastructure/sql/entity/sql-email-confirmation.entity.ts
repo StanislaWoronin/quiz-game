@@ -19,5 +19,5 @@ export class SqlEmailConfirmation {
     this.isConfirmed = isConfirmed
     this.confirmationCode = confirmationCode
     this.expirationDate = expirationDate
-  } // TODO userId подтянет автоматически
+  }
 }

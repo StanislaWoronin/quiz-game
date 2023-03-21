@@ -13,7 +13,7 @@ import { IUsersRepository } from './modules/sa/users/infrastructure/i-users.repo
 import { IUsersQueryRepository } from './modules/sa/users/infrastructure/i-users-query.repository';
 import { UsersService } from './modules/sa/users/applications/users.service';
 import { UsersController } from './modules/sa/users/api/users.controller';
-import { SqlCorrectAnswers } from './modules/sa/questions/infrastructure/sql/entity/answers.entity';
+import { SqlCorrectAnswers } from './modules/sa/questions/infrastructure/sql/entity/correct-answers.entity';
 import { SqlCredentials } from './modules/sa/users/infrastructure/sql/entity/credentials.entity';
 import { SqlQuestions } from './modules/sa/questions/infrastructure/sql/entity/questions.entity';
 import { SqlUserBanInfo } from './modules/sa/users/infrastructure/sql/entity/ban-info.entity';

@@ -5,9 +5,10 @@ import { QuestionsQueryDto } from '../../api/dto/query/questions-query.dto';
 import { CreatedQuestions } from '../../api/view/created-questions';
 import { ViewPage } from '../../../../../common/pagination/view-page';
 import { PublishedStatus } from '../../api/dto/query/published-status';
+import {IQuestionsQueryRepository} from "../i-questions-query.repository";
 
 @Injectable()
-export class QuestionsQueryRepository {
+export class QuestionsQueryRepository implements IQuestionsQueryRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getQuestions(
@@ -18,7 +19,7 @@ export class QuestionsQueryRepository {
     const query = `
       SELECT q.id, q.body, q.published, q."createdAt", q."updatedAt",
              (SELECT ARRAY (SELECT a."correctAnswer" 
-                              FROM sql_answers a
+                              FROM sql_correct_answers a
                              WHERE a."questionId" = q.id)) AS "correctAnswers"
         FROM sql_questions q
              ${filter}

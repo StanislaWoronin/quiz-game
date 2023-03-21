@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { QuestionsFactories } from './helpers/factories/questions-factories';
+import { QuestionsFactory } from './helpers/factories/questions-factory';
 import { Questions } from './helpers/request/questions';
 import { Testing } from './helpers/request/testing';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -15,7 +15,7 @@ describe('/sa/quiz/questions (e2e)', () => {
   let app: INestApplication;
   let server;
   let questions: Questions;
-  let questionsFactory: QuestionsFactories;
+  let questionsFactory: QuestionsFactory;
   let users: Users;
   let usersFactory: UsersFactory;
   let testing: Testing;
@@ -32,7 +32,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
     testing = new Testing(server);
     questions = new Questions(server);
-    questionsFactory = new QuestionsFactories(questions);
+    questionsFactory = new QuestionsFactory(questions);
     users = new Users(server);
     usersFactory = new UsersFactory(users);
   });

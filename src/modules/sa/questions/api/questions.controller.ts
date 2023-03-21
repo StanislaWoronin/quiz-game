@@ -78,7 +78,7 @@ export class QuestionsController {
       questionId,
       dto,
     );
-    console.log(isUpdated);
+
     if (isUpdated === null) {
       throw new NotFoundException();
     }
@@ -92,7 +92,7 @@ export class QuestionsController {
   @Delete(':id')
   async deleteQuestion(@Param('id') questionId: string) {
     const isDeleted = await this.questionsService.deleteQuestion(questionId);
-
+    console.log(isDeleted)
     if (!isDeleted) {
       throw new NotFoundException();
     }

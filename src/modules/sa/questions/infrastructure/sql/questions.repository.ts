@@ -3,7 +3,7 @@ import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { CreatedQuestions } from '../../api/view/created-questions';
 import { SqlQuestions } from './entity/questions.entity';
-import { SqlCorrectAnswers } from './entity/answers.entity';
+import { SqlCorrectAnswers } from './entity/correct-answers.entity';
 import { toCreatedQuestions } from '../../../../../common/data-mapper/to-created-quesions';
 import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
 import { IQuestionsRepository } from "../i-questions.repository";
@@ -25,9 +25,9 @@ export class QuestionsRepository implements IQuestionsRepository {
 
     const manager = queryRunner.manager
     try {
-      const createdQuestions = await manager.getRepository(SqlQuestions).create(new SqlQuestions(dto.body));
+      const createdQuestions = await manager.getRepository(SqlQuestions).save(new SqlQuestions(dto.body));
 
-      const mappedAnswers = dto.correctAnswers.map(el => new SqlCorrectAnswers(el));
+      const mappedAnswers = dto.correctAnswers.map(el => new SqlCorrectAnswers(createdQuestions.id, el));
       const builder = manager
         .createQueryBuilder()
         .insert()
@@ -38,8 +38,6 @@ export class QuestionsRepository implements IQuestionsRepository {
       await queryRunner.commitTransaction();
       return toCreatedQuestions(createdQuestions, dto.correctAnswers);
     } catch (e) {
-      console.log(e);
-      console.log('ya slovil oshibky');
       await queryRunner.rollbackTransaction();
       return null;
     } finally {
@@ -94,12 +92,11 @@ export class QuestionsRepository implements IQuestionsRepository {
          SET published = '${published}', "updatedAt" = '${new Date().toISOString()}'
        WHERE id = '${questionId}'
          AND EXISTS(SELECT "questionId"
-                      FROM sql_answers
+                      FROM sql_correct_answers
                      WHERE "questionId" = '${questionId}');
     `;
-    console.log(query);
     const result = await this.dataSource.query(query);
-    console.log(result);
+
     if (result[1] !== 1) {
       return false;
     }
@@ -113,12 +110,13 @@ export class QuestionsRepository implements IQuestionsRepository {
 
     const manager = queryRunner.manager;
     try {
+      await manager.delete(SqlCorrectAnswers, { questionId });
+
       const result = await manager.delete(SqlQuestions, { id: questionId });
       if (result.affected === 0) {
+        console.log('break')
         return false;
       }
-
-      await manager.delete(SqlCorrectAnswers, { questionId });
 
       return true;
     } catch (e) {
@@ -128,21 +126,4 @@ export class QuestionsRepository implements IQuestionsRepository {
       await queryRunner.release();
     }
   }
-
-  private async createAnswer(answers: string[]) {
-    try {
-      const mappedAnswers = answers.map(el => new SqlCorrectAnswers(el));
-      const builder = this.dataSource
-        .createQueryBuilder()
-        .insert()
-        .into(SqlCorrectAnswers)
-        .values(mappedAnswers);
-      const createdAnswers = await builder.execute();
-
-      console.log(createdAnswers, "created answer");
-      return
-    } catch (e) {
-      throw new Error()
-    }
-  } // TODO refactoring
 }

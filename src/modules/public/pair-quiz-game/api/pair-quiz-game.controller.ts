@@ -12,7 +12,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ViewGame } from './view/view-game';
-import { ViewGameProgress } from './view/view-game-progress';
 import { AnswerDto } from './dto/answer.dto';
 import { ViewAnswer } from './view/view-answer';
 import { PairQuizGameService } from '../applications/pair-quiz-game.service';

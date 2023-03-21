@@ -6,7 +6,7 @@ import { preparedSuperUser } from '../prepeared-data/prepared-super-user';
 import { preparedQuestions } from '../prepeared-data/prepared-questions';
 import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
 
-export class QuestionsFactories {
+export class QuestionsFactory {
   constructor(private questions: Questions) {}
 
   async createQuestions(questionsCount: number): Promise<CreatedQuestions[]> {

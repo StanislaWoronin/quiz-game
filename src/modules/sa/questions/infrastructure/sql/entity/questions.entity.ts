@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { SqlGame } from "../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-game.entity";
-import { SqlCorrectAnswers } from "./answers.entity";
+import { SqlCorrectAnswers } from "./correct-answers.entity";
 import { SqlUserAnswer } from "../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-user-answer.entity";
 
 @Entity()
