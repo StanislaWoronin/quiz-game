@@ -1,22 +1,22 @@
-import {HttpStatus, INestApplication} from "@nestjs/common";
-import {QuestionsFactory} from "./helpers/factories/questions-factory";
-import {Questions} from "./helpers/request/questions";
-import {Testing} from "./helpers/request/testing";
-import {Test, TestingModule} from "@nestjs/testing";
-import {AppModule} from "../src/app.module";
-import {createApp} from "../src/config/create-app";
-import {Game} from "./helpers/request/game";
-import {Users} from "./helpers/request/users";
-import {UsersFactory} from "./helpers/factories/users-factory";
-import {Auth} from "./helpers/request/auth";
-import {expectAnswer, expectPlayerProgress, expectQuestions, expectViewGame} from "./helpers/expect-data/expect-game";
-import {GameStatus} from "../src/modules/public/pair-quiz-game/shared/game-status";
-import {preparedAnswer} from "./helpers/prepeared-data/prepared-answer";
-import {AnswerStatus} from "../src/modules/public/pair-quiz-game/shared/answer-status";
-import {preparedGameData} from "./helpers/prepeared-data/prepared-game-data";
-import {GameFactory} from "./helpers/factories/game-factory";
-import {randomUUID} from "crypto";
-import {faker} from "@faker-js/faker";
+import { HttpStatus, INestApplication } from "@nestjs/common";
+import { QuestionsFactory } from "./helpers/factories/questions-factory";
+import { Questions } from "./helpers/request/questions";
+import { Testing } from "./helpers/request/testing";
+import { Test, TestingModule } from "@nestjs/testing";
+import { AppModule } from "../src/app.module";
+import { createApp } from "../src/config/create-app";
+import { Game } from "./helpers/request/game";
+import { Users } from "./helpers/request/users";
+import { UsersFactory } from "./helpers/factories/users-factory";
+import { Auth } from "./helpers/request/auth";
+import { expectAnswer, expectPlayerProgress, expectQuestions, expectViewGame } from "./helpers/expect-data/expect-game";
+import { GameStatus } from "../src/modules/public/pair-quiz-game/shared/game-status";
+import { preparedAnswer } from "./helpers/prepeared-data/prepared-answer";
+import { AnswerStatus } from "../src/modules/public/pair-quiz-game/shared/answer-status";
+import { preparedGameData } from "./helpers/prepeared-data/prepared-game-data";
+import { GameFactory } from "./helpers/factories/game-factory";
+import { randomUUID } from "crypto";
+import { faker } from "@faker-js/faker";
 
 describe('/sa/quiz/questions (e2e)', () => {
     const second = 1000;
@@ -270,52 +270,331 @@ describe('/sa/quiz/questions (e2e)', () => {
     })
 
     describe('Scoring test', () => {
-        it('Create data', async () => {
-            const [firstUser, secondUser] = await usersFactory.createAndLoginUsers(2)
-            await questionsFactories.createQuestions(preparedGameData.length, preparedGameData)
-            await game.joinGame(firstUser.accessToken)
-            const createdGame = await game.joinGame(secondUser.accessToken)
+        describe('First and second players take turns answering questions. Both players score' +
+          'the same number of points, but the first one wins because he was the first', () => {
 
-            expect.setState({
-                firstUser,
-                secondUser,
-                gameId: createdGame.body.id,
-                questions: createdGame.body.questions
-            })
-        })
+            it("Create data", async () => {
+                const [firstUser, secondUser] = await usersFactory.createAndLoginUsers(2);
+                await questionsFactories.createQuestions(preparedGameData.length, preparedGameData);
+                await game.joinGame(firstUser.accessToken);
+                const createdGame = await game.joinGame(secondUser.accessToken);
 
-        it('First player send incorrect answer and check game status', async () => {
-            const {firstUser, secondUser, questions} = expect.getState()
+                expect.setState({
+                    firstUser,
+                    secondUser,
+                    gameId: createdGame.body.id,
+                    questions: createdGame.body.questions
+                });
+            });
 
-            await game.sendAnswer(faker.random.alpha(5), firstUser.accessToken)
-            const response = await game.getMyCurrentGame(firstUser.accessToken)
-            expect(response.body).toStrictEqual(
-                expectViewGame(
+            it("First player send incorrect answer for first questions", async () => {
+                const { firstUser, secondUser, questions } = expect.getState();
+
+                await game.sendAnswer(faker.random.alpha(5), firstUser.accessToken);
+                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                expect(response.body).toStrictEqual(
+                  expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {1: AnswerStatus.Incorrect}),
+                        first: expectPlayerProgress(firstUser, { 1: AnswerStatus.Incorrect }),
                         second: expectPlayerProgress(secondUser, {})
                     },
                     expectQuestions(questions),
                     GameStatus.Active
-                )
-            )
-        })
+                  )
+                );
+            });
 
-        it('Second player send correct answer and check game status', async () => {
-            const {firstUser, secondUser, questions} = expect.getState()
+            it("Second player send correct answer for first questions", async () => {
+                const { firstUser, secondUser, questions } = expect.getState();
 
-            await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[0])
-            const response = await game.getMyCurrentGame(firstUser.accessToken)
-            expect(response.body).toStrictEqual(
-                expectViewGame(
+                await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[0]);
+                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                expect(response.body).toStrictEqual(
+                  expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {1: AnswerStatus.Incorrect}),
-                        second: expectPlayerProgress(secondUser, {1: AnswerStatus.Correct})
+                        first: expectPlayerProgress(firstUser, { 1: AnswerStatus.Incorrect }),
+                        second: expectPlayerProgress(secondUser, { 1: AnswerStatus.Correct, score: 1 })
                     },
                     expectQuestions(questions),
                     GameStatus.Active
-                )
-            )
+                  )
+                );
+            });
+
+            it("First player send correct answer for second questions", async () => {
+                const { firstUser, secondUser, questions } = expect.getState();
+
+                await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[1]);
+                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                expect(response.body).toStrictEqual(
+                  expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Correct,
+                            score: 1
+                        }),
+                        second: expectPlayerProgress(secondUser, { 1: AnswerStatus.Correct, score: 1 })
+                    },
+                    expectQuestions(questions),
+                    GameStatus.Active
+                  )
+                );
+            });
+
+            it("Second player send incorrect answer for second questions", async () => {
+                const { firstUser, secondUser, questions } = expect.getState();
+
+                await game.sendAnswer(faker.random.alpha(5), secondUser.accessToken);
+                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                expect(response.body).toStrictEqual(
+                  expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Correct,
+                            score: 1
+                        }),
+                        second: expectPlayerProgress(secondUser, {
+                            1: AnswerStatus.Correct,
+                            2: AnswerStatus.Incorrect,
+                            score: 1
+                        })
+                    },
+                    expectQuestions(questions),
+                    GameStatus.Active
+                  )
+                );
+            });
+
+            it("First player send correct th for third questions", async () => {
+                const { firstUser, secondUser, questions } = expect.getState();
+
+                await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[2]);
+                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                expect(response.body).toStrictEqual(
+                  expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Correct,
+                            3: AnswerStatus.Correct,
+                            score: 2
+                        }),
+                        second: expectPlayerProgress(secondUser, {
+                            1: AnswerStatus.Correct,
+                            2: AnswerStatus.Incorrect,
+                            score: 1
+                        })
+                    },
+                    expectQuestions(questions),
+                    GameStatus.Active
+                  )
+                );
+            });
+
+            it("Second player send correct answer for third questions", async () => {
+                const { firstUser, secondUser, questions } = expect.getState();
+
+                await gameFactory.sendCorrectAnswer(secondUser.accessToken, questions[1]);
+                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                expect(response.body).toStrictEqual(
+                  expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Correct,
+                            3: AnswerStatus.Correct,
+                            score: 2
+                        }),
+                        second: expectPlayerProgress(secondUser, {
+                            1: AnswerStatus.Correct,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Correct,
+                            score: 2
+                        })
+                    },
+                    expectQuestions(questions),
+                    GameStatus.Active
+                  )
+                );
+            });
+
+            it("First player send correct answer for fourth questions", async () => {
+                const { firstUser, secondUser, questions } = expect.getState();
+
+                await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[3]);
+                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                expect(response.body).toStrictEqual(
+                  expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Correct,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Correct,
+                            score: 3
+                        }),
+                        second: expectPlayerProgress(secondUser, {
+                            1: AnswerStatus.Correct,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Correct,
+                            score: 2
+                        })
+                    },
+                    expectQuestions(questions),
+                    GameStatus.Active
+                  )
+                );
+            });
+
+            it("Second player send correct answer for fourth questions", async () => {
+                const { firstUser, secondUser, questions } = expect.getState();
+
+                await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[3]);
+                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                expect(response.body).toStrictEqual(
+                  expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Correct,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Correct,
+                            score: 3
+                        }),
+                        second: expectPlayerProgress(secondUser, {
+                            1: AnswerStatus.Correct,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Correct,
+                            score: 3
+                        })
+                    },
+                    expectQuestions(questions),
+                    GameStatus.Active
+                  )
+                );
+            });
+
+            it("First player send incorrect th for fifth questions", async () => {
+                const { firstUser, secondUser, questions } = expect.getState();
+
+                await game.sendAnswer(faker.random.alpha(5), firstUser.accessToken);
+                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                expect(response.body).toStrictEqual(
+                  expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Correct,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Correct,
+                            5: AnswerStatus.Incorrect,
+                            score: 4
+                        }),
+                        second: expectPlayerProgress(secondUser, {
+                            1: AnswerStatus.Correct,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Correct,
+                            score: 3
+                        })
+                    },
+                    expectQuestions(questions),
+                    GameStatus.Active
+                  )
+                );
+            });
+
+            it("Second player send incorrect answer for fifth questions", async () => {
+                const { firstUser, secondUser, gameId, questions } = expect.getState();
+
+                await game.sendAnswer(faker.random.alpha(5), secondUser.accessToken);
+                const response = await game.getGameById(gameId, firstUser.accessToken);
+                expect(response.body).toStrictEqual(
+                  expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Correct,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Correct,
+                            5: AnswerStatus.Incorrect,
+                            score: 4
+                        }),
+                        second: expectPlayerProgress(secondUser, {
+                            1: AnswerStatus.Correct,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Correct,
+                            5: AnswerStatus.Incorrect,
+                            score: 3
+                        })
+                    },
+                    expectQuestions(questions),
+                    GameStatus.Active
+                  )
+                );
+            });
+        })
+
+        describe('The first player went faster, but gave zero correct answers. The second' +
+          'player gave one correct answer. Second player wins', () => {
+            it('Create data', async () => {
+                const [firstUser, secondUser] = await usersFactory.createAndLoginUsers(2);
+                await questionsFactories.createQuestions(preparedGameData.length, preparedGameData);
+                await game.joinGame(firstUser.accessToken);
+                const createdGame = await game.joinGame(secondUser.accessToken);
+                await gameFactory.sendManyAnswer(firstUser.accessToken, createdGame.body.questions, {
+                    1: AnswerStatus.Incorrect,
+                    2: AnswerStatus.Incorrect,
+                    3: AnswerStatus.Incorrect,
+                    4: AnswerStatus.Incorrect,
+                    5: AnswerStatus.Incorrect,
+                })
+
+                await gameFactory.sendManyAnswer(secondUser.accessToken, createdGame.body.questions, {
+                    1: AnswerStatus.Incorrect,
+                    2: AnswerStatus.Incorrect,
+                    3: AnswerStatus.Incorrect,
+                    4: AnswerStatus.Incorrect,
+                    5: AnswerStatus.Correct,
+                })
+
+                expect.setState({firstUser, secondUser, gameId: createdGame.body.id, questions: createdGame.body.questions})
+            })
+
+            it('Return game by id', async () => {
+                const {firstUser, secondUser, gameId, questions} = expect.getState()
+
+                const response = await game.getGameById(gameId, firstUser.accessToken)
+                expect(response.body).toStrictEqual(
+                  expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Incorrect,
+                            4: AnswerStatus.Incorrect,
+                            5: AnswerStatus.Incorrect,
+                            score: 0
+                        }),
+                        second: expectPlayerProgress(secondUser, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Incorrect,
+                            4: AnswerStatus.Incorrect,
+                            5: AnswerStatus.Correct,
+                            score: 1
+                        })
+                    },
+                    expectQuestions(questions),
+                    GameStatus.Active
+                  )
+                );
+            })
         })
     })
+
 })
