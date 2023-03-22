@@ -6,16 +6,18 @@ import { preparedSuperUser } from '../prepeared-data/prepared-super-user';
 import { ViewUser } from '../../../src/modules/sa/users/api/view/view-user';
 import { UpdateUserBanStatusDto } from '../../../src/modules/sa/users/api/dto/update-user-ban-status.dto';
 import { BanStatus } from '../../../src/modules/sa/users/api/dto/query/ban-status';
+import {Auth} from "../request/auth";
 
 export class UsersFactory {
-  constructor(private users: Users) {}
+  constructor(private users: Users,
+              private auth: Auth) {}
 
   async createUsers(usersCount: number): Promise<CreatedUser[]> {
     const result = [];
     for (let i = 0; i < usersCount; i++) {
       const inputData: CreateUserDto = {
-        login: `${i}${faker.random.alpha(6)}`,
-        password: faker.random.alpha(20),
+        login: `user${i}}`,
+        password: `password${i}`,
         email: `${i}${faker.internet.email()}`,
       };
       const response = await this.users.createUser(
@@ -65,5 +67,30 @@ export class UsersFactory {
     return result;
   }
 
+  async createAndLoginUsers(userCount: number): Promise<{
+    user: CreatedUser;
+    accessToken: string;
+    refreshToken: string;
+  }[]
+  > {
+    const users = await this.createUsers(userCount)
 
+    const result = [];
+    for (let i = 0; i < userCount; i++) {
+      const userLoginData = {
+        loginOrEmail: users[i].login,
+        password: `password${i}`,
+      };
+
+      const response = await this.auth.loginUser(userLoginData)
+
+      result.push({
+        user: users[i],
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken
+      });
+    }
+
+    return result;
+  }
 }

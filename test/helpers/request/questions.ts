@@ -13,13 +13,14 @@ import { SortDirection } from '../../../src/common/pagination/query-parameters/s
 import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
 import { TestsPaginationType } from '../type/pagination.type';
 import { TestingRequestDto } from "../testing-request.dto";
+import {CreateQuestionDto} from "../../../src/modules/sa/questions/api/dto/create-question.dto";
 
 export class Questions {
   constructor(private readonly server: any) {}
 
   async createQuestion(
     superUser: { login: string; password: string },
-    dto: { body: string; correctAnswers: string[] },
+    dto: { body: string; correctAnswers: string[] } | CreateQuestionDto[],
   ): Promise<TestingRequestDto<CreatedQuestions>> {
     const response = await request(this.server)
       .post(endpoints.sa.quiz.questions)

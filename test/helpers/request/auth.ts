@@ -65,19 +65,19 @@ export class Auth {
     
     async loginUser(
       dto: AuthDto
-    ) {
+    ): Promise<{
+        accessToken: string | null,
+        refreshToken: string | null,
+        status: number
+    }> {
         const response = await request(this.server)
           .post(endpoints.auth.login)
           .set('User-Agent', faker.internet.userAgent())
           .send(dto)
 
-        if (!response.body.accessToken) {
-            return { status: response.status }
-        }
-
         return {
-            accessToken: response.body.accessToken,
-            refreshToken: response.headers['set-cookie'][0].split(';')[0].split('=')[1],
+            accessToken: response.body.accessToken ?? null,
+            refreshToken: response.headers['set-cookie'][0].split(';')[0].split('=')[1] ?? null,
             status: response.status
         };
     }

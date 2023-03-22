@@ -8,7 +8,7 @@ export class ViewGame {
   id: string;
   firstPlayerProgress: ViewGameProgress;
   secondPlayerProgress: ViewGameProgress;
-  questions: Questions[];
+  questions: Questions[] | null;
   status: GameStatus;
   pairCreatedDate: string;
   startGameDate: string;
@@ -27,7 +27,7 @@ export class ViewGame {
     this.id = game.id;
     this.firstPlayerProgress = new ViewGameProgress(firstPlayerId);
     this.secondPlayerProgress = new ViewGameProgress(secondPlayerId) ?? null;
-    this.questions = questions;
+    this.questions = questions ?? null;
     this.status = status ?? GameStatus.PendingSecondPlayer;
     this.pairCreatedDate = pairCreatedDate ?? new Date().toISOString();
     this.startGameDate = startGameDate ?? null;

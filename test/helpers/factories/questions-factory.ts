@@ -9,17 +9,20 @@ import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query
 export class QuestionsFactory {
   constructor(private questions: Questions) {}
 
-  async createQuestions(questionsCount: number): Promise<CreatedQuestions[]> {
+  async createQuestions(questionsCount: number, questions?: CreateQuestionDto[]): Promise<CreatedQuestions[]> {
     const result = [];
     for (let i = 0; i < questionsCount; i++) {
-      const inputData: CreateQuestionDto = {
-        body: `${i}${faker.random.alpha(9)}`,
-        correctAnswers: [
-          `${1}${faker.random.alpha(3)}`,
-          `${2}${faker.random.alpha(3)}`,
-          `${3}${faker.random.alpha(3)}`,
-        ],
-      };
+      let inputData = questions
+      if(!questions) {
+        const inputData: CreateQuestionDto = {
+          body: `${i}${faker.random.alpha(9)}`,
+          correctAnswers: [
+            `${1}${faker.random.alpha(3)}`,
+            `${2}${faker.random.alpha(3)}`,
+            `${3}${faker.random.alpha(3)}`,
+          ],
+        };
+      }
       const response = await this.questions.createQuestion(
         preparedSuperUser.valid,
         inputData,
