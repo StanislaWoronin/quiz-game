@@ -12,6 +12,8 @@ import {ViewAnswer} from "../../api/view/view-answer";
 import {SendAnswerDto} from "../../applications/dto/send-answer.dto";
 import {AnswerStatus} from "../../shared/answer-status";
 import {SqlUserAnswer} from "./entity/sql-user-answer.entity";
+import { ViewGameProgress } from "../../api/view/view-game-progress";
+import { randomUUID } from "crypto";
 
 export class QuizGameRepository implements IQuizGameRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -24,6 +26,7 @@ export class QuizGameRepository implements IQuizGameRepository{
     const manager = queryRunner.manager;
     try {
       const questions = await this.getQuestions();
+
       const game = await manager
         .getRepository(SqlGame)
         .save(new SqlGame(questions));
@@ -38,8 +41,10 @@ export class QuizGameRepository implements IQuizGameRepository{
         .where('u.id = :id', { id: userId })
         .getRawOne();
 
-      return new ViewGame(game, new ViewPlayer(userId, userLogin)); //
+      await queryRunner.commitTransaction()
+      return new ViewGame(game, new ViewGameProgress(userId, userLogin.login));
     } catch (e) {
+      console.log(e);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
@@ -78,6 +83,8 @@ export class QuizGameRepository implements IQuizGameRepository{
          WHERE g.id = $2  
       `
       const game = await manager.query(gameBuilder, [userId, gameId])
+
+      await queryRunner.commitTransaction()
       return game
     } catch (e) {
       await queryRunner.rollbackTransaction();
@@ -126,6 +133,7 @@ export class QuizGameRepository implements IQuizGameRepository{
       .where(`EXISTS(SELECT * FROM sql_correct_answers)`)
       .orderBy('RANDOM()')
       .limit(5);
-    return await builder.getRawMany();
+    const result = await builder.getRawMany();
+    return result.map(r => r.id)
   }
 }

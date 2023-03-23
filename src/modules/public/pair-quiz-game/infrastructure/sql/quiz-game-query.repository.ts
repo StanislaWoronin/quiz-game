@@ -36,7 +36,6 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
             .createQueryBuilder(SqlGame, 'g')
             .select('g.id', 'gameId')
             .where('g.status = :status', { status: GameStatus.PendingSecondPlayer });
-        console.log('from checkOpenGame:', await builder.getRawOne())
         return await builder.getRawOne();
     }
 

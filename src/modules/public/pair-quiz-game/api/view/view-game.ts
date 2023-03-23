@@ -7,34 +7,26 @@ import {ViewPlayer} from './view-player';
 export class ViewGame {
   id: string;
   firstPlayerProgress: ViewGameProgress;
-  secondPlayerProgress: ViewGameProgress;
+  secondPlayerProgress: ViewGameProgress | null;
   questions: Questions[] | null;
   status: GameStatus;
   pairCreatedDate: string;
   startGameDate: string;
   finishGameDate: string;
 
-  // private getQuestions(status: GameStatus, questions: Questions[]): Questions[] | null {
-  //   if (!status || status === GameStatus.PendingSecondPlayer) {
-  //     return null
-  //   }
-  //   return questions
-  // }
-
   constructor(
     game: SqlGame,
-    firstPlayerId: ViewPlayer,
+    firstPlayerProgress: ViewGameProgress,
     questions?: Questions[],
-    secondPlayerId?: ViewPlayer,
+    secondPlayerId?: ViewGameProgress | null,
     status?: GameStatus,
     pairCreatedDate?: string,
     startGameDate?: string,
     finishGameDate?: string,
   ) {
     this.id = game.id;
-    this.firstPlayerProgress = new ViewGameProgress(firstPlayerId);
-    this.secondPlayerProgress = new ViewGameProgress(secondPlayerId) ?? null;
-    //this.questions = this.getQuestions(status, questions)
+    this.firstPlayerProgress = firstPlayerProgress;
+    this.secondPlayerProgress = secondPlayerId ?? null;
     this.questions = questions ?? null;
     this.status = status ?? GameStatus.PendingSecondPlayer;
     this.pairCreatedDate = pairCreatedDate ?? new Date().toISOString();

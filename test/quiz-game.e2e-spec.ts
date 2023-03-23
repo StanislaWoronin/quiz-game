@@ -85,10 +85,10 @@ describe('/sa/quiz/questions (e2e)', () => {
             const {firstUser, questions} = expect.getState()
 
             const response = await game.joinGame(firstUser.accessToken)
-            expect(response.status).toBe(HttpStatus.OK)
+            expect(response.status).toBe(HttpStatus.CREATED)
             expect(response.body).toStrictEqual(
                 expectViewGame(
-                    {first: expectPlayerProgress(firstUser, {})},
+                    {first: expectPlayerProgress(firstUser.user, {})},
                     expectQuestions(questions),
                     GameStatus.PendingSecondPlayer
                 )

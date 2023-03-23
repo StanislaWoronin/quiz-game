@@ -18,7 +18,7 @@ export class SqlGameProgress {
   @Column() userId: string;
 
   @Column({
-    default: null,
+    default: 0,
   })
   score: number;
 

@@ -1,28 +1,37 @@
-import {ViewGame} from "../../../src/modules/public/pair-quiz-game/api/view/view-game";
-import {ViewAnswer} from "../../../src/modules/public/pair-quiz-game/api/view/view-answer";
-import {AnswerStatus} from "../../../src/modules/public/pair-quiz-game/shared/answer-status";
-import {TestAnswersType} from "../type/anwers.type";
-import {CreatedUser} from "../../../src/modules/sa/users/api/view/created-user";
-import {ViewGameProgress} from "../../../src/modules/public/pair-quiz-game/api/view/view-game-progress";
-import {MemberType} from "../type/member.type";
-import {Questions} from "../../../src/modules/public/pair-quiz-game/shared/questions";
-import {GameStatus} from "../../../src/modules/public/pair-quiz-game/shared/game-status";
-import {CreatedQuestions} from "../../../src/modules/sa/questions/api/view/created-questions";
+import { ViewGame } from "../../../src/modules/public/pair-quiz-game/api/view/view-game";
+import { ViewAnswer } from "../../../src/modules/public/pair-quiz-game/api/view/view-answer";
+import { AnswerStatus } from "../../../src/modules/public/pair-quiz-game/shared/answer-status";
+import { TestAnswersType } from "../type/anwers.type";
+import { CreatedUser } from "../../../src/modules/sa/users/api/view/created-user";
+import { ViewGameProgress } from "../../../src/modules/public/pair-quiz-game/api/view/view-game-progress";
+import { MemberType } from "../type/member.type";
+import { Questions } from "../../../src/modules/public/pair-quiz-game/shared/questions";
+import { GameStatus } from "../../../src/modules/public/pair-quiz-game/shared/game-status";
+import { CreatedQuestions } from "../../../src/modules/sa/questions/api/view/created-questions";
 
 export const expectViewGame = (member: MemberType, questionsArray: Questions[], status: GameStatus): ViewGame => {
     let items = null
     if (status !== GameStatus.PendingSecondPlayer) {
-        items = expect.arrayContaining<Questions>(questionsArray)
+        items = questionsArray
     }
+    let startGameDate = null
+    if (status === GameStatus.Active) {
+        startGameDate = expect.any(String)
+    }
+    let finishGameDate = null
+    if (status === GameStatus.Finished) {
+        finishGameDate = expect.any(String)
+    }
+
     return {
         id: expect.any(String),
         firstPlayerProgress: member.first,
         secondPlayerProgress: member.second ?? null,
-        questions: questionsArray ?? null,
+        questions: items,
         status: status,
         pairCreatedDate: expect.any(String),
-        startGameDate: expect.any(String),
-        finishGameDate: expect.any(String)
+        startGameDate,
+        finishGameDate
     }
 }
 
@@ -39,7 +48,6 @@ export const expectPlayerProgress = (user: CreatedUser, answerStatus: TestAnswer
     for (let key in answerStatus) {
         answers.push(expectAnswer(answerStatus[key]))
     }
-
     return {
         answers,
         player: {

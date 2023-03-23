@@ -20,13 +20,13 @@ export class PairQuizGameService {
 
   async joinGame(userId: string): Promise<ViewGame | null> {
     const isPlaying = await this.queryGameRepository.checkUserCurrentGame(userId);
-    console.log(isPlaying)  // TODO stop here
+
     if (isPlaying) {
       return null;
     }
-    console.log(isPlaying)
+
     const existsOpenGame = await this.queryGameRepository.checkOpenGame();
-    console.log(existsOpenGame)
+
     if (!existsOpenGame) {
       return this.gameRepository.createGame(userId);
     }

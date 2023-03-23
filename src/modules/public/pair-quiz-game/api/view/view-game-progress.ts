@@ -6,9 +6,9 @@ export class ViewGameProgress {
   player: ViewPlayer;
   score: number;
 
-  constructor(player: ViewPlayer, answers?, score?: number) {
+  constructor(userId: string, login: string, answers?, score?: number) {
     this.answers = answers ?? [];
-    this.player = player;
+    this.player = new ViewPlayer(userId, login);
     this.score = score ?? 0;
   }
 }

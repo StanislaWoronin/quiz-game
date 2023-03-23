@@ -18,16 +18,24 @@ export class SqlGame {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({
+    default: GameStatus.PendingSecondPlayer
+  })
   status: GameStatus;
 
-  @Column()
+  @Column({
+    default: new Date().toISOString()
+  })
   pairCreatedDate: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   startGameDate: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   finishGameDate: string;
 
   @Column({
@@ -37,14 +45,14 @@ export class SqlGame {
   })
   questions: string[]
 
-  @OneToMany(() => SqlQuestions, (q) => q.game)
-  gameQuestions = SqlQuestions;
+  // @OneToMany(() => SqlQuestions, (q) => q.game)
+  // gameQuestions = SqlQuestions[]
 
   @OneToMany(() => SqlGameProgress, (gp) => gp.game, { cascade: true })
-  gameProgress: SqlGameProgress;
+  gameProgress: SqlGameProgress[];
 
   @OneToMany(() => SqlUserAnswer, (g) => g.game)
-  userAnswer: SqlUserAnswer
+  userAnswer: SqlUserAnswer[]
 
   constructor(questions: string[]) {
     this.id = randomUUID();

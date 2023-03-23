@@ -47,8 +47,8 @@ export class SqlQuestions {
   // @OneToMany(() => SqlCorrectAnswers, (a) => a.question, { cascade: true })
   // correctAnswers: SqlCorrectAnswers[];
 
-  @ManyToOne(() => SqlGame, (g) => g.gameQuestions)
-  game: SqlGame;
+  // @ManyToOne(() => SqlGame, (g) => g.gameQuestions)
+  // game: SqlGame;
 
   @OneToMany(() => SqlUserAnswer, (ua) => ua.question, { cascade: true })
   userAnswer: SqlUserAnswer[];
