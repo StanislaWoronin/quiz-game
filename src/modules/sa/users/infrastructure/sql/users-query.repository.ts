@@ -10,9 +10,10 @@ import { toViewUser } from '../../../../../common/data-mapper/to-view-user';
 import { SqlUsers } from './entity/users.entity';
 import {SqlCredentials} from "./entity/credentials.entity";
 import { SqlUserBanInfo } from "./entity/ban-info.entity";
+import {IUsersQueryRepository} from "../i-users-query.repository";
 
 @Injectable()
-export class UsersQueryRepository {
+export class UsersQueryRepository implements IUsersQueryRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {
   }
 

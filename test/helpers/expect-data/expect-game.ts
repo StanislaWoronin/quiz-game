@@ -9,17 +9,17 @@ import {Questions} from "../../../src/modules/public/pair-quiz-game/shared/quest
 import {GameStatus} from "../../../src/modules/public/pair-quiz-game/shared/game-status";
 import {CreatedQuestions} from "../../../src/modules/sa/questions/api/view/created-questions";
 
-export const expectViewGame = (member: MemberType, questions: Questions[], status: GameStatus): ViewGame => {
+export const expectViewGame = (member: MemberType, questionsArray: Questions[], status: GameStatus): ViewGame => {
     let items = null
     if (status !== GameStatus.PendingSecondPlayer) {
-        items = expect.arrayContaining<Questions>(questions)
+        items = expect.arrayContaining<Questions>(questionsArray)
     }
     return {
         id: expect.any(String),
         firstPlayerProgress: member.first,
         secondPlayerProgress: member.second ?? null,
-        questions: items,
-        status,
+        questions: questionsArray ?? null,
+        status: status,
         pairCreatedDate: expect.any(String),
         startGameDate: expect.any(String),
         finishGameDate: expect.any(String)

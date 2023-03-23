@@ -1,11 +1,11 @@
-import { repositories } from './repositories';
+import { repositories } from '../common/repositories-switcher/repositories';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseConfig } from '../../config/mongoose.config';
-import { entity, mongooseModels } from '../../app.module';
+import { MongooseConfig } from './mongoose.config';
+import { entity, mongooseModels } from '../app.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TypeOrmConfig } from '../../config/type-orm.config';
-import { settings } from '../../settings';
+import { TypeOrmConfig } from './type-orm.config';
+import { settings } from '../settings';
 
 export const configSwitcher = (repositoryType: string) => {
   if (repositoryType === settings.repositoryType.mongoose) {

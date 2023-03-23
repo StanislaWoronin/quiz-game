@@ -1,8 +1,9 @@
 import { InjectDataSource } from '@nestjs/typeorm';
 import {DataSource} from "typeorm";
 import {SqlUserBanInfo} from "./entity/ban-info.entity";
+import {IUserBanInfoRepository} from "../i-user-ban-info.repository";
 
-export class UserBanInfoRepository {
+export class UserBanInfoRepository implements IUserBanInfoRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async checkBanStatus(userId: string): Promise<boolean> {

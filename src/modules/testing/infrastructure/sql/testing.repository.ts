@@ -2,9 +2,10 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { SqlCredentials } from "../../../sa/users/infrastructure/sql/entity/credentials.entity";
+import {ITestingRepository} from "../i-testing.repository";
 
 @Injectable()
-export class TestingRepository {
+export class TestingRepository implements ITestingRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getConfirmationCode(

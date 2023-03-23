@@ -10,6 +10,8 @@ import { faker } from "@faker-js/faker";
 import { TokensDto } from "../tokens.dto";
 import { TestingRequestDto } from "../testing-request.dto";
 import { ViewAboutMe } from "../../../src/modules/public/auth/api/view/view-about-me";
+import {LoginType} from "../type/login.type";
+import {HttpStatus} from "@nestjs/common";
 
 export class Auth {
     constructor(private readonly server: any) {}
@@ -65,15 +67,15 @@ export class Auth {
     
     async loginUser(
       dto: AuthDto
-    ): Promise<{
-        accessToken: string | null,
-        refreshToken: string | null,
-        status: number
-    }> {
+    ): Promise<LoginType> {
         const response = await request(this.server)
           .post(endpoints.auth.login)
           .set('User-Agent', faker.internet.userAgent())
           .send(dto)
+
+        if (response.status !== HttpStatus.CREATED) {
+            return {status: response.status}
+        }
 
         return {
             accessToken: response.body.accessToken ?? null,

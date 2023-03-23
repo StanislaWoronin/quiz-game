@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { SqlEmailConfirmation } from "./entity/sql-email-confirmation.entity";
+import {IEmailConfirmationRepository} from "../i-email-confirmation.repository";
 
 @Injectable()
-export class EmailConfirmationRepository {
+export class EmailConfirmationRepository implements IEmailConfirmationRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getEmailConfirmationByCode(

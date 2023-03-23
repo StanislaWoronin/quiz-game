@@ -12,11 +12,15 @@ export class UsersFactory {
   constructor(private users: Users,
               private auth: Auth) {}
 
-  async createUsers(usersCount: number): Promise<CreatedUser[]> {
+  async createUsers(usersCount: number, startFrom?: number): Promise<CreatedUser[]> {
+    let start = 0
+    if (startFrom) {
+      start = startFrom
+    }
     const result = [];
-    for (let i = 0; i < usersCount; i++) {
+    for (let i = start; i < start + usersCount; i++) {
       const inputData: CreateUserDto = {
-        login: `user${i}}`,
+        login: `user${i}`,
         password: `password${i}`,
         email: `${i}${faker.internet.email()}`,
       };
@@ -31,8 +35,8 @@ export class UsersFactory {
     return result;
   }
 
-  async crateAndBanUsers(usersCount: number): Promise<ViewUser[]> {
-    const createdUsers: CreatedUser[] = await this.createUsers(usersCount);
+  async crateAndBanUsers(usersCount: number, startFrom?: number): Promise<ViewUser[]> {
+    const createdUsers: CreatedUser[] = await this.createUsers(usersCount, startFrom);
 
     const result = [];
     for (let i = 0; i < usersCount; i++) {
@@ -41,7 +45,7 @@ export class UsersFactory {
         banReason: faker.random.alpha(20),
       };
 
-      const response = await this.users.setBanStatus(
+      await this.users.setBanStatus(
         preparedSuperUser.valid,
         updateBanStatusDto,
         createdUsers[i].id,
@@ -50,7 +54,7 @@ export class UsersFactory {
       const users = await this.users.getUsers(preparedSuperUser.valid, {
         banStatus: BanStatus.Banned,
       });
-      console.log(users)
+
       result.push({
         id: createdUsers[i].id,
         login: createdUsers[i].login,

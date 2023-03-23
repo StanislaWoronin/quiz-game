@@ -9,9 +9,10 @@ import { CreatedUserDb } from './pojo/created-user.db';
 import { SqlUserBanInfo } from './entity/ban-info.entity';
 import { UpdateUserBanStatusDto } from '../../api/dto/update-user-ban-status.dto';
 import { SqlEmailConfirmation } from "./entity/sql-email-confirmation.entity";
+import {IUsersRepository} from "../i-users.repository";
 
 @Injectable()
-export class UsersRepository {
+export class UsersRepository implements IUsersRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createUser(
@@ -76,7 +77,6 @@ export class UsersRepository {
 
   async updateUserPassword(
       userId: string,
-      passwordSalt: string,
       passwordHash: string,
   ): Promise<boolean> {
     const result = await this.dataSource
@@ -99,27 +99,31 @@ export class UsersRepository {
 
     const manager = queryRunner.manager;
     try {
+      await this.dataSource.query(
+          this.getQuery('sql_credentials', 'userId'),
+          [userId]
+      );
+
+      await this.dataSource.query(
+          this.getQuery('sql_user_ban_info', 'userId'),
+          [userId],
+      );
+
+      await this.dataSource.query(
+          this.getQuery('sql_email_confirmation', 'userId'),
+          [userId],
+      );
+
       const result = await this.dataSource.query(
         this.getQuery('sql_users', 'id'),
         [userId],
       );
-
-      if (result[1] === 0) {
-        return false;
+      console.log(result)
+      if (result[1] !== 1) {
+        return false
       }
-
-      await this.dataSource.query(this.getQuery('sql_credentials', 'userId'), [
-        userId,
-      ]);
-
-      await this.dataSource.query(
-        this.getQuery('sql_user_ban_info', 'userId'),
-        [userId],
-      );
-
       return true;
     } catch (e) {
-      console.log(e);
       await queryRunner.rollbackTransaction();
       return false;
     } finally {
@@ -129,7 +133,7 @@ export class UsersRepository {
 
   private getQuery(tableName: string, fieldName: string): string {
     return `DELETE 
-                  FROM ${tableName} CASCADE
-                 WHERE "${fieldName}" = $1`;
+              FROM ${tableName} CASCADE
+             WHERE "${fieldName}" = $1`;
   }
 }

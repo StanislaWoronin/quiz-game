@@ -20,6 +20,7 @@ export class AuthBearerGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
 
     if (!req.headers.authorization) {
+      console.log('1')
       throw new UnauthorizedException();
     }
 
@@ -27,6 +28,7 @@ export class AuthBearerGuard implements CanActivate {
     const tokenPayload = await this.jwtService.getTokenPayload(accessToken);
 
     if (!tokenPayload) {
+      console.log('2')
       throw new UnauthorizedException();
     }
 
@@ -35,6 +37,7 @@ export class AuthBearerGuard implements CanActivate {
     );
 
     if (!user) {
+      console.log('3')
       throw new UnauthorizedException();
     }
 

@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { SqlTokenBlackList } from './entity/sql-token-black-list.entity';
+import {IJwtRepository} from "../i-jwt.repository";
 
 @Injectable()
-export class JwtRepository {
+export class JwtRepository implements IJwtRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async checkTokenInBlackList(refreshToken: string): Promise<boolean> {

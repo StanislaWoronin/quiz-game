@@ -228,6 +228,7 @@ describe('/auth', () => {
 
         it('Should login and return token', async () => {
             const response = await auth.loginUser(prepareLogin.valid)
+            expect(response.status).toBe(HttpStatus.CREATED)
             expect(response.accessToken).toBeTruthy();
             expect(response.refreshToken).toBeTruthy()
 

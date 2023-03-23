@@ -14,12 +14,16 @@ import {SecurityRepository} from "../../modules/public/security/infrastructure/s
 import { EmailConfirmationRepository } from "../../modules/sa/users/infrastructure/sql/email-confirmation.repository";
 import { UserBanInfoRepository } from "../../modules/sa/users/infrastructure/sql/ban-info.repository";
 import { SecurityQueryRepository } from "../../modules/public/security/infrastructure/sql/security-query-repository.service";
+import {
+  QuizGameQueryRepository
+} from "../../modules/public/pair-quiz-game/infrastructure/sql/quiz-game-query.repository";
 
 export const repositories = {
   sql: {
     banInfoRepository: UserBanInfoRepository,
     emailConfirmation: EmailConfirmationRepository,
     gameRepository: QuizGameRepository,
+    gameQueryRepository: QuizGameQueryRepository,
     questionsRepository: QuestionsRepository,
     questionsQueryRepository: QuestionsQueryRepository,
     jwt: JwtRepository,

@@ -8,7 +8,6 @@ import { toCreatedQuestions } from '../../../../../common/data-mapper/to-created
 import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
 import { IQuestionsRepository } from "../i-questions.repository";
 import { CreateQuestionDto } from "../../api/dto/create-question.dto";
-import { SqlUserBanInfo } from "../../../users/infrastructure/sql/entity/ban-info.entity";
 
 @Injectable()
 export class QuestionsRepository implements IQuestionsRepository {
@@ -114,7 +113,6 @@ export class QuestionsRepository implements IQuestionsRepository {
 
       const result = await manager.delete(SqlQuestions, { id: questionId });
       if (result.affected === 0) {
-        console.log('break')
         return false;
       }
 

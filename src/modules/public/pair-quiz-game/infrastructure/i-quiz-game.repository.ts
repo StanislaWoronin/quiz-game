@@ -1,13 +1,12 @@
 import { ViewGame } from '../api/view/view-game';
 import { ViewAnswer } from '../api/view/view-answer';
+import {UserGameProgress} from "./sql/pojo/user-game-progress";
+import {SendAnswerDto} from "../applications/dto/send-answer.dto";
 
 export interface IQuizGameRepository {
-  checkUserCurrentGame(userId: string): Promise<boolean>;
-  checkOpenGame(): Promise<string | null>;
   createGame(userId): Promise<ViewGame>;
-  joinGame(userId: string): Promise<ViewGame>;
-  checkUserGameProgress(userId: string): Promise<boolean>;
-  sendAnswer(userId: string, answer: string): Promise<ViewAnswer>;
+  joinGame(userId: string, gameId: string): Promise<ViewGame>;
+  sendAnswer(dto: SendAnswerDto): Promise<ViewAnswer>;
 }
 
 export const IQuizGameRepository = 'IQuizGameRepository';

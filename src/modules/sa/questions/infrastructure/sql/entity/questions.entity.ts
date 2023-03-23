@@ -26,7 +26,7 @@ export class SqlQuestions {
   @Column({
     type: 'character varying',
     nullable: false,
-    // default: new Date().toISOString()
+    default: new Date().toISOString()
   })
   createdAt: string = new Date().toISOString();
 
@@ -37,10 +37,17 @@ export class SqlQuestions {
   })
   updatedAt: string;
 
-  @OneToMany(() => SqlCorrectAnswers, (a) => a.question, { cascade: true })
-  correctAnswers: SqlCorrectAnswers[];
+  @Column({
+    type: "text",
+    array: true,
+    default: []
+  })
+  correctAnswers: string[]
 
-  @ManyToOne(() => SqlGame, (g) => g.questions)
+  // @OneToMany(() => SqlCorrectAnswers, (a) => a.question, { cascade: true })
+  // correctAnswers: SqlCorrectAnswers[];
+
+  @ManyToOne(() => SqlGame, (g) => g.gameQuestions)
   game: SqlGame;
 
   @OneToMany(() => SqlUserAnswer, (ua) => ua.question, { cascade: true })

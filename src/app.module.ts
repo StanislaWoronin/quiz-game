@@ -38,7 +38,7 @@ import {
   MongoQuestion,
   QuestionSchema,
 } from './modules/sa/questions/infrastructure/mongoose/schema/question.schema';
-import { configSwitcher } from './common/repositories-switcher/config-switcher';
+import { configSwitcher } from './config/config-switcher';
 import { IJwtRepository } from './modules/public/auth/infrastructure/i-jwt.repository';
 import { PairQuizGameController } from './modules/public/pair-quiz-game/api/pair-quiz-game.controller';
 import { PairQuizGameService } from './modules/public/pair-quiz-game/applications/pair-quiz-game.service';
@@ -137,10 +137,17 @@ const repositories = [
     ),
   },
   {
+    provide: IQuizGameRepository,
+    useClass: repositorySwitcher(
+        settings.currentRepository,
+        repositoryName.GameRepository,
+    ),
+  },
+  {
     provide: IQuizGameQueryRepository,
     useClass: repositorySwitcher(
       settings.currentRepository,
-      repositoryName.GameRepository,
+      repositoryName.GameQueryRepository,
     ),
   },
   {

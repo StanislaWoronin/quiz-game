@@ -12,16 +12,16 @@ export class QuestionsFactory {
   async createQuestions(questionsCount: number, questions?: CreateQuestionDto[]): Promise<CreatedQuestions[]> {
     const result = [];
     for (let i = 0; i < questionsCount; i++) {
-      let inputData = questions
-      if(!questions) {
-        const inputData: CreateQuestionDto = {
-          body: `${i}${faker.random.alpha(9)}`,
-          correctAnswers: [
-            `${1}${faker.random.alpha(3)}`,
-            `${2}${faker.random.alpha(3)}`,
-            `${3}${faker.random.alpha(3)}`,
-          ],
-        };
+      let inputData: CreateQuestionDto = {
+        body: `${i}${faker.random.alpha(9)}`,
+        correctAnswers: [
+          `${1}${faker.random.alpha(3)}`,
+          `${2}${faker.random.alpha(3)}`,
+          `${3}${faker.random.alpha(3)}`,
+        ],
+      }
+      if(questions) {
+        inputData = questions[i]
       }
       const response = await this.questions.createQuestion(
         preparedSuperUser.valid,

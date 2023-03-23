@@ -3,9 +3,10 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ViewSecurity } from '../../api/view/view-security';
 import {SqlSecurity} from "./entity/security";
+import {ISecurityQueryRepository} from "../i-security-query.repository";
 
 @Injectable()
-export class SecurityQueryRepository {
+export class SecurityQueryRepository implements ISecurityQueryRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getAllActiveSessions(

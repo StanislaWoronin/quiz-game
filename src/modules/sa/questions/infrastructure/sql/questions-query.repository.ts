@@ -6,6 +6,7 @@ import { CreatedQuestions } from '../../api/view/created-questions';
 import { ViewPage } from '../../../../../common/pagination/view-page';
 import { PublishedStatus } from '../../api/dto/query/published-status';
 import {IQuestionsQueryRepository} from "../i-questions-query.repository";
+import {SqlQuestions} from "./entity/questions.entity";
 
 @Injectable()
 export class QuestionsQueryRepository implements IQuestionsQueryRepository{
@@ -40,6 +41,14 @@ export class QuestionsQueryRepository implements IQuestionsQueryRepository{
       query: queryDto,
       totalCount: Number(totalCount[0].count),
     });
+  }
+
+  async getQuestionAnswers(questionId: string): Promise<string[]> {
+    const builder = await this.dataSource
+        .createQueryBuilder(SqlQuestions, 'q')
+        .select('q.correctAnswers')
+        .where('q.id = :questionId', {questionId})
+    return await builder.getRawOne()
   }
 
   async questionExists(questionId: string): Promise<boolean | null> {

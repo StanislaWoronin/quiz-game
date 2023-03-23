@@ -1,35 +1,20 @@
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { GameStatus } from '../../shared/game-status';
-import { SqlGameProgress } from './entity/sql-game-progress.entity';
-import { ViewGame } from '../../api/view/view-game';
-import { SqlGame } from './entity/sql-game.entity';
-import { SqlQuestions } from '../../../../sa/questions/infrastructure/sql/entity/questions.entity';
-import { exists } from 'fs';
-import { SqlUsers } from '../../../../sa/users/infrastructure/sql/entity/users.entity';
-import { Questions } from '../../shared/questions';
-import { ViewPlayer } from '../../api/view/view-player';
+import {InjectDataSource} from '@nestjs/typeorm';
+import {DataSource} from 'typeorm';
+import {GameStatus} from '../../shared/game-status';
+import {SqlGameProgress} from './entity/sql-game-progress.entity';
+import {ViewGame} from '../../api/view/view-game';
+import {SqlGame} from './entity/sql-game.entity';
+import {SqlQuestions} from '../../../../sa/questions/infrastructure/sql/entity/questions.entity';
+import {SqlUsers} from '../../../../sa/users/infrastructure/sql/entity/users.entity';
+import {ViewPlayer} from '../../api/view/view-player';
+import {IQuizGameRepository} from "../i-quiz-game.repository";
+import {ViewAnswer} from "../../api/view/view-answer";
+import {SendAnswerDto} from "../../applications/dto/send-answer.dto";
+import {AnswerStatus} from "../../shared/answer-status";
+import {SqlUserAnswer} from "./entity/sql-user-answer.entity";
 
-export class QuizGameRepository {
+export class QuizGameRepository implements IQuizGameRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {}
-
-  async checkUserCurrentGame(userId: string): Promise<boolean> {
-    const builder = this.dataSource
-      .createQueryBuilder(SqlGameProgress, 'gp')
-      .leftJoin('gp.sql_game', 'g', 'g.status = :status', {
-        status: GameStatus.Active,
-      })
-      .where('gp.userId = :id', { id: userId });
-    return await builder.getExists();
-  }
-
-  async checkOpenGame(): Promise<string | null> {
-    const builder = this.dataSource
-      .createQueryBuilder(SqlGame, 'g')
-      .select('g.id', 'gameId')
-      .where('g.status = :status', { status: GameStatus.PendingSecondPlayer });
-    return await builder.getRawOne();
-  }
 
   async createGame(userId: string): Promise<ViewGame> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -42,42 +27,105 @@ export class QuizGameRepository {
       const game = await manager
         .getRepository(SqlGame)
         .save(new SqlGame(questions));
+
       await manager
         .getRepository(SqlGameProgress)
         .save(new SqlGameProgress(game.id, userId));
+
       const userLogin = await manager
         .createQueryBuilder(SqlUsers, 'u')
         .select('u.login', 'login')
         .where('u.id = :id', { id: userId })
         .getRawOne();
 
-      return new ViewGame(game, questions, new ViewPlayer(userId, userLogin));
+      return new ViewGame(game, new ViewPlayer(userId, userLogin)); //
     } catch (e) {
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
     }
   }
-  //
-  // async joinGame(userId: string): Promise<ViewGame> {
-  //
-  // }
 
-  private async getQuestionsCount(): Promise<number> {
-    const builder = this.dataSource
-      .createQueryBuilder(SqlQuestions, 'q')
-      .where(`EXISTS(SELECT * FROM sql_correct_answers)`);
-    return await builder.getCount();
+  async joinGame(userId: string, gameId: string): Promise<ViewGame> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    const manager = queryRunner.manager;
+    try {
+      await manager
+          .getRepository(SqlGameProgress)
+          .save(new SqlGameProgress(gameId, userId));
+
+      await manager
+          .createQueryBuilder()
+          .update(SqlGame)
+          .set({
+            status: GameStatus.Active,
+            startGameDate: new Date().toISOString()
+          })
+          .where('id = :gameId', { gameId })
+
+      const gameBuilder = `
+        SELECT g.id, g.status, g.questions, g."pairCreatedDate", g."startGameDate", g."finishGameDate"
+               gp."userId", gp.score,
+               (SELECT u.login
+                  FROM sql_users
+                 WHERE u.id = gp."userId")
+          LEFT JOIN sql_game_progress gp
+            ON gp."gameId" = g.id
+          FROM sql_game g
+         WHERE g.id = $2  
+      `
+      const game = await manager.query(gameBuilder, [userId, gameId])
+      return game
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  private async getQuestions(): Promise<Questions[]> {
+  async sendAnswer(dto: SendAnswerDto): Promise<ViewAnswer> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    const manager = queryRunner.manager;
+    try {
+      const createdAnswer = await manager
+          .save(new SqlUserAnswer(
+              dto.userId,
+              dto.gameId,
+              dto.questionsId,
+              dto.answer,
+          ))
+
+      let score = 0
+      if (dto.answerStatus === AnswerStatus.Correct) {
+        score = 1
+      }
+      await manager.createQueryBuilder()
+          .update(SqlGameProgress)
+          .set({score: () => `score + ${score}`})
+          .where('userId = :userId', {userId: dto.userId})
+          .andWhere('questionsId = :questionsId', {questionsId: dto.questionsId})
+
+      return new ViewAnswer(dto.questionsId, dto.answerStatus, createdAnswer.addedAt)
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private async getQuestions(): Promise<string[]> {
     const builder = this.dataSource
       .createQueryBuilder(SqlQuestions, 'q')
       .select('q.id', 'id')
-      .select('q.body', 'body')
       .where(`EXISTS(SELECT * FROM sql_correct_answers)`)
       .orderBy('RANDOM()')
       .limit(5);
-    return await builder.getMany();
+    return await builder.getRawMany();
   }
 }

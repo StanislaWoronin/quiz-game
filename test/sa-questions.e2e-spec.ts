@@ -151,12 +151,13 @@ describe('/sa/quiz/questions (e2e)', () => {
         questionId,
         preparedQuestions.publishStatus.true,
       );
-      //expect(response.status).toBe(HttpStatus.NO_CONTENT);
+      expect(response.status).toBe(HttpStatus.NO_CONTENT);
 
       const question = await questions.getQuestions(
         preparedSuperUser.valid,
         {},
       );
+      expect(question.status).toBe(HttpStatus.OK)
       expect(question.body.items[1].published).toBe(true);
       expect(question.body.items[1].updatedAt).not.toBeNull();
     });

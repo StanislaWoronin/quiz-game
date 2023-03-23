@@ -13,6 +13,7 @@ import { randomUUID } from 'crypto';
 import { SortByField } from '../src/common/pagination/query-parameters/sort-by-field';
 import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
 import { BanStatus } from '../src/modules/sa/users/api/dto/query/ban-status';
+import {Auth} from "./helpers/request/auth";
 
 describe('/sa/users (e2e)', () => {
   const second = 1000;
@@ -22,6 +23,7 @@ describe('/sa/users (e2e)', () => {
   let server;
 
   let testing: Testing;
+  let auth: Auth;
   let users: Users;
   let usersFactories: UsersFactory;
 
@@ -36,7 +38,7 @@ describe('/sa/users (e2e)', () => {
     server = await app.getHttpServer();
 
     users = new Users(server);
-    usersFactories = new UsersFactory(users);
+    usersFactories = new UsersFactory(users, auth);
     testing = new Testing(server);
   });
 
@@ -110,7 +112,7 @@ describe('/sa/users (e2e)', () => {
         expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
     })
 
-    it('Should update if input model is incorrect', async () => {
+    it('Shouldn`t update if input model is incorrect', async () => {
         const { userId } = expect.getState()
         const errorsMessages = getErrorsMessage(['banReason'])
 
@@ -159,7 +161,7 @@ describe('/sa/users (e2e)', () => {
 
     it('Create data', async () => {
       const createdUsers = await usersFactories.createUsers(5);
-      const bannedUsers = await usersFactories.crateAndBanUsers(5);
+      const bannedUsers = await usersFactories.crateAndBanUsers(5, 5);
 
       expect.setState({
         createdUsers,
