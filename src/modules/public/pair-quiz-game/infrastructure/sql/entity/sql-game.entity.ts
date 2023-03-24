@@ -38,8 +38,15 @@ export class SqlGame {
   })
   finishGameDate: string;
 
+  // @Column({
+  //   type: "uuid",
+  //   array: true,
+  //   default: []
+  // })
+  // questions: string[]
+
   @Column({
-    type: "text",
+    type: "uuid",
     array: true,
     default: []
   })

@@ -95,22 +95,22 @@ describe('/sa/quiz/questions (e2e)', () => {
             )
         })
 
-        // it('User join into active game', async () => {
-        //     const {firstUser, secondUser, questions} = expect.getState()
-        //
-        //     const response = await game.joinGame(secondUser.accessToken)
-        //     expect(response.status).toBe(HttpStatus.OK)
-        //     expect(response.body).toStrictEqual(
-        //         expectViewGame(
-        //             {
-        //                 first: expectPlayerProgress(firstUser, {}),
-        //                 second: expectPlayerProgress(secondUser, {})
-        //             },
-        //             expectQuestions(questions),
-        //             GameStatus.PendingSecondPlayer
-        //         )
-        //     )
-        // })
+        it('User join into active game', async () => {
+            const {firstUser, secondUser, questions} = expect.getState()
+            console.log('Second user join into the game')
+            const response = await game.joinGame(secondUser.accessToken)
+            expect(response.status).toBe(HttpStatus.CREATED)
+            expect(response.body).toStrictEqual(
+                expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser, {}),
+                        second: expectPlayerProgress(secondUser, {})
+                    },
+                    expectQuestions(questions),
+                    GameStatus.PendingSecondPlayer
+                )
+            )
+        })
         //
         // it('Shouldn`t join into the game, if user already has active game', async () => {
         //     const {secondUser} = expect.getState()

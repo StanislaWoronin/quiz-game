@@ -4,6 +4,7 @@ import { SqlQuestions } from '../../../../../sa/questions/infrastructure/sql/ent
 import {SqlGame} from "./sql-game.entity";
 import {SendAnswerDto} from "../../../applications/dto/send-answer.dto";
 import {randomUUID} from "crypto";
+import {AnswerStatus} from "../../../shared/answer-status";
 
 @Entity()
 export class SqlUserAnswer {
@@ -26,6 +27,9 @@ export class SqlUserAnswer {
 
   @Column()
   userAnswer: string;
+
+  @Column()
+  answerStatus: AnswerStatus
 
   @Column()
   addedAt: string;

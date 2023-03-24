@@ -61,7 +61,7 @@ export class QuizGameRepository implements IQuizGameRepository{
       await manager
           .getRepository(SqlGameProgress)
           .save(new SqlGameProgress(gameId, userId));
-
+      console.log('save +')
       await manager
           .createQueryBuilder()
           .update(SqlGame)
@@ -70,23 +70,27 @@ export class QuizGameRepository implements IQuizGameRepository{
             startGameDate: new Date().toISOString()
           })
           .where('id = :gameId', { gameId })
-
+          .execute()
+      console.log('update +')
+      console.log(gameId)
       const gameBuilder = `
-        SELECT g.id, g.status, g.questions, g."pairCreatedDate", g."startGameDate", g."finishGameDate"
-               gp."userId", gp.score,
-               (SELECT u.login
-                  FROM sql_users
+        SELECT g.id, g.status, g.questions, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
+               gp."userId", 
+               (SELECT u.login 
+                  FROM sql_users u
                  WHERE u.id = gp."userId")
+          FROM sql_game g
           LEFT JOIN sql_game_progress gp
             ON gp."gameId" = g.id
-          FROM sql_game g
-         WHERE g.id = $2  
+         WHERE g.id = $1;  
       `
-      const game = await manager.query(gameBuilder, [userId, gameId])
-
+      console.log(gameBuilder)
+      const game = await manager.query(gameBuilder, [gameId])
+      console.log(game)
       await queryRunner.commitTransaction()
       return game
     } catch (e) {
+      console.log(e)
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();

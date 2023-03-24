@@ -20,13 +20,11 @@ export class PairQuizGameService {
 
   async joinGame(userId: string): Promise<ViewGame | null> {
     const isPlaying = await this.queryGameRepository.checkUserCurrentGame(userId);
-
     if (isPlaying) {
       return null;
     }
 
     const existsOpenGame = await this.queryGameRepository.checkOpenGame();
-
     if (!existsOpenGame) {
       return this.gameRepository.createGame(userId);
     }
@@ -34,17 +32,18 @@ export class PairQuizGameService {
   }
 
   async sendAnswer(userId: string, dto: AnswerDto): Promise<ViewAnswer | null> {
-    const userGameProgress = await this.queryGameRepository.checkUserGameProgress(userId);
-    if (userGameProgress.answers.length !== 4) {
-      const currentQuestion = userGameProgress.answers.length + 1;
-      const questionsId = userGameProgress.questions[currentQuestion]
-      const correctAnswers = await this.questionsQueryRepository.getQuestionAnswers(questionsId)
-
-      const isCorrectAnswer = correctAnswers.includes(dto.answer)
-
-      return await this.gameRepository.sendAnswer(new SendAnswerDto(userId, dto.answer, userGameProgress.gameId, questionsId, isCorrectAnswer));
+    const currentUserGameProgress = await this.queryGameRepository.checkUserGameProgress(userId);
+    if (currentUserGameProgress.answers.length === 4) {
+      return null
     }
 
+    const currentQuestion = currentUserGameProgress.answers.length + 1;
+    const currentQuestionId = currentUserGameProgress.questions[currentQuestion]
+    const currentCorrectAnswers = await this.questionsQueryRepository.getQuestionAnswers(currentQuestionId)
+    const isCorrectAnswer = currentCorrectAnswers.includes(dto.answer)
 
+    return await this.gameRepository.sendAnswer(new SendAnswerDto(
+        userId, dto.answer, currentUserGameProgress.gameId, currentQuestionId, isCorrectAnswer
+    ));
   }
 }

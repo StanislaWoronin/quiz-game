@@ -19,9 +19,9 @@ export class QuestionsQueryRepository implements IQuestionsQueryRepository{
 
     const query = `
       SELECT q.id, q.body, q.published, q."createdAt", q."updatedAt",
-             (SELECT ARRAY (SELECT a."correctAnswer" 
-                              FROM sql_correct_answers a
-                             WHERE a."questionId" = q.id)) AS "correctAnswers"
+             ARRAY (SELECT a."correctAnswer" 
+                      FROM sql_correct_answers a
+                     WHERE a."questionId" = q.id) AS "correctAnswers"
         FROM sql_questions q
              ${filter}
       ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}

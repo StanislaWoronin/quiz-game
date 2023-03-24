@@ -6,6 +6,8 @@ import {InjectDataSource} from "@nestjs/typeorm";
 import {DataSource} from "typeorm";
 import {ViewGame} from "../../api/view/view-game";
 import {UserGameProgress} from "./pojo/user-game-progress";
+import {util} from "prettier";
+import skipEverythingButNewLine = util.skipEverythingButNewLine;
 
 export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -32,11 +34,15 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     }
 
     async checkOpenGame(): Promise<string | null> {
-        const builder = this.dataSource
-            .createQueryBuilder(SqlGame, 'g')
-            .select('g.id', 'gameId')
-            .where('g.status = :status', { status: GameStatus.PendingSecondPlayer });
-        return await builder.getRawOne();
+        const query = ` 
+            SELECT id FROM sql_game WHERE status = $1
+        `
+        const result = await this.dataSource.query(query, [GameStatus.PendingSecondPlayer])
+
+        if (!result.length) {
+            return null
+        }
+        return result[0].id
     }
 
     async checkUserGameProgress(userId: string): Promise<UserGameProgress> {
