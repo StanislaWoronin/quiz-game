@@ -12,6 +12,7 @@ import { SqlGameProgress } from './sql-game-progress.entity';
 import { randomUUID } from 'crypto';
 import { Questions } from '../../../shared/questions';
 import {SqlUserAnswer} from "./sql-user-answer.entity";
+import { SqlGameQuestions } from "./sql-game-questions.entity";
 
 @Entity()
 export class SqlGame {
@@ -41,16 +42,9 @@ export class SqlGame {
   // @Column({
   //   type: "uuid",
   //   array: true,
-  //   default: []
+  //   default: [],
   // })
   // questions: string[]
-
-  @Column({
-    type: "uuid",
-    array: true,
-    default: []
-  })
-  questions: string[]
 
   // @OneToMany(() => SqlQuestions, (q) => q.game)
   // gameQuestions = SqlQuestions[]
@@ -61,12 +55,14 @@ export class SqlGame {
   @OneToMany(() => SqlUserAnswer, (g) => g.game)
   userAnswer: SqlUserAnswer[]
 
-  constructor(questions: string[]) {
+  @OneToMany(() => SqlGameQuestions, gq => gq.game)
+  questions: SqlGameQuestions
+
+  constructor() {
     this.id = randomUUID();
     this.status = GameStatus.PendingSecondPlayer;
     this.pairCreatedDate = new Date().toISOString();
     this.startGameDate = null;
     this.finishGameDate = null;
-    this.questions = questions
   }
 }

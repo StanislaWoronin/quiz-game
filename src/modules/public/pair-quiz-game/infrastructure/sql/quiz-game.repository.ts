@@ -6,14 +6,13 @@ import {ViewGame} from '../../api/view/view-game';
 import {SqlGame} from './entity/sql-game.entity';
 import {SqlQuestions} from '../../../../sa/questions/infrastructure/sql/entity/questions.entity';
 import {SqlUsers} from '../../../../sa/users/infrastructure/sql/entity/users.entity';
-import {ViewPlayer} from '../../api/view/view-player';
 import {IQuizGameRepository} from "../i-quiz-game.repository";
 import {ViewAnswer} from "../../api/view/view-answer";
 import {SendAnswerDto} from "../../applications/dto/send-answer.dto";
 import {AnswerStatus} from "../../shared/answer-status";
 import {SqlUserAnswer} from "./entity/sql-user-answer.entity";
 import { ViewGameProgress } from "../../api/view/view-game-progress";
-import { randomUUID } from "crypto";
+import { SqlGameQuestions } from "./entity/sql-game-questions.entity";
 
 export class QuizGameRepository implements IQuizGameRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -25,15 +24,19 @@ export class QuizGameRepository implements IQuizGameRepository{
 
     const manager = queryRunner.manager;
     try {
-      const questions = await this.getQuestions();
-
       const game = await manager
         .getRepository(SqlGame)
-        .save(new SqlGame(questions));
+        .save(new SqlGame());
 
       await manager
         .getRepository(SqlGameProgress)
         .save(new SqlGameProgress(game.id, userId));
+
+      const questions = await this.getQuestions();
+      const mappedQuestions = questions.map(q => new SqlGameQuestions(game.id, q))
+      await manager
+        .getRepository(SqlGameQuestions)
+        .save(mappedQuestions)
 
       const userLogin = await manager
         .createQueryBuilder(SqlUsers, 'u')
@@ -131,13 +134,19 @@ export class QuizGameRepository implements IQuizGameRepository{
   }
 
   private async getQuestions(): Promise<string[]> {
-    const builder = this.dataSource
-      .createQueryBuilder(SqlQuestions, 'q')
-      .select('q.id', 'id')
-      .where(`EXISTS(SELECT * FROM sql_correct_answers)`)
-      .orderBy('RANDOM()')
-      .limit(5);
-    const result = await builder.getRawMany();
-    return result.map(r => r.id)
+    const query = `
+      SELECT id FROM sql_questions
+       ORDER BY RANDOM()
+       LIMIT 5
+    `
+    return await this.dataSource.query(query)
+    // const builder = this.dataSource
+    //   .createQueryBuilder(SqlQuestions, 'q')
+    //   .select('q.id', 'id')
+    //   .where(`EXISTS(SELECT * FROM sql_correct_answers)`)
+    //   .orderBy('RANDOM()')
+    //   .limit(5);
+    // const result = await builder.getRawMany();
+    // return result.map(r => r.id)
   }
 }

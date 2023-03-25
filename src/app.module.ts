@@ -68,6 +68,7 @@ import { ConfirmationCodeValidator } from "./common/validators/confirmation-code
 import { PasswordRecoveryValidator } from "./modules/public/auth/guards/password-recovery.validator";
 import { SqlTokenBlackList } from "./modules/public/auth/infrastructure/sql/entity/sql-token-black-list.entity";
 import { SqlEmailConfirmation } from "./modules/sa/users/infrastructure/sql/entity/sql-email-confirmation.entity";
+import { SqlGameQuestions } from "./modules/public/pair-quiz-game/infrastructure/sql/entity/sql-game-questions.entity";
 
 const controllers = [
   AuthController,
@@ -192,6 +193,7 @@ export const entity = [
   SqlCredentials,
   SqlEmailConfirmation,
   SqlGame,
+  SqlGameQuestions,
   SqlGameProgress,
   SqlQuestions,
   SqlSecurity,
