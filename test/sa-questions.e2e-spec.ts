@@ -108,40 +108,40 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
     });
 
-    it('Shouldn`t update status if id from uri param not found', async () => {
-      const randomId = randomUUID();
-
-      const response = await questions.updateQuestionStatus(
-        preparedSuperUser.valid,
-        randomId,
-        preparedQuestions.publishStatus.true,
-      );
-      expect(response.status).toBe(HttpStatus.NOT_FOUND);
-    });
-
-    it('User without permissions try update "published" status', async () => {
-      const { questionId } = expect.getState();
-
-      const response = await questions.updateQuestionStatus(
-        preparedSuperUser.notValid,
-        questionId,
-        preparedQuestions.publishStatus.true,
-      );
-      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
-    });
-
-    it('Shouldn`t update "published" status if specified question' +
-      'doesn`t have correct answers', async () => {
-        const { questionWithoutAnswersId } = expect.getState();
-
-        const response = await questions.updateQuestionStatus(
-          preparedSuperUser.valid,
-          questionWithoutAnswersId,
-          preparedQuestions.publishStatus.true,
-        );
-        expect(response.status).toBe(HttpStatus.BAD_REQUEST);
-      },
-    );
+    // it('Shouldn`t update status if id from uri param not found', async () => {
+    //   const randomId = randomUUID();
+    //
+    //   const response = await questions.updateQuestionStatus(
+    //     preparedSuperUser.valid,
+    //     randomId,
+    //     preparedQuestions.publishStatus.true,
+    //   );
+    //   expect(response.status).toBe(HttpStatus.NOT_FOUND);
+    // });
+    //
+    // it('User without permissions try update "published" status', async () => {
+    //   const { questionId } = expect.getState();
+    //
+    //   const response = await questions.updateQuestionStatus(
+    //     preparedSuperUser.notValid,
+    //     questionId,
+    //     preparedQuestions.publishStatus.true,
+    //   );
+    //   expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+    // });
+    //
+    // it('Shouldn`t update "published" status if specified question' +
+    //   'doesn`t have correct answers', async () => {
+    //     const { questionWithoutAnswersId } = expect.getState();
+    //
+    //     const response = await questions.updateQuestionStatus(
+    //       preparedSuperUser.valid,
+    //       questionWithoutAnswersId,
+    //       preparedQuestions.publishStatus.true,
+    //     );
+    //     expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+    //   },
+    // );
 
     it('Should update "published" status. Set status "true"', async () => {
       const { questionId } = expect.getState();

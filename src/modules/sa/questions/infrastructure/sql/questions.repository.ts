@@ -19,20 +19,13 @@ export class QuestionsRepository implements IQuestionsRepository {
     dto: CreateQuestionDto,
   ): Promise<CreatedQuestions | null> {
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
 
-    const manager = queryRunner.manager
     try {
-      const createdQuestions = await manager.getRepository(SqlQuestions).save(new SqlQuestions(dto.body));
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const manager = queryRunner.manager
 
-      const mappedAnswers = dto.correctAnswers.map(el => new SqlCorrectAnswers(createdQuestions.id, el));
-      const builder = manager
-        .createQueryBuilder()
-        .insert()
-        .into(SqlCorrectAnswers)
-        .values(mappedAnswers);
-      await builder.execute();
+      const createdQuestions = await manager.getRepository(SqlQuestions).save(new SqlQuestions(dto.body, dto.correctAnswers));
 
       await queryRunner.commitTransaction();
       return toCreatedQuestions(createdQuestions, dto.correctAnswers);
@@ -49,29 +42,22 @@ export class QuestionsRepository implements IQuestionsRepository {
     dto: UpdateQuestionDto,
   ): Promise<boolean> {
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
 
-    const manager = queryRunner.manager;
     try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const manager = queryRunner.manager;
+
       await this.dataSource
         .createQueryBuilder()
         .update(SqlQuestions)
         .set({
           body: dto.body,
+          correctAnswers: dto.correctAnswers,
           updatedAt: new Date().toISOString(),
         })
         .where('id = :id', { id: questionId })
         .execute();
-
-      await manager.delete(SqlCorrectAnswers, { questionId });
-
-      for (let i = 0, length = dto.correctAnswers.length; i < length; i++) {
-        await manager.getRepository(SqlCorrectAnswers).save({
-          questionId: questionId,
-          correctAnswer: dto.correctAnswers[i],
-        });
-      }
 
       return true;
     } catch (e) {
@@ -90,9 +76,6 @@ export class QuestionsRepository implements IQuestionsRepository {
       UPDATE sql_questions
          SET published = '${published}', "updatedAt" = '${new Date().toISOString()}'
        WHERE id = '${questionId}'
-         AND EXISTS(SELECT "questionId"
-                      FROM sql_correct_answers
-                     WHERE "questionId" = '${questionId}');
     `;
     const result = await this.dataSource.query(query);
 
@@ -104,11 +87,12 @@ export class QuestionsRepository implements IQuestionsRepository {
 
   async deleteQuestion(questionId: string): Promise<boolean> {
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
 
-    const manager = queryRunner.manager;
     try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const manager = queryRunner.manager;
+
       await manager.delete(SqlCorrectAnswers, { questionId });
 
       const result = await manager.delete(SqlQuestions, { id: questionId });

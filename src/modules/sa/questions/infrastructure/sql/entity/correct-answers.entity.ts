@@ -31,4 +31,4 @@ export class SqlCorrectAnswers {
     this.questionId = questionId
     this.correctAnswer = el
   }
-}
+} // TODO not use

@@ -53,13 +53,14 @@ export class SqlQuestions {
   // @ManyToOne(() => SqlGame, (g) => g.gameQuestions)
   // game: SqlGame;
 
-  @OneToMany(() => SqlGameQuestions, gq => gq.questions)
+  @OneToMany(() => SqlGameQuestions, gq => gq.question)
   game: SqlGameQuestions
 
   @OneToMany(() => SqlUserAnswer, (ua) => ua.question, { cascade: true })
   userAnswer: SqlUserAnswer[];
 
-  constructor(body: string) {
+  constructor(body: string, answers: string[]) {
     this.body = body
+    this.correctAnswers = answers
   }
 }

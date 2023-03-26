@@ -18,7 +18,7 @@ export class Game {
 
     async sendAnswer(answer: string, token?: string,): Promise<TestingRequestDto<ViewAnswer>> {
         const response = await request(this.server)
-            .post(endpoints.pairGameQuiz.pairs.connection)
+            .post(endpoints.pairGameQuiz.pairs.sendAnswers)
             .auth(token, {type: "bearer"})
             .send({answer})
 
@@ -27,14 +27,14 @@ export class Game {
 
     async getMyCurrentGame(token?: string): Promise<TestingRequestDto<ViewGame>> {
         const response = await request(this.server)
-            .post(endpoints.pairGameQuiz.pairs.connection)
+            .post(endpoints.pairGameQuiz.pairs.myCurrent)
             .auth(token, {type: "bearer"})
 
         return {body: response.body, status: response.status}
     }
 
     async getGameById(gameId: string, token?: string,): Promise<TestingRequestDto<ViewGame>> {
-        const url = getUrlWithId(endpoints.pairGameQuiz.pairs.connection, gameId)
+        const url = getUrlWithId(endpoints.pairGameQuiz.pairs.pairs, gameId)
 
         const response = await request(this.server)
             .post(url)

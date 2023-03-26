@@ -6,6 +6,7 @@ import { ViewAnswer } from '../api/view/view-answer';
 import {IQuizGameQueryRepository} from "../infrastructure/i-quiz-game-query.repository";
 import {IQuestionsQueryRepository} from "../../../sa/questions/infrastructure/i-questions-query.repository";
 import {SendAnswerDto} from "./dto/send-answer.dto";
+import { CheckGameProgressDb } from "../infrastructure/sql/pojo/checkGameProgressDb";
 
 @Injectable()
 export class PairQuizGameService {
@@ -32,18 +33,19 @@ export class PairQuizGameService {
   }
 
   async sendAnswer(userId: string, dto: AnswerDto): Promise<ViewAnswer | null> {
-    const currentUserGameProgress = await this.queryGameRepository.checkUserGameProgress(userId);
-    if (currentUserGameProgress.answers.length === 4) {
+    const currentUserGameProgress: CheckGameProgressDb = await this.queryGameRepository.checkUserGameProgress(userId);
+    if (!currentUserGameProgress) {
       return null
     }
 
-    const currentQuestion = currentUserGameProgress.answers.length + 1;
-    const currentQuestionId = currentUserGameProgress.questions[currentQuestion]
-    const currentCorrectAnswers = await this.questionsQueryRepository.getQuestionAnswers(currentQuestionId)
-    const isCorrectAnswer = currentCorrectAnswers.includes(dto.answer)
+    const answerCorrect = currentUserGameProgress.correctAnswers.includes(dto.answer)
 
     return await this.gameRepository.sendAnswer(new SendAnswerDto(
-        userId, dto.answer, currentUserGameProgress.gameId, currentQuestionId, isCorrectAnswer
+      userId,
+      dto.answer,
+      currentUserGameProgress.gameId,
+      currentUserGameProgress.questionId,
+      answerCorrect
     ));
   }
 }

@@ -1,7 +1,6 @@
 import { ViewGame } from '../api/view/view-game';
 import { ViewAnswer } from '../api/view/view-answer';
-import {UserGameProgress} from "./sql/pojo/user-game-progress";
-import {SendAnswerDto} from "../applications/dto/send-answer.dto";
+import { SendAnswerDto } from "../applications/dto/send-answer.dto";
 
 export interface IQuizGameRepository {
   createGame(userId): Promise<ViewGame>;

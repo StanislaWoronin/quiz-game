@@ -4,26 +4,28 @@ import {GameStatus} from '../../shared/game-status';
 import {SqlGameProgress} from './entity/sql-game-progress.entity';
 import {ViewGame} from '../../api/view/view-game';
 import {SqlGame} from './entity/sql-game.entity';
-import {SqlQuestions} from '../../../../sa/questions/infrastructure/sql/entity/questions.entity';
 import {SqlUsers} from '../../../../sa/users/infrastructure/sql/entity/users.entity';
 import {IQuizGameRepository} from "../i-quiz-game.repository";
 import {ViewAnswer} from "../../api/view/view-answer";
-import {SendAnswerDto} from "../../applications/dto/send-answer.dto";
 import {AnswerStatus} from "../../shared/answer-status";
 import {SqlUserAnswer} from "./entity/sql-user-answer.entity";
 import { ViewGameProgress } from "../../api/view/view-game-progress";
 import { SqlGameQuestions } from "./entity/sql-game-questions.entity";
+import { JoinGameDb } from "./pojo/join-game.db";
+import { toViewJoinGame } from "../../../../../common/data-mapper/to-view-join-game";
+import { SendAnswerDto } from "../../applications/dto/send-answer.dto";
 
 export class QuizGameRepository implements IQuizGameRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createGame(userId: string): Promise<ViewGame> {
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
 
-    const manager = queryRunner.manager;
     try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const manager = queryRunner.manager;
+
       const game = await manager
         .getRepository(SqlGame)
         .save(new SqlGame());
@@ -33,7 +35,7 @@ export class QuizGameRepository implements IQuizGameRepository{
         .save(new SqlGameProgress(game.id, userId));
 
       const questions = await this.getQuestions();
-      const mappedQuestions = questions.map(q => new SqlGameQuestions(game.id, q))
+      const mappedQuestions = questions.map(q => new SqlGameQuestions(game.id, q.id))
       await manager
         .getRepository(SqlGameQuestions)
         .save(mappedQuestions)
@@ -56,15 +58,15 @@ export class QuizGameRepository implements IQuizGameRepository{
 
   async joinGame(userId: string, gameId: string): Promise<ViewGame> {
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
 
-    const manager = queryRunner.manager;
     try {
-      await manager
-          .getRepository(SqlGameProgress)
-          .save(new SqlGameProgress(gameId, userId));
-      console.log('save +')
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const manager = queryRunner.manager;
+
+      const gameProgress = new SqlGameProgress(gameId, userId);
+      await manager.getRepository(SqlGameProgress).save(gameProgress);
+
       await manager
           .createQueryBuilder()
           .update(SqlGame)
@@ -74,24 +76,27 @@ export class QuizGameRepository implements IQuizGameRepository{
           })
           .where('id = :gameId', { gameId })
           .execute()
-      console.log('update +')
-      console.log(gameId)
+
       const gameBuilder = `
-        SELECT g.id, g.status, g.questions, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
+        SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
                gp."userId", 
+               gq."questionId",
                (SELECT u.login 
                   FROM sql_users u
-                 WHERE u.id = gp."userId")
+                 WHERE u.id = gp."userId"),
+               (SELECT q.body
+                  FROM sql_questions q
+                 WHERE q.id = gq."questionId")
           FROM sql_game g
           LEFT JOIN sql_game_progress gp
             ON gp."gameId" = g.id
+          LEFT JOIN sql_game_questions gq  
+            ON gq."gameId" = g.id
          WHERE g.id = $1;  
       `
-      console.log(gameBuilder)
-      const game = await manager.query(gameBuilder, [gameId])
-      console.log(game)
+      const game: JoinGameDb[] = await manager.query(gameBuilder, [gameId])
       await queryRunner.commitTransaction()
-      return game
+      return toViewJoinGame(game)
     } catch (e) {
       console.log(e)
       await queryRunner.rollbackTransaction();
@@ -102,17 +107,19 @@ export class QuizGameRepository implements IQuizGameRepository{
 
   async sendAnswer(dto: SendAnswerDto): Promise<ViewAnswer> {
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
 
-    const manager = queryRunner.manager;
     try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const manager = queryRunner.manager;
+
       const createdAnswer = await manager
           .save(new SqlUserAnswer(
               dto.userId,
               dto.gameId,
               dto.questionsId,
               dto.answer,
+              dto.answerStatus,
           ))
 
       let score = 0
@@ -125,15 +132,17 @@ export class QuizGameRepository implements IQuizGameRepository{
           .where('userId = :userId', {userId: dto.userId})
           .andWhere('questionsId = :questionsId', {questionsId: dto.questionsId})
 
+      await queryRunner.commitTransaction()
       return new ViewAnswer(dto.questionsId, dto.answerStatus, createdAnswer.addedAt)
     } catch (e) {
+      console.log(e);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
     }
   }
 
-  private async getQuestions(): Promise<string[]> {
+  private async getQuestions(): Promise<{ id: string }[]> {
     const query = `
       SELECT id FROM sql_questions
        ORDER BY RANDOM()

@@ -38,10 +38,13 @@ export class QuestionsService {
     questionId: string,
     dto: UpdatePublishStatusDto,
   ): Promise<boolean | null> {
-    const isExists = await this.questionsQueryRepository.questionExists(
+    const isHasAnswer = await this.questionsQueryRepository.questionHasAnswer(
       questionId,
     );
-    if (isExists === null) return null;
+    if (isHasAnswer === null) return null;
+    if (!isHasAnswer.length) {
+      return false
+    }
 
     return await this.questionsRepository.updatePublishStatus(
       questionId,

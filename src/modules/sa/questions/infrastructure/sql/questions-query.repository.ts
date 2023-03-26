@@ -18,15 +18,13 @@ export class QuestionsQueryRepository implements IQuestionsQueryRepository{
     const filter = this.getFilter(queryDto);
 
     const query = `
-      SELECT q.id, q.body, q.published, q."createdAt", q."updatedAt",
-             ARRAY (SELECT a."correctAnswer" 
-                      FROM sql_correct_answers a
-                     WHERE a."questionId" = q.id) AS "correctAnswers"
+      SELECT q.id, q.body, q.published, q."createdAt", q."updatedAt", q."correctAnswers"
         FROM sql_questions q
              ${filter}
       ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
       LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};
     `;
+    console.log(query);
     const questions = await this.dataSource.query(query);
 
     const countQuery = ` 
@@ -63,6 +61,20 @@ export class QuestionsQueryRepository implements IQuestionsQueryRepository{
       return null;
     }
     return result[0].published;
+  }
+
+  async questionHasAnswer(questionId: string): Promise<string[] | null> {
+    const query = `
+      SELECT "correctAnswers"
+        FROM sql_questions
+       WHERE id = $1;
+    `;
+    const result = await this.dataSource.query(query, [questionId]);
+
+    if (!result.length) {
+      return null;
+    }
+    return result[0].correctAnswers;
   }
 
   private getFilter(query: QuestionsQueryDto): string {

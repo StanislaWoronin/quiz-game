@@ -9,10 +9,10 @@ import { Questions } from "../../../src/modules/public/pair-quiz-game/shared/que
 import { GameStatus } from "../../../src/modules/public/pair-quiz-game/shared/game-status";
 import { CreatedQuestions } from "../../../src/modules/sa/questions/api/view/created-questions";
 
-export const expectViewGame = (member: MemberType, questionsArray: Questions[], status: GameStatus): ViewGame => {
+export const expectViewGame = (member: MemberType, status: GameStatus, questionsArray?: Questions[]): ViewGame => {
     let items = null
     if (status !== GameStatus.PendingSecondPlayer) {
-        items = questionsArray
+        items = questions()
     }
     let startGameDate = null
     if (status === GameStatus.Active) {
@@ -48,6 +48,7 @@ export const expectPlayerProgress = (user: CreatedUser, answerStatus: TestAnswer
     for (let key in answerStatus) {
         answers.push(expectAnswer(answerStatus[key]))
     }
+
     return {
         answers,
         player: {
@@ -64,6 +65,17 @@ export const expectQuestions = (questions: CreatedQuestions[]): Questions[] => {
         result.push({
             id: questions[i].id,
             body: questions[i].body
+        })
+    }
+    return result
+}
+
+const questions = () => {
+    let result = []
+    for (let i = 0; i < 5; i++) {
+        result.push({
+            id: expect.any(String),
+            body: expect.any(String),
         })
     }
     return result

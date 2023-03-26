@@ -4,10 +4,7 @@ import {GameStatus} from "../../shared/game-status";
 import {SqlGame} from "./entity/sql-game.entity";
 import {InjectDataSource} from "@nestjs/typeorm";
 import {DataSource} from "typeorm";
-import {ViewGame} from "../../api/view/view-game";
-import {UserGameProgress} from "./pojo/user-game-progress";
-import {util} from "prettier";
-import skipEverythingButNewLine = util.skipEverythingButNewLine;
+import { CheckGameProgressDb } from "./pojo/checkGameProgressDb";
 
 export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -45,15 +42,24 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
         return result[0].id
     }
 
-    async checkUserGameProgress(userId: string): Promise<UserGameProgress> {
-        const builder = this.dataSource
-            .createQueryBuilder(SqlGameProgress, 'gp')
-            .select('gp."gameId"', 'gameId')
-            .addSelect('gp.answers', 'answers')
-            .addSelect('g.questions', 'questions')
-            .leftJoin(SqlGame, 'g')
-            .where('gp.userId = :id', {id: userId})
-        console.log('from checkUserGameProgress:', await builder.getRawOne())
-        return await builder.getRawOne()
+    async checkUserGameProgress(userId: string): Promise<CheckGameProgressDb> {
+        const query = `
+            SELECT gp."gameId", ua."userAnswer",
+                   q.id AS "questionId", q."correctAnswers" 
+              FROM sql_game_progress gp
+              LEFT JOIN sql_user_answer ua
+                ON ua."gameId" = gp."gameId" 
+               AND ua."userId" = $1
+              LEFT JOIN sql_game_questions gq
+                ON gq."gameId" = gp."gameId" 
+              LEFT JOIN sql_questions q
+                ON q.id = gq."questionId"
+              WHERE gp."userId" = $1
+                AND ua."userAnswer" isNull
+              LIMIT 1;
+        `
+        const result = await this.dataSource.query(query, [userId])
+
+        return result[0]
     }
 }

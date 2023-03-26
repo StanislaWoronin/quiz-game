@@ -6,6 +6,7 @@ export interface IQuestionsQueryRepository {
   getQuestions(query: QuestionsQueryDto): Promise<ViewPage<ViewQuestion>>;
   getQuestionAnswers(questionId: string): Promise<string[]>
   questionExists(questionId: string): Promise<boolean | null>;
+  questionHasAnswer(questionId: string): Promise<string[] | null>;
 }
 
 export const IQuestionsQueryRepository = 'IQuestionsQueryRepository';

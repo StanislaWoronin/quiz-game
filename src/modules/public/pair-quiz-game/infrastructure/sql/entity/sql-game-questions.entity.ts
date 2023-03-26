@@ -14,7 +14,8 @@ export class SqlGameQuestions {
   gameId: string
 
   @ManyToOne(() => SqlQuestions, q => q.game)
-  questions: SqlQuestions
+  @JoinColumn()
+  question: SqlQuestions
   @Column()
   questionId: string
 

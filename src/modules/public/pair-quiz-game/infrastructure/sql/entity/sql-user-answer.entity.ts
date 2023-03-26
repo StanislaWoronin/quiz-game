@@ -38,12 +38,14 @@ export class SqlUserAnswer {
       userId: string,
       gameId: string,
       questionsId: string,
-      answer: string
+      answer: string,
+      answerStatus: AnswerStatus
   ) {
     this.userId = userId
     this.gameId = gameId
     this.questionId = questionsId
     this.userAnswer = answer
+    this.answerStatus = answerStatus
     this.addedAt = new Date().toISOString()
   }
 }

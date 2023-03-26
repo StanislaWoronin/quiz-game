@@ -17,10 +17,10 @@ export class SqlGameProgress {
   user: SqlUsers;
   @Column() userId: string;
 
-  // @Column({
-  //   default: 0,
-  // })
-  // score: number;
+  @Column({
+    default: 0,
+  })
+  score: number;
 
   constructor(gameId: string, userId: string) {
     this.gameId = gameId;
