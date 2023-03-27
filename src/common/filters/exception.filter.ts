@@ -26,7 +26,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
       } catch (e) {
         response.status(HttpStatus.BAD_REQUEST).send('Bad Request');
       }
-    } else {
+    } else if (status === 500) {
+      const responseBody: any = exception.getResponse();
+      console.log(responseBody.message)
+      // console.log(responseBody.errors)
+      return response.sendStatus(400)
+    }
+    else {
       // response.status(status).json({
       //   statusCode: status,
       //   timestamp: new Date().toISOString(),

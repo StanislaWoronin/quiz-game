@@ -56,10 +56,10 @@ export class PairQuizGameController {
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   async getGameById(
-    @Param('id') gameId: ParamsId,
+    @Param() gameId: ParamsId,
     @UserId() userId: string,
   ): Promise<ViewGame> {
-    const result = await this.gameQueryRepository.getGameById(gameId);
+    const result = await this.gameQueryRepository.getGameById(gameId.id);
     if (!result) {
       throw new NotFoundException();
     }
@@ -67,6 +67,9 @@ export class PairQuizGameController {
       result.firstPlayerProgress.player.id !== userId ||
       result.secondPlayerProgress?.player.id !== userId
     ) {
+      console.log('user is not in game')
+      console.log(result)
+      console.log(userId)
       throw new ForbiddenException();
     }
 

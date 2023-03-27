@@ -14,7 +14,7 @@ export class ErrorExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
 
     if (settings.environment !== 'prod') {
-      response.status(500).send(exception.toString());
+      response.status(500).send({e: exception.toString()});
     } else {
       response.status(500).send('Some error occurred');
     }

@@ -1,15 +1,11 @@
-import {IsNotEmpty, IsNotIn, IsString, IsUUID, Validate} from "class-validator";
+import {isUUID} from "class-validator";
+import {Transform} from "class-transformer";
+import {BadRequestException} from "@nestjs/common";
 
 export class ParamsId {
-  @IsString()
-  @Validate(
-      function isNotInteger(str) {
-        if (isNaN(str)) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-  )
+  @Transform(({value}) => {
+    if (isUUID(value)) return value
+    throw new BadRequestException()
+  })
   id: string;
 }
