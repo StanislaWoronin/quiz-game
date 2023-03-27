@@ -1,8 +1,8 @@
-import { JoinGameDb } from "../../modules/public/pair-quiz-game/infrastructure/sql/pojo/join-game.db";
+import { GameDb } from "../../modules/public/pair-quiz-game/infrastructure/sql/pojo/game.db";
 import { ViewGame } from "../../modules/public/pair-quiz-game/api/view/view-game";
 import { Questions } from "../../modules/public/pair-quiz-game/shared/questions";
 
-export const toViewJoinGame = (game: JoinGameDb[]): ViewGame => {
+export const toViewJoinGame = (game: GameDb[]): ViewGame => {
   const questions = getQuestions(game.slice(0,5))
 
   return {
@@ -31,7 +31,7 @@ export const toViewJoinGame = (game: JoinGameDb[]): ViewGame => {
   }
 }
 
-const getQuestions = (game: JoinGameDb[]): Questions[] => {
+const getQuestions = (game: GameDb[]): Questions[] => {
   const questions = []
   game.map(g => {
     questions.push({

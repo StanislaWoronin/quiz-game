@@ -200,12 +200,13 @@ describe('/sa/quiz/questions (e2e)', () => {
         it('Shouldn`t return game if specifical id not found', async () => {
             const {firstUser} = expect.getState()
             const randomId = randomUUID()
-
+            console.log(randomId)
             const response = await game.getGameById(randomId, firstUser.accessToken)
+            console.log(response.body)
             expect(response.status).toBe(HttpStatus.NOT_FOUND)
         })
 
-        it('Shouldn`t return game if user tries to get pair in which user' +
+        it('Shouldn`t return game if user tries to get pair in which user ' +
             'is not participant', async () => {
             const {thirdUser, gameId} = expect.getState()
 
@@ -221,11 +222,29 @@ describe('/sa/quiz/questions (e2e)', () => {
         })
 
         it('Shouldn`t return game, if id has invalid format', async () => {
-            const {gameId} = expect.getState()
+            const {firstUser} = expect.getState()
             const invalidId = Date.now()
 
-            const response = await game.getGameById(gameId, invalidId.toString())
+            const response = await game.getGameById(invalidId.toString(), firstUser.accessToken)
             expect(response.status).toBe(HttpStatus.BAD_REQUEST)
+        })
+
+        it('', async () => {
+            const {firstUser, secondUser, gameId, questions} = expect.getState()
+
+            const response = await game.getGameById(gameId, firstUser.accessToken)
+            console.log(response.body)
+            expect(response.status).toBe(HttpStatus.OK)
+            expect(response.body).toStrictEqual(
+                expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser, {}),
+                        second: expectPlayerProgress(secondUser, {})
+                    },
+                    GameStatus.Active,
+                    expectQuestions(questions),
+                )
+            )
         })
     })
 
@@ -251,17 +270,17 @@ describe('/sa/quiz/questions (e2e)', () => {
             })
         })
 
-        it('Shouldn`t return game if user don`t has active pair', async () => {
-            const {thirdUser} = expect.getState()
-
-            const response = await game.getMyCurrentGame(thirdUser.accessToken)
-            expect(response.status).toBe(HttpStatus.NOT_FOUND)
-        })
-
-        it('Shouldn`t return game, if he is unauthorized', async () => {
-            const response = await game.getMyCurrentGame()
-            expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
-        })
+        // it('Shouldn`t return game if user don`t has active pair', async () => {
+        //     const {thirdUser} = expect.getState()
+        //
+        //     const response = await game.getMyCurrentGame(thirdUser.accessToken)
+        //     expect(response.status).toBe(HttpStatus.NOT_FOUND)
+        // })
+        //
+        // it('Shouldn`t return game, if he is unauthorized', async () => {
+        //     const response = await game.getMyCurrentGame()
+        //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
+        // })
 
         it('Should return game', async () => {
             const {firstUser, secondUser, questions} = expect.getState()

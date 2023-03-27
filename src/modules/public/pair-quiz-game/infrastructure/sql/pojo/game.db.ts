@@ -1,6 +1,7 @@
 import { GameStatus } from "../../../shared/game-status";
+import {AnswerStatus} from "../../../shared/answer-status";
 
-export class JoinGameDb {
+export class GameDb {
   id: string
   status: GameStatus
   pairCreatedDate: string
@@ -10,4 +11,7 @@ export class JoinGameDb {
   login: string
   questionId: string
   body: string
+  answerStatus?: AnswerStatus
+  addedAt?: string
+  score?: number
 }

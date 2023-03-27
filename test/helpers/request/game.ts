@@ -27,7 +27,7 @@ export class Game {
 
     async getMyCurrentGame(token?: string): Promise<TestingRequestDto<ViewGame>> {
         const response = await request(this.server)
-            .post(endpoints.pairGameQuiz.pairs.myCurrent)
+            .get(endpoints.pairGameQuiz.pairs.myCurrent)
             .auth(token, {type: "bearer"})
 
         return {body: response.body, status: response.status}
@@ -37,7 +37,7 @@ export class Game {
         const url = getUrlWithId(endpoints.pairGameQuiz.pairs.pairs, gameId)
 
         const response = await request(this.server)
-            .post(url)
+            .get(url)
             .auth(token, {type: "bearer"})
 
         return {body: response.body, status: response.status}

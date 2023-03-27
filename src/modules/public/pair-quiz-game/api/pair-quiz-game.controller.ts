@@ -1,8 +1,8 @@
 import {
   Body,
   Controller,
-  ForbiddenException,
-  Inject,
+  ForbiddenException, Get, HttpCode, HttpStatus,
+  Inject, NotFoundException, Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -47,29 +47,29 @@ export class PairQuizGameController {
     return result;
   }
 
-  // @HttpCode(HttpStatus.OK)
-  // @Get('my-current')
-  // async getMyCurrentGame(@UserId() userId: string): Promise<ViewGame> {
-  //   return await this.gameQueryRepository.getMyCurrentGame(userId);
-  // }
-  //
-  // @HttpCode(HttpStatus.OK)
-  // @Get(':id')
-  // async getGameById(
-  //   @Param('id') gameId: ParamsId,
-  //   @UserId() userId: string,
-  // ): Promise<ViewGame> {
-  //   const result = await this.gameQueryRepository.getGameById(gameId);
-  //   if (!result) {
-  //     throw new NotFoundException();
-  //   }
-  //   if (
-  //     result.firstPlayerProgress.player.id !== userId ||
-  //     result.secondPlayerProgress?.player.id !== userId
-  //   ) {
-  //     throw new ForbiddenException();
-  //   }
-  //
-  //   return result;
-  // }
+  @HttpCode(HttpStatus.OK)
+  @Get('my-current')
+  async getMyCurrentGame(@UserId() userId: string): Promise<ViewGame> {
+    return await this.gameQueryRepository.getMyCurrentGame(userId);
+  } // return game witch has status "Active"
+
+  @HttpCode(HttpStatus.OK)
+  @Get(':id')
+  async getGameById(
+    @Param('id') gameId: ParamsId,
+    @UserId() userId: string,
+  ): Promise<ViewGame> {
+    const result = await this.gameQueryRepository.getGameById(gameId);
+    if (!result) {
+      throw new NotFoundException();
+    }
+    if (
+      result.firstPlayerProgress.player.id !== userId ||
+      result.secondPlayerProgress?.player.id !== userId
+    ) {
+      throw new ForbiddenException();
+    }
+
+    return result;
+  }
 }
