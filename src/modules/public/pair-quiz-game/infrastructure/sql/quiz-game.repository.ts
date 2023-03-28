@@ -14,6 +14,7 @@ import { SqlGameQuestions } from "./entity/sql-game-questions.entity";
 import { GameDb } from "./pojo/game.db";
 import { toViewJoinGame } from "../../../../../common/data-mapper/to-view-join-game";
 import { SendAnswerDto } from "../../applications/dto/send-answer.dto";
+import {log} from "util";
 
 export class QuizGameRepository implements IQuizGameRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -126,16 +127,26 @@ export class QuizGameRepository implements IQuizGameRepository{
       if (dto.answerStatus === AnswerStatus.Correct) {
         score = 1
       }
+
       await manager.createQueryBuilder()
           .update(SqlGameProgress)
           .set({score: () => `score + ${score}`})
           .where('userId = :userId', {userId: dto.userId})
           .andWhere('questionsId = :questionsId', {questionsId: dto.questionsId})
 
+      if (dto.isLastQuestions) {
+        await manager.createQueryBuilder()
+            .update(SqlGame)
+            .set({
+              status: GameStatus.Finished,
+              finishGameDate: new Date().toISOString()
+            })
+            .where('id = :id', {gameId: dto.gameId})
+      }
+
       await queryRunner.commitTransaction()
       return new ViewAnswer(dto.questionsId, dto.answerStatus, createdAnswer.addedAt)
     } catch (e) {
-      console.log(e);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
@@ -149,13 +160,5 @@ export class QuizGameRepository implements IQuizGameRepository{
        LIMIT 5
     `
     return await this.dataSource.query(query)
-    // const builder = this.dataSource
-    //   .createQueryBuilder(SqlQuestions, 'q')
-    //   .select('q.id', 'id')
-    //   .where(`EXISTS(SELECT * FROM sql_correct_answers)`)
-    //   .orderBy('RANDOM()')
-    //   .limit(5);
-    // const result = await builder.getRawMany();
-    // return result.map(r => r.id)
   }
 }

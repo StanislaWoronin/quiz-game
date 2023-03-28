@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm';
 import { SqlUsers } from '../../../../../sa/users/infrastructure/sql/entity/users.entity';
 import { SqlQuestions } from '../../../../../sa/questions/infrastructure/sql/entity/questions.entity';
 import {SqlGame} from "./sql-game.entity";
@@ -8,10 +8,13 @@ import {AnswerStatus} from "../../../shared/answer-status";
 
 @Entity()
 export class SqlUserAnswer {
+  @PrimaryGeneratedColumn()
+  id: string
+
   @ManyToOne(() => SqlUsers, (u) => u.answers)
   @JoinColumn()
   user: SqlUsers;
-  @PrimaryColumn() userId: string;
+  @Column() userId: string;
 
   @ManyToOne(() => SqlQuestions, (q) => q.userAnswer)
   @JoinColumn()

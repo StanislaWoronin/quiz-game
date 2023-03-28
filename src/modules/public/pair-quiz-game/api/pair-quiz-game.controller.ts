@@ -39,12 +39,16 @@ export class PairQuizGameController {
     @Body() dto: AnswerDto,
     @UserId() userId: string,
   ): Promise<ViewAnswer> {
-    const result = await this.gameService.sendAnswer(userId, dto);
-    if (!result) {
+    const hasActiveGame = await this.gameQueryRepository.checkUserCurrentGame(userId)
+    if (!hasActiveGame) {
       throw new ForbiddenException();
     }
+    const result = await this.gameService.sendAnswer(userId, dto);
+    if (!result) {
+      throw new ForbiddenException(); // if player already answered to all questions
+    }
 
-    return result;
+    return result
   }
 
   @HttpCode(HttpStatus.OK)
@@ -59,20 +63,16 @@ export class PairQuizGameController {
     @Param() gameId: ParamsId,
     @UserId() userId: string,
   ): Promise<ViewGame> {
-    const result = await this.gameQueryRepository.getGameById(gameId.id);
-    if (!result) {
+    const players = await this.gameQueryRepository.getPlayerByGameId(gameId.id)
+    if (!players.length) {
       throw new NotFoundException();
     }
-    if (
-      result.firstPlayerProgress.player.id !== userId ||
-      result.secondPlayerProgress?.player.id !== userId
-    ) {
-      console.log('user is not in game')
-      console.log(result)
-      console.log(userId)
+
+    const isPlayer = players.find(el => el.playerId === userId)
+    if (!isPlayer) {
       throw new ForbiddenException();
     }
 
-    return result;
+    return await this.gameQueryRepository.getGameById(gameId.id, userId);
   }
 }

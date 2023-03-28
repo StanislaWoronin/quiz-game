@@ -2,6 +2,8 @@ import {GameDb} from "../../modules/public/pair-quiz-game/infrastructure/sql/poj
 import {ViewGame} from "../../modules/public/pair-quiz-game/api/view/view-game";
 import {Questions} from "../../modules/public/pair-quiz-game/shared/questions";
 import {ViewAnswer} from "../../modules/public/pair-quiz-game/api/view/view-answer";
+import {ViewGameProgress} from "../../modules/public/pair-quiz-game/api/view/view-game-progress";
+import {GameStatus} from "../../modules/public/pair-quiz-game/shared/game-status";
 
 export const toViewGame = (game: GameDb[]): ViewGame => {
     const questions = getQuestions(game.slice(0,5))
@@ -9,22 +11,8 @@ export const toViewGame = (game: GameDb[]): ViewGame => {
 
     return {
         id: game[0].id,
-            firstPlayerProgress: {
-            answers: getAnswers(game.slice(0,5)),
-            player: {
-                id: game[0].userId,
-                login: game[0].login
-            },
-            score: score.firstScore
-        },
-        secondPlayerProgress: {
-            answers: getAnswers(game.slice(5, 10)),
-            player: {
-                id: game[5].userId,
-                login: game[5].login
-            },
-            score: score.secondScore
-        },
+        firstPlayerProgress: getPlayerProgress(game.slice(0,5), score.firstScore),
+        secondPlayerProgress: getPlayerProgress(game.slice(5,10), score.firstScore),
         questions,
         status: game[0].status,
         pairCreatedDate: game[0].pairCreatedDate,
@@ -34,6 +22,9 @@ export const toViewGame = (game: GameDb[]): ViewGame => {
 }
 
 const getQuestions = (game: GameDb[]): Questions[] => {
+    if (game[0].status === GameStatus.PendingSecondPlayer) {
+        return null
+    }
     const questions = []
     game.map(g => {
         questions.push({
@@ -43,6 +34,21 @@ const getQuestions = (game: GameDb[]): Questions[] => {
     });
 
     return questions
+}
+
+const getPlayerProgress = (game: GameDb[], score: number): ViewGameProgress | null => {
+    if (!game.length) {
+        return null
+    }
+
+    return {
+        answers: getAnswers(game),
+        player: {
+            id: game[0].userId,
+            login: game[0].login
+        },
+        score
+    }
 }
 
 const getAnswers = (game: GameDb[]): ViewAnswer[] => {
@@ -63,9 +69,9 @@ const getAnswers = (game: GameDb[]): ViewAnswer[] => {
 }
 
 const getScore = (firstPlayerProgress: GameDb, secondPlayerProgress: GameDb): { firstScore: number, secondScore: number } => {
-    if (!firstPlayerProgress.addedAt && !secondPlayerProgress.addedAt) {
+    if (!secondPlayerProgress) {
         return {
-            firstScore: firstPlayerProgress.score, secondScore: secondPlayerProgress.score
+            firstScore: 0, secondScore: 0
         }
     }
     if (!firstPlayerProgress.addedAt) {
@@ -87,5 +93,8 @@ const getScore = (firstPlayerProgress: GameDb, secondPlayerProgress: GameDb): { 
         return {
             firstScore: firstPlayerProgress.score + 1, secondScore: secondPlayerProgress.score
         }
+    }
+    return {
+        firstScore: firstPlayerProgress.score, secondScore: secondPlayerProgress.score
     }
 }

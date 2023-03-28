@@ -2,7 +2,6 @@ import {Questions} from '../../shared/questions';
 import {GameStatus} from '../../shared/game-status';
 import {ViewGameProgress} from './view-game-progress';
 import {SqlGame} from '../../infrastructure/sql/entity/sql-game.entity';
-import {ViewPlayer} from './view-player';
 
 export class ViewGame {
   id: string;

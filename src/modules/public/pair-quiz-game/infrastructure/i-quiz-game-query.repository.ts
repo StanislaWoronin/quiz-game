@@ -1,12 +1,16 @@
 import { ViewGame } from '../api/view/view-game';
-import { CheckGameProgressDb } from "./sql/pojo/checkGameProgressDb";
+import { CheckAnswerProgressDb } from "./sql/pojo/checkAnswerProgressDb";
+import {PlayerIdDb} from "./sql/pojo/player-id.db";
+import {GetCorrectAnswerDb} from "./sql/pojo/get-correct-answer.db";
 
 export interface IQuizGameQueryRepository {
-  getMyCurrentGame(userId): Promise<ViewGame>;
-  getGameById(gameId): Promise<ViewGame>;
+  getMyCurrentGame(userId: string): Promise<ViewGame>;
+  getGameById(gameId: string, userId: string): Promise<ViewGame>;
+  getPlayerByGameId(gameId: string): Promise<PlayerIdDb[]>
+  getCorrectAnswers(userId: string, questionNumber: number): Promise<GetCorrectAnswerDb>
   checkUserCurrentGame(userId: string): Promise<boolean>;
   checkOpenGame(): Promise<string | null>;
-  checkUserGameProgress(userId: string): Promise<CheckGameProgressDb>;
+  checkUserAnswerProgress(userId: string): Promise<CheckAnswerProgressDb[]>;
 }
 
 export const IQuizGameQueryRepository = 'IQuizGameQueryRepository';

@@ -19,11 +19,12 @@ export class GameFactory {
     async sendManyAnswer(token: string, questions: Questions[], answers: TestAnswersType) {
         for (let key in answers) {
             if (key === "score") break
-            if (answers[Number(key) - 1] === AnswerStatus.Incorrect) {
+
+            if (answers[Number(key)] === AnswerStatus.Incorrect) {
                 await this.game.sendAnswer(faker.random.alpha(5), token)
             } else {
                 const correctAnswer = preparedGameData
-                    .find(gameData => gameData.body === questions[Number(key) - 1].body)
+                    .find(gameData => gameData.body === questions[Number(key)].body)
                     .correctAnswers[0]
                 await this.game.sendAnswer(correctAnswer, token)
             }

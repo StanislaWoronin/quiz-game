@@ -4,11 +4,13 @@ import {GameStatus} from "../../shared/game-status";
 import {SqlGame} from "./entity/sql-game.entity";
 import {InjectDataSource} from "@nestjs/typeorm";
 import {DataSource} from "typeorm";
-import { CheckGameProgressDb } from "./pojo/checkGameProgressDb";
+import { CheckAnswerProgressDb } from "./pojo/checkAnswerProgressDb";
 import {ViewGame} from "../../api/view/view-game";
 import {toViewJoinGame} from "../../../../../common/data-mapper/to-view-join-game";
 import {toViewGame} from "../../../../../common/data-mapper/to-view-game";
 import {GameDb} from "./pojo/game.db";
+import {PlayerIdDb} from "./pojo/player-id.db";
+import {GetCorrectAnswerDb} from "./pojo/get-correct-answer.db";
 
 export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -44,7 +46,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
         return toViewGame(result)
     }
 
-    async getGameById(gameId): Promise<ViewGame | null> {
+    async getGameById(gameId: string, userId: string): Promise<ViewGame | null> {
         const query = `
             SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
                    gp."userId", gp.score,
@@ -70,7 +72,33 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
         if (!result.length) {
             return null
         }
+
         return toViewGame(result)
+    }
+
+    async getPlayerByGameId(gameId: string): Promise<PlayerIdDb[]> {
+        const query = `
+            SELECT "userId" AS "playerId"
+              FROM sql_game_progress
+             WHERE "gameId" = $1;
+        `
+        return await this.dataSource.query(query, [gameId])
+    }
+
+    async getCorrectAnswers(userId: string, lastQuestionNumber: number): Promise<GetCorrectAnswerDb> {
+        const query = `
+            SELECT gq."gameId", gq."questionId", q."correctAnswers"
+              FROM sql_game_progress gp
+              LEFT JOIN sql_game_questions gq
+                ON gq."gameId" = gp."gameId"
+              LEFT JOIN sql_questions q
+                ON q.id = gq."questionId"
+             WHERE gp."userId" = $1
+            OFFSET $2 LIMIT 1;
+        `
+        const result = await this.dataSource.query(query, [userId, lastQuestionNumber])
+
+        return result[0]
     }
 
     async checkUserCurrentGame(userId: string): Promise<boolean> {
@@ -88,7 +116,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
 
     async checkOpenGame(): Promise<string | null> {
         const query = ` 
-            SELECT id FROM sql_game WHERE status = $1
+            SELECT id FROM sql_game WHERE status = $1;
         `
         const result = await this.dataSource.query(query, [GameStatus.PendingSecondPlayer])
 
@@ -98,24 +126,17 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
         return result[0].id
     }
 
-    async checkUserGameProgress(userId: string): Promise<CheckGameProgressDb> {
+    async checkUserAnswerProgress(userId: string): Promise<CheckAnswerProgressDb[]> {
         const query = `
-            SELECT gp."gameId", ua."userAnswer",
-                   q.id AS "questionId", q."correctAnswers" 
-              FROM sql_game_progress gp
-              LEFT JOIN sql_user_answer ua
-                ON ua."gameId" = gp."gameId" 
-               AND ua."userId" = $1
-              LEFT JOIN sql_game_questions gq
-                ON gq."gameId" = gp."gameId" 
-              LEFT JOIN sql_questions q
-                ON q.id = gq."questionId"
-              WHERE gp."userId" = $1
-                AND ua."userAnswer" isNull
-              LIMIT 1;
+            SELECT ua."userAnswer"
+              FROM sql_user_answer ua
+              LEFT JOIN sql_game_progress gp
+                ON gp."userId" = ua."userId"
+              LEFT JOIN sql_game g
+                ON g.id = gp."gameId"
+             WHERE ua."userId" = $1
+               AND g.status = $2; 
         `
-        const result = await this.dataSource.query(query, [userId])
-
-        return result[0]
+        return await this.dataSource.query(query, [userId, GameStatus.Active])
     }
 }

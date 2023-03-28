@@ -15,7 +15,7 @@ export const expectViewGame = (member: MemberType, status: GameStatus, questions
         items = questions()
     }
     let startGameDate = null
-    if (status === GameStatus.Active) {
+    if (status === GameStatus.Active || status === GameStatus.Finished) {
         startGameDate = expect.any(String)
     }
     let finishGameDate = null

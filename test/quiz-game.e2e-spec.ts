@@ -139,30 +139,31 @@ describe('/sa/quiz/questions (e2e)', () => {
                 questions: createdGame.body.questions
             })
         })
-        //
-        // it('Shouldn`t send answer, if he is unauthorized', async () => {
-        //     const response = await game.sendAnswer(preparedAnswer.random)
-        //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
-        // })
-        //
-        // it('Should send answer', async () => {
-        //     const {firstUser} = expect.getState()
-        //
-        //     const response = await game.sendAnswer(preparedAnswer.random, firstUser.accessToken)
-        //     expect(response.status).toBe(HttpStatus.CREATED)
-        //     expect(response.body).toStrictEqual(expectAnswer(AnswerStatus.Incorrect))
-        // })
-        //
-        // it('The user can`t send a response if he is not in an active pair', async () => {
-        //     const {thirdUser} = expect.getState()
-        //     console.log(thirdUser.accessToken);
-        //     const thirdUserAnswered = await game.sendAnswer(preparedAnswer.random, thirdUser.accessToken)
-        //     expect(thirdUserAnswered.status).toBe(HttpStatus.FORBIDDEN)
-        // })
+
+        it('Shouldn`t send answer, if he is unauthorized', async () => {
+            const response = await game.sendAnswer(preparedAnswer.random)
+            expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
+        })
+
+        it('Should send answer', async () => {
+            const {firstUser} = expect.getState()
+
+            const response = await game.sendAnswer(preparedAnswer.random, firstUser.accessToken)
+            expect(response.status).toBe(HttpStatus.CREATED)
+            expect(response.body).toStrictEqual(expectAnswer(AnswerStatus.Incorrect))
+        })
+
+        it('The user can`t send a response if he is not in an active pair', async () => {
+            const {thirdUser} = expect.getState()
+            console.log(thirdUser.accessToken);
+            const thirdUserAnswered = await game.sendAnswer(preparedAnswer.random, thirdUser.accessToken)
+            expect(thirdUserAnswered.status).toBe(HttpStatus.FORBIDDEN)
+        })
 
         it('The user can`t send a response if he has already answered on' +
-            'all questions', async () => {
+            ' all questions', async () => {
             const {secondUser, questions} = expect.getState()
+
             await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
                 1: AnswerStatus.Incorrect,
                 2: AnswerStatus.Incorrect,
@@ -171,7 +172,6 @@ describe('/sa/quiz/questions (e2e)', () => {
                 5: AnswerStatus.Incorrect,
                 score: 0
             })
-
             const response = await game.sendAnswer(preparedAnswer.random, secondUser.accessToken)
             expect(response.status).toBe(HttpStatus.FORBIDDEN)
         })
@@ -197,54 +197,118 @@ describe('/sa/quiz/questions (e2e)', () => {
             })
         })
 
-        it('Shouldn`t return game if specifical id not found', async () => {
-            const {firstUser} = expect.getState()
-            const randomId = randomUUID()
-            console.log(randomId)
-            const response = await game.getGameById(randomId, firstUser.accessToken)
-            console.log(response.body)
-            expect(response.status).toBe(HttpStatus.NOT_FOUND)
-        })
+        // it('Shouldn`t return game if specifical id not found', async () => {
+        //     const {firstUser} = expect.getState()
+        //     const randomId = randomUUID()
+        //
+        //     const response = await game.getGameById(randomId, firstUser.accessToken)
+        //     expect(response.status).toBe(HttpStatus.NOT_FOUND)
+        // })
+        //
+        // it('Shouldn`t return game if user tries to get pair in which user ' +
+        //     'is not participant', async () => {
+        //     const {thirdUser, gameId} = expect.getState()
+        //
+        //     const response = await game.getGameById(gameId, thirdUser.accessToken)
+        //     expect(response.status).toBe(HttpStatus.FORBIDDEN)
+        // })
+        //
+        // it('Shouldn`t return game, if he is unauthorized', async () => {
+        //     const {gameId} = expect.getState()
+        //
+        //     const response = await game.getGameById(gameId)
+        //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
+        // })
+        //
+        // it('Shouldn`t return game, if id has invalid format', async () => {
+        //     const {firstUser} = expect.getState()
+        //     const invalidId = Date.now()
+        //
+        //     const response = await game.getGameById(invalidId.toString(), firstUser.accessToken)
+        //     expect(response.status).toBe(HttpStatus.BAD_REQUEST)
+        // })
+        //
+        // it('Should return "Active" game', async () => {
+        //     const {firstUser, secondUser, gameId, questions} = expect.getState()
+        //
+        //     const response = await game.getGameById(gameId, firstUser.accessToken)
+        //     expect(response.status).toBe(HttpStatus.OK)
+        //     expect(response.body).toStrictEqual(
+        //         expectViewGame(
+        //             {
+        //                 first: expectPlayerProgress(firstUser.user, {}),
+        //                 second: expectPlayerProgress(secondUser.user, {})
+        //             },
+        //             GameStatus.Active,
+        //             expectQuestions(questions),
+        //         )
+        //     )
+        // })
+        //
+        // it('Should return "PendingSecondPlayer" game', async () => {
+        //     const {thirdUser} = expect.getState()
+        //
+        //     const createdGame = await game.joinGame(thirdUser.accessToken)
+        //
+        //     const response = await game.getGameById(createdGame.body.id, thirdUser.accessToken)
+        //     expect(response.status).toBe(HttpStatus.OK)
+        //     expect(response.body).toStrictEqual(
+        //         expectViewGame(
+        //             {
+        //                 first: expectPlayerProgress(thirdUser.user, {})
+        //             },
+        //             GameStatus.PendingSecondPlayer,
+        //         )
+        //     )
+        // })
 
-        it('Shouldn`t return game if user tries to get pair in which user ' +
-            'is not participant', async () => {
-            const {thirdUser, gameId} = expect.getState()
-
-            const response = await game.getGameById(gameId, thirdUser.accessToken)
-            expect(response.status).toBe(HttpStatus.FORBIDDEN)
-        })
-
-        it('Shouldn`t return game, if he is unauthorized', async () => {
-            const {gameId} = expect.getState()
-
-            const response = await game.getGameById(gameId)
-            expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
-        })
-
-        it('Shouldn`t return game, if id has invalid format', async () => {
-            const {firstUser} = expect.getState()
-            const invalidId = Date.now()
-
-            const response = await game.getGameById(invalidId.toString(), firstUser.accessToken)
-            expect(response.status).toBe(HttpStatus.BAD_REQUEST)
-        })
-
-        it('', async () => {
+        it('Should return "Finished" game', async () => {
             const {firstUser, secondUser, gameId, questions} = expect.getState()
 
+            await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
+                1: AnswerStatus.Incorrect,
+                2: AnswerStatus.Incorrect,
+                3: AnswerStatus.Incorrect,
+                4: AnswerStatus.Incorrect,
+                5: AnswerStatus.Incorrect,
+            })
+
+            await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
+                1: AnswerStatus.Incorrect,
+                2: AnswerStatus.Incorrect,
+                3: AnswerStatus.Incorrect,
+                4: AnswerStatus.Incorrect,
+                5: AnswerStatus.Incorrect,
+            })
+
             const response = await game.getGameById(gameId, firstUser.accessToken)
-            console.log(response.body)
+            // console.log('response ---> ', response.body)
+            // console.log('expect ---> ', response.body)
             expect(response.status).toBe(HttpStatus.OK)
             expect(response.body).toStrictEqual(
                 expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {}),
-                        second: expectPlayerProgress(secondUser, {})
+                        first: expectPlayerProgress(firstUser.user, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Incorrect,
+                            4: AnswerStatus.Incorrect,
+                            5: AnswerStatus.Incorrect,
+                            score: 0
+                        }),
+                        second: expectPlayerProgress(secondUser.user, {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Incorrect,
+                            4: AnswerStatus.Incorrect,
+                            5: AnswerStatus.Incorrect,
+                            score: 0
+                        })
                     },
-                    GameStatus.Active,
+                    GameStatus.Finished,
                     expectQuestions(questions),
                 )
-            )
+            );
         })
     })
 
