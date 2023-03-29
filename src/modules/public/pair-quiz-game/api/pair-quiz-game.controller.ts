@@ -39,8 +39,8 @@ export class PairQuizGameController {
     @Body() dto: AnswerDto,
     @UserId() userId: string,
   ): Promise<ViewAnswer> {
-    const hasActiveGame = await this.gameQueryRepository.checkUserCurrentGame(userId)
-    if (!hasActiveGame) {
+    const currentGame = await this.gameQueryRepository.checkUserCurrentGame(userId)
+    if (!currentGame) {
       throw new ForbiddenException();
     }
     const result = await this.gameService.sendAnswer(userId, dto);
@@ -52,13 +52,18 @@ export class PairQuizGameController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('my-current')
+  @Get('my-current') // return game witch has status "Active"
   async getMyCurrentGame(@UserId() userId: string): Promise<ViewGame> {
-    return await this.gameQueryRepository.getMyCurrentGame(userId);
-  } // return game witch has status "Active"
+    const currentGame = await this.gameQueryRepository.checkUserCurrentGame(userId)
+    if (!currentGame) {
+      throw new NotFoundException();
+    }
+
+    return await this.gameQueryRepository.getMyCurrentGame(currentGame);
+  }
 
   @HttpCode(HttpStatus.OK)
-  @Get(':id')
+  @Get(':id') // return the game with any status
   async getGameById(
     @Param() gameId: ParamsId,
     @UserId() userId: string,
@@ -73,6 +78,6 @@ export class PairQuizGameController {
       throw new ForbiddenException();
     }
 
-    return await this.gameQueryRepository.getGameById(gameId.id, userId);
+    return await this.gameQueryRepository.getGameById(gameId.id);
   }
 }

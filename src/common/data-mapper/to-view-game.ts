@@ -84,12 +84,12 @@ const getScore = (firstPlayerProgress: GameDb, secondPlayerProgress: GameDb): { 
             firstScore: firstPlayerProgress.score + 1, secondScore: secondPlayerProgress.score
         }
     }
-    if (new Date(firstPlayerProgress.addedAt) > new Date(secondPlayerProgress.addedAt)) {
+    if (new Date(firstPlayerProgress.addedAt) > new Date(secondPlayerProgress.addedAt) && firstPlayerProgress.score !== 0) {
         return {
             firstScore: firstPlayerProgress.score, secondScore: secondPlayerProgress.score + 1
         }
     }
-    if (new Date(firstPlayerProgress.addedAt) < new Date(secondPlayerProgress.addedAt)) {
+    if (new Date(firstPlayerProgress.addedAt) < new Date(secondPlayerProgress.addedAt) && secondPlayerProgress.score !== 0) {
         return {
             firstScore: firstPlayerProgress.score + 1, secondScore: secondPlayerProgress.score
         }

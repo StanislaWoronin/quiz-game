@@ -15,6 +15,7 @@ import { GameDb } from "./pojo/game.db";
 import { toViewJoinGame } from "../../../../../common/data-mapper/to-view-join-game";
 import { SendAnswerDto } from "../../applications/dto/send-answer.dto";
 import {log} from "util";
+import {GameProgressDb} from "./pojo/game-progress.db";
 
 export class QuizGameRepository implements IQuizGameRepository{
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -114,39 +115,53 @@ export class QuizGameRepository implements IQuizGameRepository{
       await queryRunner.startTransaction();
       const manager = queryRunner.manager;
 
-      const createdAnswer = await manager
-          .save(new SqlUserAnswer(
-              dto.userId,
-              dto.gameId,
-              dto.questionsId,
-              dto.answer,
-              dto.answerStatus,
-          ))
+      const answer = new SqlUserAnswer(
+          dto.userId,
+          dto.gameId,
+          dto.questionsId,
+          dto.answer,
+          dto.answerStatus,
+      )
+      const createdAnswer = await manager.save(answer)
 
       let score = 0
       if (dto.answerStatus === AnswerStatus.Correct) {
         score = 1
       }
 
-      await manager.createQueryBuilder()
-          .update(SqlGameProgress)
-          .set({score: () => `score + ${score}`})
-          .where('userId = :userId', {userId: dto.userId})
-          .andWhere('questionsId = :questionsId', {questionsId: dto.questionsId})
-
+      let extraScore = 0
       if (dto.isLastQuestions) {
+        // if one item returned, then the current player was the first to answer on all questions
+        const lastQuestionProgress: GameProgressDb[] = await manager.query(this.getQuery(), [dto.gameId, dto.questionsId])
+        if (lastQuestionProgress.length === 1 && lastQuestionProgress[0].score > 0) {
+          extraScore = 1
+        }
+
+        if (lastQuestionProgress.length === 2) {
+          await manager.createQueryBuilder()
+              .update(SqlGame)
+              .set({
+                status: GameStatus.Finished,
+                finishGameDate: new Date().toISOString()
+              })
+              .where('id = :gameId', {gameId: dto.gameId})
+              .execute()
+        }
+      }
+
+      if (score + extraScore !== 0) {
         await manager.createQueryBuilder()
-            .update(SqlGame)
-            .set({
-              status: GameStatus.Finished,
-              finishGameDate: new Date().toISOString()
-            })
-            .where('id = :id', {gameId: dto.gameId})
+            .update(SqlGameProgress)
+            .set({score: () => `score + ${score} + ${extraScore}`})
+            .where('userId = :userId', {userId: dto.userId})
+            .andWhere('gameId = :gameId', {gameId: dto.gameId})
+            .execute()
       }
 
       await queryRunner.commitTransaction()
       return new ViewAnswer(dto.questionsId, dto.answerStatus, createdAnswer.addedAt)
     } catch (e) {
+
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
@@ -160,5 +175,16 @@ export class QuizGameRepository implements IQuizGameRepository{
        LIMIT 5
     `
     return await this.dataSource.query(query)
+  }
+
+  private getQuery(): string {
+    return `
+      SELECT gp.score
+        FROM sql_game_progress gp
+        LEFT JOIN sql_user_answer ua
+          ON ua."userId" = gp."userId"
+       WHERE gp."gameId" = $1
+         AND ua."questionId" = $2;
+    `
   }
 }

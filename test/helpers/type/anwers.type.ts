@@ -6,5 +6,4 @@ export type TestAnswersType = Partial<{
     3: AnswerStatus,
     4: AnswerStatus,
     5: AnswerStatus,
-    score: number
 }>

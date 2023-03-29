@@ -170,7 +170,6 @@ describe('/sa/quiz/questions (e2e)', () => {
                 3: AnswerStatus.Incorrect,
                 4: AnswerStatus.Incorrect,
                 5: AnswerStatus.Incorrect,
-                score: 0
             })
             const response = await game.sendAnswer(preparedAnswer.random, secondUser.accessToken)
             expect(response.status).toBe(HttpStatus.FORBIDDEN)
@@ -197,77 +196,77 @@ describe('/sa/quiz/questions (e2e)', () => {
             })
         })
 
-        // it('Shouldn`t return game if specifical id not found', async () => {
-        //     const {firstUser} = expect.getState()
-        //     const randomId = randomUUID()
-        //
-        //     const response = await game.getGameById(randomId, firstUser.accessToken)
-        //     expect(response.status).toBe(HttpStatus.NOT_FOUND)
-        // })
-        //
-        // it('Shouldn`t return game if user tries to get pair in which user ' +
-        //     'is not participant', async () => {
-        //     const {thirdUser, gameId} = expect.getState()
-        //
-        //     const response = await game.getGameById(gameId, thirdUser.accessToken)
-        //     expect(response.status).toBe(HttpStatus.FORBIDDEN)
-        // })
-        //
-        // it('Shouldn`t return game, if he is unauthorized', async () => {
-        //     const {gameId} = expect.getState()
-        //
-        //     const response = await game.getGameById(gameId)
-        //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
-        // })
-        //
-        // it('Shouldn`t return game, if id has invalid format', async () => {
-        //     const {firstUser} = expect.getState()
-        //     const invalidId = Date.now()
-        //
-        //     const response = await game.getGameById(invalidId.toString(), firstUser.accessToken)
-        //     expect(response.status).toBe(HttpStatus.BAD_REQUEST)
-        // })
-        //
-        // it('Should return "Active" game', async () => {
-        //     const {firstUser, secondUser, gameId, questions} = expect.getState()
-        //
-        //     const response = await game.getGameById(gameId, firstUser.accessToken)
-        //     expect(response.status).toBe(HttpStatus.OK)
-        //     expect(response.body).toStrictEqual(
-        //         expectViewGame(
-        //             {
-        //                 first: expectPlayerProgress(firstUser.user, {}),
-        //                 second: expectPlayerProgress(secondUser.user, {})
-        //             },
-        //             GameStatus.Active,
-        //             expectQuestions(questions),
-        //         )
-        //     )
-        // })
-        //
-        // it('Should return "PendingSecondPlayer" game', async () => {
-        //     const {thirdUser} = expect.getState()
-        //
-        //     const createdGame = await game.joinGame(thirdUser.accessToken)
-        //
-        //     const response = await game.getGameById(createdGame.body.id, thirdUser.accessToken)
-        //     expect(response.status).toBe(HttpStatus.OK)
-        //     expect(response.body).toStrictEqual(
-        //         expectViewGame(
-        //             {
-        //                 first: expectPlayerProgress(thirdUser.user, {})
-        //             },
-        //             GameStatus.PendingSecondPlayer,
-        //         )
-        //     )
-        // })
+        it('Shouldn`t return game if specifical id not found', async () => {
+            const {firstUser} = expect.getState()
+            const randomId = randomUUID()
+
+            const response = await game.getGameById(randomId, firstUser.accessToken)
+            expect(response.status).toBe(HttpStatus.NOT_FOUND)
+        })
+
+        it('Shouldn`t return game if user tries to get pair in which user ' +
+            'is not participant', async () => {
+            const {thirdUser, gameId} = expect.getState()
+
+            const response = await game.getGameById(gameId, thirdUser.accessToken)
+            expect(response.status).toBe(HttpStatus.FORBIDDEN)
+        })
+
+        it('Shouldn`t return game, if he is unauthorized', async () => {
+            const {gameId} = expect.getState()
+
+            const response = await game.getGameById(gameId)
+            expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
+        })
+
+        it('Shouldn`t return game, if id has invalid format', async () => {
+            const {firstUser} = expect.getState()
+            const invalidId = Date.now()
+
+            const response = await game.getGameById(invalidId.toString(), firstUser.accessToken)
+            expect(response.status).toBe(HttpStatus.BAD_REQUEST)
+        })
+
+        it('Should return "Active" game', async () => {
+            const {firstUser, secondUser, gameId, questions} = expect.getState()
+
+            const response = await game.getGameById(gameId, firstUser.accessToken)
+            expect(response.status).toBe(HttpStatus.OK)
+            expect(response.body).toStrictEqual(
+                expectViewGame(
+                    {
+                        first: expectPlayerProgress(firstUser.user, {}),
+                        second: expectPlayerProgress(secondUser.user, {})
+                    },
+                    GameStatus.Active,
+                    expectQuestions(questions),
+                )
+            )
+        })
+
+        it('Should return "PendingSecondPlayer" game', async () => {
+            const {thirdUser} = expect.getState()
+
+            const createdGame = await game.joinGame(thirdUser.accessToken)
+
+            const response = await game.getGameById(createdGame.body.id, thirdUser.accessToken)
+            expect(response.status).toBe(HttpStatus.OK)
+            expect(response.body).toStrictEqual(
+                expectViewGame(
+                    {
+                        first: expectPlayerProgress(thirdUser.user, {})
+                    },
+                    GameStatus.PendingSecondPlayer,
+                )
+            )
+        })
 
         it('Should return "Finished" game', async () => {
             const {firstUser, secondUser, gameId, questions} = expect.getState()
 
             await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
                 1: AnswerStatus.Incorrect,
-                2: AnswerStatus.Incorrect,
+                2: AnswerStatus.Correct,
                 3: AnswerStatus.Incorrect,
                 4: AnswerStatus.Incorrect,
                 5: AnswerStatus.Incorrect,
@@ -277,38 +276,54 @@ describe('/sa/quiz/questions (e2e)', () => {
                 1: AnswerStatus.Incorrect,
                 2: AnswerStatus.Incorrect,
                 3: AnswerStatus.Incorrect,
-                4: AnswerStatus.Incorrect,
+                4: AnswerStatus.Correct,
                 5: AnswerStatus.Incorrect,
             })
 
             const response = await game.getGameById(gameId, firstUser.accessToken)
-            // console.log('response ---> ', response.body)
-            // console.log('expect ---> ', response.body)
+            const expectGame = expectViewGame(
+                {
+                    first: expectPlayerProgress(firstUser.user, {
+                        1: AnswerStatus.Incorrect,
+                        2: AnswerStatus.Correct,
+                        3: AnswerStatus.Incorrect,
+                        4: AnswerStatus.Incorrect,
+                        5: AnswerStatus.Incorrect,
+                    }, 2),
+                    second: expectPlayerProgress(secondUser.user, {
+                        1: AnswerStatus.Incorrect,
+                        2: AnswerStatus.Incorrect,
+                        3: AnswerStatus.Incorrect,
+                        4: AnswerStatus.Correct,
+                        5: AnswerStatus.Incorrect,
+                    }, 1)
+                },
+                GameStatus.Finished,
+                expectQuestions(questions),
+            )
+            console.log('response ---> ', response.body.firstPlayerProgress.answers)
+            console.log('expect ---> ', expectGame.firstPlayerProgress.answers)
             expect(response.status).toBe(HttpStatus.OK)
-            expect(response.body).toStrictEqual(
-                expectViewGame(
-                    {
-                        first: expectPlayerProgress(firstUser.user, {
-                            1: AnswerStatus.Incorrect,
-                            2: AnswerStatus.Incorrect,
-                            3: AnswerStatus.Incorrect,
-                            4: AnswerStatus.Incorrect,
-                            5: AnswerStatus.Incorrect,
-                            score: 0
-                        }),
-                        second: expectPlayerProgress(secondUser.user, {
-                            1: AnswerStatus.Incorrect,
-                            2: AnswerStatus.Incorrect,
-                            3: AnswerStatus.Incorrect,
-                            4: AnswerStatus.Incorrect,
-                            5: AnswerStatus.Incorrect,
-                            score: 0
-                        })
-                    },
-                    GameStatus.Finished,
-                    expectQuestions(questions),
-                )
-            );
+            expect(response.body).toStrictEqual(expectViewGame(
+                {
+                    first: expectPlayerProgress(firstUser.user, {
+                        1: AnswerStatus.Incorrect,
+                        2: AnswerStatus.Incorrect,
+                        3: AnswerStatus.Incorrect,
+                        4: AnswerStatus.Incorrect,
+                        5: AnswerStatus.Incorrect,
+                    }),
+                    second: expectPlayerProgress(secondUser.user, {
+                        1: AnswerStatus.Incorrect,
+                        2: AnswerStatus.Incorrect,
+                        3: AnswerStatus.Incorrect,
+                        4: AnswerStatus.Incorrect,
+                        5: AnswerStatus.Incorrect,
+                    })
+                },
+                GameStatus.Finished,
+                expectQuestions(questions),
+            ))
         })
     })
 
@@ -354,8 +369,8 @@ describe('/sa/quiz/questions (e2e)', () => {
             expect(response.body).toStrictEqual(
                 expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {}),
-                        second: expectPlayerProgress(secondUser, {})
+                        first: expectPlayerProgress(firstUser.user, {}),
+                        second: expectPlayerProgress(secondUser.user, {})
                     },
                     GameStatus.Active,
                     expectQuestions(questions),
@@ -394,8 +409,10 @@ describe('/sa/quiz/questions (e2e)', () => {
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, { 1: AnswerStatus.Incorrect }),
-                        second: expectPlayerProgress(secondUser, {})
+                        first: expectPlayerProgress(firstUser.user, {
+                            1: AnswerStatus.Incorrect
+                        }),
+                        second: expectPlayerProgress(secondUser.user, {})
                     },
                     GameStatus.Active,
                     expectQuestions(questions),
@@ -411,8 +428,12 @@ describe('/sa/quiz/questions (e2e)', () => {
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, { 1: AnswerStatus.Incorrect }),
-                        second: expectPlayerProgress(secondUser, { 1: AnswerStatus.Correct, score: 1 })
+                        first: expectPlayerProgress(firstUser.user, {
+                            1: AnswerStatus.Incorrect
+                        }),
+                        second: expectPlayerProgress(secondUser.user, {
+                            1: AnswerStatus.Correct
+                        }, 1)
                     },
                     GameStatus.Active,
                     expectQuestions(questions),
@@ -428,12 +449,13 @@ describe('/sa/quiz/questions (e2e)', () => {
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {
+                        first: expectPlayerProgress(firstUser.user, {
                             1: AnswerStatus.Incorrect,
                             2: AnswerStatus.Correct,
-                            score: 1
-                        }),
-                        second: expectPlayerProgress(secondUser, { 1: AnswerStatus.Correct, score: 1 })
+                        }, 1),
+                        second: expectPlayerProgress(secondUser.user, {
+                            1: AnswerStatus.Correct,
+                        }, 1)
                     },
                     GameStatus.Active,
                     expectQuestions(questions),
@@ -449,16 +471,14 @@ describe('/sa/quiz/questions (e2e)', () => {
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {
+                        first: expectPlayerProgress(firstUser.user, {
                             1: AnswerStatus.Incorrect,
                             2: AnswerStatus.Correct,
-                            score: 1
-                        }),
-                        second: expectPlayerProgress(secondUser, {
+                        }, 1),
+                        second: expectPlayerProgress(secondUser.user, {
                             1: AnswerStatus.Correct,
                             2: AnswerStatus.Incorrect,
-                            score: 1
-                        })
+                        }, 1)
                     },
                     GameStatus.Active,
                     expectQuestions(questions),
@@ -474,17 +494,15 @@ describe('/sa/quiz/questions (e2e)', () => {
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {
+                        first: expectPlayerProgress(firstUser.user, {
                             1: AnswerStatus.Incorrect,
                             2: AnswerStatus.Correct,
                             3: AnswerStatus.Correct,
-                            score: 2
-                        }),
-                        second: expectPlayerProgress(secondUser, {
+                        }, 2),
+                        second: expectPlayerProgress(secondUser.user, {
                             1: AnswerStatus.Correct,
                             2: AnswerStatus.Incorrect,
-                            score: 1
-                        })
+                        }, 1)
                     },
                     GameStatus.Active,
                     expectQuestions(questions),
@@ -500,18 +518,16 @@ describe('/sa/quiz/questions (e2e)', () => {
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {
+                        first: expectPlayerProgress(firstUser.user, {
                             1: AnswerStatus.Incorrect,
                             2: AnswerStatus.Correct,
                             3: AnswerStatus.Correct,
-                            score: 2
-                        }),
-                        second: expectPlayerProgress(secondUser, {
+                        }, 2),
+                        second: expectPlayerProgress(secondUser.user, {
                             1: AnswerStatus.Correct,
                             2: AnswerStatus.Incorrect,
                             3: AnswerStatus.Correct,
-                            score: 2
-                        })
+                        },2)
                     },
                     GameStatus.Active,
                     expectQuestions(questions),
@@ -527,19 +543,17 @@ describe('/sa/quiz/questions (e2e)', () => {
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {
+                        first: expectPlayerProgress(firstUser.user, {
                             1: AnswerStatus.Incorrect,
                             2: AnswerStatus.Correct,
                             3: AnswerStatus.Correct,
                             4: AnswerStatus.Correct,
-                            score: 3
-                        }),
-                        second: expectPlayerProgress(secondUser, {
+                        }, 3),
+                        second: expectPlayerProgress(secondUser.user, {
                             1: AnswerStatus.Correct,
                             2: AnswerStatus.Incorrect,
                             3: AnswerStatus.Correct,
-                            score: 2
-                        })
+                        },2)
                     },
                     GameStatus.Active,
                     expectQuestions(questions),
@@ -555,20 +569,18 @@ describe('/sa/quiz/questions (e2e)', () => {
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {
+                        first: expectPlayerProgress(firstUser.user, {
                             1: AnswerStatus.Incorrect,
                             2: AnswerStatus.Correct,
                             3: AnswerStatus.Correct,
                             4: AnswerStatus.Correct,
-                            score: 3
-                        }),
-                        second: expectPlayerProgress(secondUser, {
+                        }, 3),
+                        second: expectPlayerProgress(secondUser.user, {
                             1: AnswerStatus.Correct,
                             2: AnswerStatus.Incorrect,
                             3: AnswerStatus.Correct,
                             4: AnswerStatus.Correct,
-                            score: 3
-                        })
+                        }, 3)
                     },
                     GameStatus.Active,
                     expectQuestions(questions),
@@ -584,21 +596,19 @@ describe('/sa/quiz/questions (e2e)', () => {
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {
+                        first: expectPlayerProgress(firstUser.user, {
                             1: AnswerStatus.Incorrect,
                             2: AnswerStatus.Correct,
                             3: AnswerStatus.Correct,
                             4: AnswerStatus.Correct,
                             5: AnswerStatus.Incorrect,
-                            score: 4
-                        }),
-                        second: expectPlayerProgress(secondUser, {
+                        }, 4),
+                        second: expectPlayerProgress(secondUser.user, {
                             1: AnswerStatus.Correct,
                             2: AnswerStatus.Incorrect,
                             3: AnswerStatus.Correct,
                             4: AnswerStatus.Correct,
-                            score: 3
-                        })
+                        }, 3)
                     },
                     GameStatus.Active,
                     expectQuestions(questions),
@@ -614,22 +624,20 @@ describe('/sa/quiz/questions (e2e)', () => {
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {
+                        first: expectPlayerProgress(firstUser.user, {
                             1: AnswerStatus.Incorrect,
                             2: AnswerStatus.Correct,
                             3: AnswerStatus.Correct,
                             4: AnswerStatus.Correct,
                             5: AnswerStatus.Incorrect,
-                            score: 4
-                        }),
-                        second: expectPlayerProgress(secondUser, {
+                        }, 4),
+                        second: expectPlayerProgress(secondUser.user, {
                             1: AnswerStatus.Correct,
                             2: AnswerStatus.Incorrect,
                             3: AnswerStatus.Correct,
                             4: AnswerStatus.Correct,
                             5: AnswerStatus.Incorrect,
-                            score: 3
-                        })
+                        }, 3)
                     },
                     GameStatus.Active,
                     expectQuestions(questions),
@@ -676,22 +684,20 @@ describe('/sa/quiz/questions (e2e)', () => {
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
-                        first: expectPlayerProgress(firstUser, {
+                        first: expectPlayerProgress(firstUser.user, {
                             1: AnswerStatus.Incorrect,
                             2: AnswerStatus.Incorrect,
                             3: AnswerStatus.Incorrect,
                             4: AnswerStatus.Incorrect,
                             5: AnswerStatus.Incorrect,
-                            score: 0
-                        }),
-                        second: expectPlayerProgress(secondUser, {
+                        }, 0),
+                        second: expectPlayerProgress(secondUser.user, {
                             1: AnswerStatus.Incorrect,
                             2: AnswerStatus.Incorrect,
                             3: AnswerStatus.Incorrect,
                             4: AnswerStatus.Incorrect,
                             5: AnswerStatus.Correct,
-                            score: 1
-                        })
+                        }, 1)
                     },
                     GameStatus.Active,
                     expectQuestions(questions),

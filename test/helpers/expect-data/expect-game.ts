@@ -9,7 +9,7 @@ import { Questions } from "../../../src/modules/public/pair-quiz-game/shared/que
 import { GameStatus } from "../../../src/modules/public/pair-quiz-game/shared/game-status";
 import { CreatedQuestions } from "../../../src/modules/sa/questions/api/view/created-questions";
 
-export const expectViewGame = (member: MemberType, status: GameStatus, questionsArray?: Questions[]): ViewGame => {
+export const expectViewGame = (member: MemberType, status: GameStatus, questionsArray?: Questions[], score?: number): ViewGame => {
     let items = null
     if (status !== GameStatus.PendingSecondPlayer) {
         items = questions()
@@ -43,7 +43,7 @@ export const expectAnswer = (answerStatus: AnswerStatus): ViewAnswer => {
     }
 }
 
-export const expectPlayerProgress = (user: CreatedUser, answerStatus: TestAnswersType): ViewGameProgress => {
+export const expectPlayerProgress = (user: CreatedUser, answerStatus: TestAnswersType, score?): ViewGameProgress => {
     let answers = []
     for (let key in answerStatus) {
         answers.push(expectAnswer(answerStatus[key]))
@@ -55,7 +55,7 @@ export const expectPlayerProgress = (user: CreatedUser, answerStatus: TestAnswer
             id: user.id,
             login: user.login
         },
-        score: answerStatus.score ?? 0
+        score: score ?? 0
     }
 }
 
