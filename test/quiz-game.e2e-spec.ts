@@ -707,5 +707,4 @@ describe('/sa/quiz/questions (e2e)', () => {
             })
         })
     })
-
 })
