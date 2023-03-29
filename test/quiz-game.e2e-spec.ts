@@ -1,22 +1,22 @@
-import { HttpStatus, INestApplication } from "@nestjs/common";
-import { QuestionsFactory } from "./helpers/factories/questions-factory";
-import { Questions } from "./helpers/request/questions";
-import { Testing } from "./helpers/request/testing";
-import { Test, TestingModule } from "@nestjs/testing";
-import { AppModule } from "../src/app.module";
-import { createApp } from "../src/config/create-app";
-import { Game } from "./helpers/request/game";
-import { Users } from "./helpers/request/users";
-import { UsersFactory } from "./helpers/factories/users-factory";
-import { Auth } from "./helpers/request/auth";
-import { expectAnswer, expectPlayerProgress, expectQuestions, expectViewGame } from "./helpers/expect-data/expect-game";
-import { GameStatus } from "../src/modules/public/pair-quiz-game/shared/game-status";
-import { preparedAnswer } from "./helpers/prepeared-data/prepared-answer";
-import { AnswerStatus } from "../src/modules/public/pair-quiz-game/shared/answer-status";
-import { preparedGameData } from "./helpers/prepeared-data/prepared-game-data";
-import { GameFactory } from "./helpers/factories/game-factory";
-import { randomUUID } from "crypto";
-import { faker } from "@faker-js/faker";
+import {HttpStatus, INestApplication} from "@nestjs/common";
+import {QuestionsFactory} from "./helpers/factories/questions-factory";
+import {Questions} from "./helpers/request/questions";
+import {Testing} from "./helpers/request/testing";
+import {Test, TestingModule} from "@nestjs/testing";
+import {AppModule} from "../src/app.module";
+import {createApp} from "../src/config/create-app";
+import {Game} from "./helpers/request/game";
+import {Users} from "./helpers/request/users";
+import {UsersFactory} from "./helpers/factories/users-factory";
+import {Auth} from "./helpers/request/auth";
+import {expectAnswer, expectPlayerProgress, expectQuestions, expectViewGame} from "./helpers/expect-data/expect-game";
+import {GameStatus} from "../src/modules/public/pair-quiz-game/shared/game-status";
+import {preparedAnswer} from "./helpers/prepeared-data/prepared-answer";
+import {AnswerStatus} from "../src/modules/public/pair-quiz-game/shared/answer-status";
+import {preparedGameData} from "./helpers/prepeared-data/prepared-game-data";
+import {GameFactory} from "./helpers/factories/game-factory";
+import {randomUUID} from "crypto";
+import {faker} from "@faker-js/faker";
 
 describe('/sa/quiz/questions (e2e)', () => {
     const second = 1000;
@@ -155,7 +155,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
         it('The user can`t send a response if he is not in an active pair', async () => {
             const {thirdUser} = expect.getState()
-            console.log(thirdUser.accessToken);
+
             const thirdUserAnswered = await game.sendAnswer(preparedAnswer.random, thirdUser.accessToken)
             expect(thirdUserAnswered.status).toBe(HttpStatus.FORBIDDEN)
         })
@@ -281,7 +281,8 @@ describe('/sa/quiz/questions (e2e)', () => {
             })
 
             const response = await game.getGameById(gameId, firstUser.accessToken)
-            const expectGame = expectViewGame(
+            expect(response.status).toBe(HttpStatus.OK)
+            expect(response.body).toStrictEqual(expectViewGame(
                 {
                     first: expectPlayerProgress(firstUser.user, {
                         1: AnswerStatus.Incorrect,
@@ -297,29 +298,6 @@ describe('/sa/quiz/questions (e2e)', () => {
                         4: AnswerStatus.Correct,
                         5: AnswerStatus.Incorrect,
                     }, 1)
-                },
-                GameStatus.Finished,
-                expectQuestions(questions),
-            )
-            console.log('response ---> ', response.body.firstPlayerProgress.answers)
-            console.log('expect ---> ', expectGame.firstPlayerProgress.answers)
-            expect(response.status).toBe(HttpStatus.OK)
-            expect(response.body).toStrictEqual(expectViewGame(
-                {
-                    first: expectPlayerProgress(firstUser.user, {
-                        1: AnswerStatus.Incorrect,
-                        2: AnswerStatus.Incorrect,
-                        3: AnswerStatus.Incorrect,
-                        4: AnswerStatus.Incorrect,
-                        5: AnswerStatus.Incorrect,
-                    }),
-                    second: expectPlayerProgress(secondUser.user, {
-                        1: AnswerStatus.Incorrect,
-                        2: AnswerStatus.Incorrect,
-                        3: AnswerStatus.Incorrect,
-                        4: AnswerStatus.Incorrect,
-                        5: AnswerStatus.Incorrect,
-                    })
                 },
                 GameStatus.Finished,
                 expectQuestions(questions),
@@ -349,17 +327,17 @@ describe('/sa/quiz/questions (e2e)', () => {
             })
         })
 
-        // it('Shouldn`t return game if user don`t has active pair', async () => {
-        //     const {thirdUser} = expect.getState()
-        //
-        //     const response = await game.getMyCurrentGame(thirdUser.accessToken)
-        //     expect(response.status).toBe(HttpStatus.NOT_FOUND)
-        // })
-        //
-        // it('Shouldn`t return game, if he is unauthorized', async () => {
-        //     const response = await game.getMyCurrentGame()
-        //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
-        // })
+        it('Shouldn`t return game if user don`t has active pair', async () => {
+            const {thirdUser} = expect.getState()
+
+            const response = await game.getMyCurrentGame(thirdUser.accessToken)
+            expect(response.status).toBe(HttpStatus.NOT_FOUND)
+        })
+
+        it('Shouldn`t return game, if he is unauthorized', async () => {
+            const response = await game.getMyCurrentGame()
+            expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
+        })
 
         it('Should return game', async () => {
             const {firstUser, secondUser, questions} = expect.getState()
@@ -376,6 +354,29 @@ describe('/sa/quiz/questions (e2e)', () => {
                     expectQuestions(questions),
                 )
             )
+        })
+
+        it('Shouldn`t return the game if the game has been completed', async () => {
+            const {firstUser, secondUser, questions} = expect.getState()
+
+            await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
+                1: AnswerStatus.Incorrect,
+                2: AnswerStatus.Incorrect,
+                3: AnswerStatus.Incorrect,
+                4: AnswerStatus.Incorrect,
+                5: AnswerStatus.Incorrect,
+            })
+
+            await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
+                1: AnswerStatus.Incorrect,
+                2: AnswerStatus.Incorrect,
+                3: AnswerStatus.Incorrect,
+                4: AnswerStatus.Incorrect,
+                5: AnswerStatus.Incorrect,
+            })
+
+            const response = await game.getMyCurrentGame(firstUser.accessToken)
+            expect(response.status).toBe(HttpStatus.NOT_FOUND)
         })
     })
 
@@ -401,7 +402,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 });
             });
 
-            it("First player send incorrect answer for first questions", async () => {
+            it("1 - First player send incorrect answer for first questions", async () => {
                 const { firstUser, secondUser, questions } = expect.getState();
 
                 await game.sendAnswer(faker.random.alpha(5), firstUser.accessToken);
@@ -420,11 +421,11 @@ describe('/sa/quiz/questions (e2e)', () => {
                 );
             });
 
-            it("Second player send correct answer for first questions", async () => {
-                const { firstUser, secondUser, questions } = expect.getState();
+            it("2 - Second player send correct answer for first questions", async () => {
+                const { firstUser, secondUser, gameId, questions } = expect.getState();
 
-                await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[0]);
-                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                await gameFactory.sendCorrectAnswer(secondUser.accessToken, questions[0]);
+                const response = await game.getGameById(gameId, firstUser.accessToken);
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
@@ -441,7 +442,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 );
             });
 
-            it("First player send correct answer for second questions", async () => {
+            it("3 - First player send correct answer for second questions", async () => {
                 const { firstUser, secondUser, questions } = expect.getState();
 
                 await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[1]);
@@ -463,11 +464,11 @@ describe('/sa/quiz/questions (e2e)', () => {
                 );
             });
 
-            it("Second player send incorrect answer for second questions", async () => {
+            it("4 - Second player send incorrect answer for second questions", async () => {
                 const { firstUser, secondUser, questions } = expect.getState();
 
                 await game.sendAnswer(faker.random.alpha(5), secondUser.accessToken);
-                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                const response = await game.getMyCurrentGame(secondUser.accessToken);
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
@@ -486,11 +487,11 @@ describe('/sa/quiz/questions (e2e)', () => {
                 );
             });
 
-            it("First player send correct th for third questions", async () => {
-                const { firstUser, secondUser, questions } = expect.getState();
+            it("5 - First player send correct th for third questions", async () => {
+                const { firstUser, secondUser, gameId, questions } = expect.getState();
 
                 await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[2]);
-                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                const response = await game.getGameById(gameId, firstUser.accessToken);
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
@@ -510,10 +511,10 @@ describe('/sa/quiz/questions (e2e)', () => {
                 );
             });
 
-            it("Second player send correct answer for third questions", async () => {
+            it("6 - Second player send correct answer for third questions", async () => {
                 const { firstUser, secondUser, questions } = expect.getState();
 
-                await gameFactory.sendCorrectAnswer(secondUser.accessToken, questions[1]);
+                await gameFactory.sendCorrectAnswer(secondUser.accessToken, questions[2]);
                 const response = await game.getMyCurrentGame(firstUser.accessToken);
                 expect(response.body).toStrictEqual(
                   expectViewGame(
@@ -535,7 +536,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 );
             });
 
-            it("First player send correct answer for fourth questions", async () => {
+            it("7 - First player send correct answer for fourth questions", async () => {
                 const { firstUser, secondUser, questions } = expect.getState();
 
                 await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[3]);
@@ -561,10 +562,10 @@ describe('/sa/quiz/questions (e2e)', () => {
                 );
             });
 
-            it("Second player send correct answer for fourth questions", async () => {
+            it("8 - Second player send correct answer for fourth questions", async () => {
                 const { firstUser, secondUser, questions } = expect.getState();
 
-                await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[3]);
+                await gameFactory.sendCorrectAnswer(secondUser.accessToken, questions[3]);
                 const response = await game.getMyCurrentGame(firstUser.accessToken);
                 expect(response.body).toStrictEqual(
                   expectViewGame(
@@ -588,11 +589,11 @@ describe('/sa/quiz/questions (e2e)', () => {
                 );
             });
 
-            it("First player send incorrect th for fifth questions", async () => {
+            it("9 - First player send incorrect th for fifth questions", async () => {
                 const { firstUser, secondUser, questions } = expect.getState();
 
                 await game.sendAnswer(faker.random.alpha(5), firstUser.accessToken);
-                const response = await game.getMyCurrentGame(firstUser.accessToken);
+                const response = await game.getMyCurrentGame(secondUser.accessToken);
                 expect(response.body).toStrictEqual(
                   expectViewGame(
                     {
@@ -616,7 +617,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 );
             });
 
-            it("Second player send incorrect answer for fifth questions", async () => {
+            it("10 - Second player send incorrect answer for fifth questions", async () => {
                 const { firstUser, secondUser, gameId, questions } = expect.getState();
 
                 await game.sendAnswer(faker.random.alpha(5), secondUser.accessToken);
@@ -639,7 +640,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                             5: AnswerStatus.Incorrect,
                         }, 3)
                     },
-                    GameStatus.Active,
+                    GameStatus.Finished,
                     expectQuestions(questions),
                   )
                 );
@@ -699,7 +700,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                             5: AnswerStatus.Correct,
                         }, 1)
                     },
-                    GameStatus.Active,
+                    GameStatus.Finished,
                     expectQuestions(questions),
                   )
                 );

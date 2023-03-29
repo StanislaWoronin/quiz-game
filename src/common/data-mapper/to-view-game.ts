@@ -7,12 +7,11 @@ import {GameStatus} from "../../modules/public/pair-quiz-game/shared/game-status
 
 export const toViewGame = (game: GameDb[]): ViewGame => {
     const questions = getQuestions(game.slice(0,5))
-    const score = getScore(game[4], game[9])
 
     return {
         id: game[0].id,
-        firstPlayerProgress: getPlayerProgress(game.slice(0,5), score.firstScore),
-        secondPlayerProgress: getPlayerProgress(game.slice(5,10), score.firstScore),
+        firstPlayerProgress: getPlayerProgress(game.slice(0,5)),
+        secondPlayerProgress: getPlayerProgress(game.slice(5,10)),
         questions,
         status: game[0].status,
         pairCreatedDate: game[0].pairCreatedDate,
@@ -36,7 +35,7 @@ const getQuestions = (game: GameDb[]): Questions[] => {
     return questions
 }
 
-const getPlayerProgress = (game: GameDb[], score: number): ViewGameProgress | null => {
+const getPlayerProgress = (game: GameDb[]): ViewGameProgress | null => {
     if (!game.length) {
         return null
     }
@@ -47,7 +46,7 @@ const getPlayerProgress = (game: GameDb[], score: number): ViewGameProgress | nu
             id: game[0].userId,
             login: game[0].login
         },
-        score
+        score: game[0].score
     }
 }
 
@@ -66,35 +65,4 @@ const getAnswers = (game: GameDb[]): ViewAnswer[] => {
     })
 
     return answers
-}
-
-const getScore = (firstPlayerProgress: GameDb, secondPlayerProgress: GameDb): { firstScore: number, secondScore: number } => {
-    if (!secondPlayerProgress) {
-        return {
-            firstScore: 0, secondScore: 0
-        }
-    }
-    if (!firstPlayerProgress.addedAt) {
-        return {
-            firstScore: firstPlayerProgress.score, secondScore: secondPlayerProgress.score + 1
-        }
-    }
-    if (!secondPlayerProgress.addedAt) {
-        return {
-            firstScore: firstPlayerProgress.score + 1, secondScore: secondPlayerProgress.score
-        }
-    }
-    if (new Date(firstPlayerProgress.addedAt) > new Date(secondPlayerProgress.addedAt) && firstPlayerProgress.score !== 0) {
-        return {
-            firstScore: firstPlayerProgress.score, secondScore: secondPlayerProgress.score + 1
-        }
-    }
-    if (new Date(firstPlayerProgress.addedAt) < new Date(secondPlayerProgress.addedAt) && secondPlayerProgress.score !== 0) {
-        return {
-            firstScore: firstPlayerProgress.score + 1, secondScore: secondPlayerProgress.score
-        }
-    }
-    return {
-        firstScore: firstPlayerProgress.score, secondScore: secondPlayerProgress.score
-    }
 }

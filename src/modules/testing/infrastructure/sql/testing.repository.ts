@@ -88,7 +88,7 @@ export class TestingRepository implements ITestingRepository{
                 true,
                 '') as xml_count
                 FROM information_schema.tables
-               WHERE table_schema = 'public') t
+               WHERE table_schema = 'public') t;
     `;
     const result = await this.dataSource.query(query);
     const allRowCount = result.reduce((acc, el) => acc + el.rowCount, 0);
