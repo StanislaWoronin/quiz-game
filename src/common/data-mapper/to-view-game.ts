@@ -10,8 +10,8 @@ export const toViewGame = (game: GameDb[]): ViewGame => {
 
     return {
         id: game[0].id,
-        firstPlayerProgress: getPlayerProgress(game.slice(0,5)),
-        secondPlayerProgress: getPlayerProgress(game.slice(5,10)),
+        firstPlayerProgress: getPlayerProgress(game.slice(0, 5)),
+        secondPlayerProgress: getPlayerProgress(game.slice(5, 10)),
         questions,
         status: game[0].status,
         pairCreatedDate: game[0].pairCreatedDate,

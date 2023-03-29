@@ -17,10 +17,10 @@ export const endpoints = {
   },
   pairGameQuiz: {
     pairs: {
-      sendAnswers: `${pairGameQuiz}/pair/answers`,
-      connection: `${pairGameQuiz}/pair/connection`,
-      myCurrent: `${pairGameQuiz}/pair/my-current`,
-      pairs: `${pairGameQuiz}/pair`,
+      sendAnswers: `${pairGameQuiz}/pairs/answers`,
+      connection: `${pairGameQuiz}/pairs/connection`,
+      myCurrent: `${pairGameQuiz}/pairs/my-current`,
+      pairs: `${pairGameQuiz}/pairs`,
     }
   },
   sa: {

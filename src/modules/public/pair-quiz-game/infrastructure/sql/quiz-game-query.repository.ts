@@ -13,7 +13,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     constructor(@InjectDataSource() private dataSource: DataSource) {}
 
     async getMyCurrentGame(userId): Promise<ViewGame> {
-        const query = this.getQuery(GameStatus.Active)
+        const query = this.getQuery(GameStatus.Active) // TODO fix
         const result: GameDb[] = await this.dataSource.query(query, [userId])
         if (!result.length) {
             return null
@@ -103,7 +103,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     private getQuery(gameStatus?: GameStatus): string {
         let filter = ''
         if (gameStatus) {
-            filter = `AND g.status = '${gameStatus}'`
+            filter = `AND g.status = '${gameStatus}'` // TODO fix
         }
         return `
             SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",

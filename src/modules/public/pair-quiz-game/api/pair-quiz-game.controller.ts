@@ -16,7 +16,7 @@ import { IQuizGameQueryRepository } from '../infrastructure/i-quiz-game-query.re
 import { ParamsId } from '../../../../common/dto/params-id';
 
 @UseGuards(AuthBearerGuard)
-@Controller('pair-game-quiz/pair')
+@Controller('pair-game-quiz/pairs')
 export class PairQuizGameController {
   constructor(
     protected gameService: PairQuizGameService,
@@ -24,6 +24,7 @@ export class PairQuizGameController {
     protected gameQueryRepository: IQuizGameQueryRepository,
   ) {}
 
+  @HttpCode(HttpStatus.OK)
   @Post('connection')
   async joinGame(@UserId() userId: string): Promise<ViewGame> {
     const result = await this.gameService.joinGame(userId);
@@ -34,6 +35,7 @@ export class PairQuizGameController {
     return result;
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post('answers')
   async sendAnswer(
     @Body() dto: AnswerDto,

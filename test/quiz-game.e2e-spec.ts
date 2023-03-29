@@ -84,14 +84,24 @@ describe('/sa/quiz/questions (e2e)', () => {
         it('User create new pair quiz-game', async () => {
             const {firstUser} = expect.getState()
 
+
             const response = await game.joinGame(firstUser.accessToken)
-            expect(response.status).toBe(HttpStatus.CREATED)
+            expect(response.status).toBe(HttpStatus.OK)
+            console.log(response.body)
             expect(response.body).toStrictEqual(
                 expectViewGame(
                     {first: expectPlayerProgress(firstUser.user, {})},
                     GameStatus.PendingSecondPlayer
                 )
             )
+        })
+
+        it('1 - Shouldn`t join into the game, if user already has active game', async () => {
+            const {firstUser} = expect.getState()
+
+            const response = await game.joinGame(firstUser.accessToken)
+            console.log(response.body)
+            expect(response.status).toBe(HttpStatus.FORBIDDEN)
         })
 
         it('User join into active game', async () => {
@@ -111,7 +121,14 @@ describe('/sa/quiz/questions (e2e)', () => {
             )
         })
 
-        it('Shouldn`t join into the game, if user already has active game', async () => {
+        it('2 - Shouldn`t join into the game, if user already has active game', async () => {
+            const {firstUser} = expect.getState()
+
+            const response = await game.joinGame(firstUser.accessToken)
+            expect(response.status).toBe(HttpStatus.FORBIDDEN)
+        })
+
+        it('3 - Shouldn`t join into the game, if user already has active game', async () => {
             const {secondUser} = expect.getState()
 
             const response = await game.joinGame(secondUser.accessToken)

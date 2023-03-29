@@ -87,7 +87,6 @@ export class UsersFactory {
       };
 
       const response = await this.auth.loginUser(userLoginData)
-
       result.push({
         user: users[i],
         accessToken: response.accessToken,

@@ -63,6 +63,7 @@ export class AuthController {
   //@Throttle(5, 10)
   @UseGuards(/*ThrottlerGuard, */ CheckCredentialGuard)
   @Post('login')
+  @HttpCode(200)
   async createUser(
       @Body() dto: AuthDto,
       @Ip() ipAddress: string,

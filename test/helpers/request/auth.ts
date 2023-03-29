@@ -73,7 +73,8 @@ export class Auth {
           .set('User-Agent', faker.internet.userAgent())
           .send(dto)
 
-        if (response.status !== HttpStatus.CREATED) {
+
+        if (response.status !== HttpStatus.OK) {
             return {status: response.status}
         }
 

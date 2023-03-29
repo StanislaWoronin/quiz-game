@@ -23,6 +23,7 @@ export class PairQuizGameService {
 
   async joinGame(userId: string): Promise<ViewGame | null> {
     const isPlaying = await this.queryGameRepository.checkUserCurrentGame(userId);
+    console.log(isPlaying)
     if (isPlaying) {
       return null;
     }
@@ -35,7 +36,7 @@ export class PairQuizGameService {
   }
 
   async sendAnswer(userId: string, dto: AnswerDto): Promise<ViewAnswer | null> {
-    const currentUserAnswerProgress = await this.queryGameRepository.checkUserAnswerProgress(userId);
+    const currentUserAnswerProgress = await this.queryGameRepository.checkUserAnswerProgress(userId); // TODO check
     if (currentUserAnswerProgress.length === 5) {
       return null
     }
