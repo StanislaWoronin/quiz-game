@@ -1,3 +1,3 @@
 export class PlayerIdDb {
-    playerId: string
+  playerId: string;
 }

@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ISecurityRepository } from '../infrastructure/i-security.repository';
 import { ISecurityQueryRepository } from '../infrastructure/i-security-query.repository';
-import {JwtService} from "../../auth/applications/jwt.service";
-import {Tokens} from "../../../../common/dto/tokens";
-import {TokenPayload} from "../../../../common/dto/token-payload";
-import {randomUUID} from "crypto";
-import {SqlSecurity} from "../infrastructure/sql/entity/security";
+import { JwtService } from '../../auth/applications/jwt.service';
+import { Tokens } from '../../../../common/dto/tokens';
+import { TokenPayload } from '../../../../common/dto/token-payload';
+import { randomUUID } from 'crypto';
+import { SqlSecurity } from '../infrastructure/sql/entity/security';
 
 @Injectable()
 export class SecurityService {
@@ -52,11 +52,9 @@ export class SecurityService {
     return token;
   }
 
-  async createNewRefreshToken(
-    refreshToken: string,
-  ) {
+  async createNewRefreshToken(refreshToken: string) {
     await this.jwtService.addTokenInBlackList(refreshToken);
-    const tokenPayload = await this.jwtService.getTokenPayload(refreshToken)
+    const tokenPayload = await this.jwtService.getTokenPayload(refreshToken);
     const token = await this.jwtService.createTokens(
       tokenPayload.userId,
       tokenPayload.deviceId,

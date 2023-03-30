@@ -9,7 +9,10 @@ import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query
 export class QuestionsFactory {
   constructor(private questions: Questions) {}
 
-  async createQuestions(questionsCount: number, questions?: CreateQuestionDto[]): Promise<CreatedQuestions[]> {
+  async createQuestions(
+    questionsCount: number,
+    questions?: CreateQuestionDto[],
+  ): Promise<CreatedQuestions[]> {
     const result = [];
     for (let i = 0; i < questionsCount; i++) {
       let inputData: CreateQuestionDto = {
@@ -19,9 +22,9 @@ export class QuestionsFactory {
           `${2}${faker.random.alpha(3)}`,
           `${3}${faker.random.alpha(3)}`,
         ],
-      }
-      if(questions) {
-        inputData = questions[i]
+      };
+      if (questions) {
+        inputData = questions[i];
       }
       const response = await this.questions.createQuestion(
         preparedSuperUser.valid,

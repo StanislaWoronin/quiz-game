@@ -1,8 +1,8 @@
 import add from 'date-fns/add';
 import { Inject, Injectable } from '@nestjs/common';
 import { EmailManager } from '../email-transfer/email.manager';
-import {IEmailConfirmationRepository} from "../../../sa/users/infrastructure/i-email-confirmation.repository";
-import {randomUUID} from "crypto";
+import { IEmailConfirmationRepository } from '../../../sa/users/infrastructure/i-email-confirmation.repository';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -36,7 +36,7 @@ export class AuthService {
       await this.emailConfirmationRepository.updateConfirmationCode(
         userId,
         newConfirmationCode,
-        add(new Date(), { hours: 24 }).toISOString()
+        add(new Date(), { hours: 24 }).toISOString(),
       );
 
     if (!result) {

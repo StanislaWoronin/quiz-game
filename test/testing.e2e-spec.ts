@@ -7,6 +7,7 @@ import { AppModule } from '../src/app.module';
 import { createApp } from '../src/config/create-app';
 import { Users } from './helpers/request/users';
 import { UsersFactory } from './helpers/factories/users-factory';
+import { Auth } from './helpers/request/auth';
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -14,6 +15,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
   let app: INestApplication;
   let server;
+  let auth: Auth;
   let questions: Questions;
   let questionsFactory: QuestionsFactory;
   let users: Users;
@@ -34,7 +36,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     questions = new Questions(server);
     questionsFactory = new QuestionsFactory(questions);
     users = new Users(server);
-    usersFactory = new UsersFactory(users);
+    usersFactory = new UsersFactory(users, auth);
   });
 
   afterAll(async () => {

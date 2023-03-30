@@ -10,7 +10,7 @@ export class MongoAnswers {
   correctAnswer: string;
 
   constructor(answers: string) {
-    this.correctAnswer = answers
+    this.correctAnswer = answers;
   }
 }
 

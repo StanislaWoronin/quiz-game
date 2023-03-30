@@ -13,7 +13,6 @@ import { IUsersRepository } from './modules/sa/users/infrastructure/i-users.repo
 import { IUsersQueryRepository } from './modules/sa/users/infrastructure/i-users-query.repository';
 import { UsersService } from './modules/sa/users/applications/users.service';
 import { UsersController } from './modules/sa/users/api/users.controller';
-import { SqlCorrectAnswers } from './modules/sa/questions/infrastructure/sql/entity/correct-answers.entity';
 import { SqlCredentials } from './modules/sa/users/infrastructure/sql/entity/credentials.entity';
 import { SqlQuestions } from './modules/sa/questions/infrastructure/sql/entity/questions.entity';
 import { SqlUserBanInfo } from './modules/sa/users/infrastructure/sql/entity/ban-info.entity';
@@ -55,22 +54,22 @@ import { EmailExistValidator } from './common/validators/email-exists.validator'
 import { LoginExistValidator } from './common/validators/login-exist.validator';
 import { EmailAdapters } from './modules/public/auth/email-transfer/email.adapter';
 import { EmailManager } from './modules/public/auth/email-transfer/email.manager';
-import {SqlSecurity} from "./modules/public/security/infrastructure/sql/entity/security";
-import {ISecurityRepository} from "./modules/public/security/infrastructure/i-security.repository";
-import { AuthController } from "./modules/public/auth/api/auth.controller";
-import { AuthService } from "./modules/public/auth/applications/auth.service";
-import { IEmailConfirmationRepository } from "./modules/sa/users/infrastructure/i-email-confirmation.repository";
-import { IUserBanInfoRepository } from "./modules/sa/users/infrastructure/i-user-ban-info.repository";
-import { SecurityService } from "./modules/public/security/application/security.service";
-import { ISecurityQueryRepository } from "./modules/public/security/infrastructure/i-security-query.repository";
-import { EmailResendingValidator } from "./common/validators/email-resending.validator";
-import { ConfirmationCodeValidator } from "./common/validators/confirmation-code.validator";
-import { PasswordRecoveryValidator } from "./modules/public/auth/guards/password-recovery.validator";
-import { SqlTokenBlackList } from "./modules/public/auth/infrastructure/sql/entity/sql-token-black-list.entity";
-import { SqlEmailConfirmation } from "./modules/sa/users/infrastructure/sql/entity/sql-email-confirmation.entity";
-import { SqlGameQuestions } from "./modules/public/pair-quiz-game/infrastructure/sql/entity/sql-game-questions.entity";
-import {APP_INTERCEPTOR} from "@nestjs/core";
-import {LoggingInterceptor} from "./common/interceptor/interceptor";
+import { SqlSecurity } from './modules/public/security/infrastructure/sql/entity/security';
+import { ISecurityRepository } from './modules/public/security/infrastructure/i-security.repository';
+import { AuthController } from './modules/public/auth/api/auth.controller';
+import { AuthService } from './modules/public/auth/applications/auth.service';
+import { IEmailConfirmationRepository } from './modules/sa/users/infrastructure/i-email-confirmation.repository';
+import { IUserBanInfoRepository } from './modules/sa/users/infrastructure/i-user-ban-info.repository';
+import { SecurityService } from './modules/public/security/application/security.service';
+import { ISecurityQueryRepository } from './modules/public/security/infrastructure/i-security-query.repository';
+import { EmailResendingValidator } from './common/validators/email-resending.validator';
+import { ConfirmationCodeValidator } from './common/validators/confirmation-code.validator';
+import { PasswordRecoveryValidator } from './modules/public/auth/guards/password-recovery.validator';
+import { SqlTokenBlackList } from './modules/public/auth/infrastructure/sql/entity/sql-token-black-list.entity';
+import { SqlEmailConfirmation } from './modules/sa/users/infrastructure/sql/entity/sql-email-confirmation.entity';
+import { SqlGameQuestions } from './modules/public/pair-quiz-game/infrastructure/sql/entity/sql-game-questions.entity';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './common/interceptor/interceptor';
 
 const controllers = [
   AuthController,
@@ -92,7 +91,13 @@ const services = [
   UsersService,
 ];
 
-const validators = [ConfirmationCodeValidator, EmailExistValidator, EmailResendingValidator, LoginExistValidator, PasswordRecoveryValidator];
+const validators = [
+  ConfirmationCodeValidator,
+  EmailExistValidator,
+  EmailResendingValidator,
+  LoginExistValidator,
+  PasswordRecoveryValidator,
+];
 
 const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
 
@@ -101,15 +106,15 @@ const repositories = [
     provide: IUserBanInfoRepository,
     useClass: repositorySwitcher(
       settings.currentRepository,
-      repositoryName.BanInfoRepository
-    )
+      repositoryName.BanInfoRepository,
+    ),
   },
   {
     provide: IEmailConfirmationRepository,
     useClass: repositorySwitcher(
       settings.currentRepository,
-      repositoryName.EmailConfirmation
-    )
+      repositoryName.EmailConfirmation,
+    ),
   },
   {
     provide: IQuestionsRepository,
@@ -142,8 +147,8 @@ const repositories = [
   {
     provide: IQuizGameRepository,
     useClass: repositorySwitcher(
-        settings.currentRepository,
-        repositoryName.GameRepository,
+      settings.currentRepository,
+      repositoryName.GameRepository,
     ),
   },
   {
@@ -163,16 +168,16 @@ const repositories = [
   {
     provide: ISecurityRepository,
     useClass: repositorySwitcher(
-        settings.currentRepository,
-        repositoryName.SecurityRepository
-    )
+      settings.currentRepository,
+      repositoryName.SecurityRepository,
+    ),
   },
   {
     provide: ISecurityQueryRepository,
     useClass: repositorySwitcher(
       settings.currentRepository,
-      repositoryName.SecurityQueryRepository
-    )
+      repositoryName.SecurityQueryRepository,
+    ),
   },
   {
     provide: IUsersRepository,
@@ -191,7 +196,6 @@ const repositories = [
 ];
 
 export const entity = [
-  SqlCorrectAnswers,
   SqlCredentials,
   SqlEmailConfirmation,
   SqlGame,
@@ -220,7 +224,7 @@ export const mongooseModels = [
   ],
   controllers: [...controllers],
   providers: [
-      ...repositories,
+    ...repositories,
     ...services,
     ...validators,
     ...useCases,

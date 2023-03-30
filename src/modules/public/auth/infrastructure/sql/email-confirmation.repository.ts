@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { SqlEmailConfirmation } from "../../../../sa/users/infrastructure/sql/entity/sql-email-confirmation.entity";
+import { SqlEmailConfirmation } from '../../../../sa/users/infrastructure/sql/entity/sql-email-confirmation.entity';
 
 @Injectable()
 export class EmailConfirmationRepository {
@@ -63,7 +63,7 @@ export class EmailConfirmationRepository {
         confirmationCode,
         expirationDate,
       })
-      .where('userId = :id', { id: userId })
+      .where('userId = :id', { id: userId });
     const result = await builder.execute();
 
     if (result.affected != 1) {

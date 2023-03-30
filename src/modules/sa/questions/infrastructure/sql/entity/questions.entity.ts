@@ -1,10 +1,13 @@
-import { Column, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { SqlGame } from "../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-game.entity";
-import { SqlCorrectAnswers } from "./correct-answers.entity";
-import { SqlUserAnswer } from "../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-user-answer.entity";
 import {
-  SqlGameQuestions
-} from "../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-game-questions.entity";
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { SqlUserAnswer } from '../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-user-answer.entity';
+import { SqlGameQuestions } from '../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-game-questions.entity';
 
 @Entity()
 export class SqlQuestions {
@@ -24,12 +27,12 @@ export class SqlQuestions {
     nullable: false,
     default: false,
   })
-  published: boolean = false;
+  published = false;
 
   @Column({
     type: 'character varying',
     nullable: false,
-    default: new Date().toISOString()
+    default: new Date().toISOString(),
   })
   createdAt: string = new Date().toISOString();
 
@@ -41,11 +44,11 @@ export class SqlQuestions {
   updatedAt: string;
 
   @Column({
-    type: "text",
+    type: 'text',
     array: true,
-    default: []
+    default: [],
   })
-  correctAnswers: string[]
+  correctAnswers: string[];
 
   // @OneToMany(() => SqlCorrectAnswers, (a) => a.question, { cascade: true })
   // correctAnswers: SqlCorrectAnswers[];
@@ -53,14 +56,14 @@ export class SqlQuestions {
   // @ManyToOne(() => SqlGame, (g) => g.gameQuestions)
   // game: SqlGame;
 
-  @OneToMany(() => SqlGameQuestions, gq => gq.question)
-  game: SqlGameQuestions
+  @OneToMany(() => SqlGameQuestions, (gq) => gq.question)
+  game: SqlGameQuestions;
 
   @OneToMany(() => SqlUserAnswer, (ua) => ua.question, { cascade: true })
   userAnswer: SqlUserAnswer[];
 
   constructor(body: string, answers: string[]) {
-    this.body = body
-    this.correctAnswers = answers
+    this.body = body;
+    this.correctAnswers = answers;
   }
 }

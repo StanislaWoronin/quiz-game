@@ -13,7 +13,7 @@ import { randomUUID } from 'crypto';
 import { SortByField } from '../src/common/pagination/query-parameters/sort-by-field';
 import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
 import { BanStatus } from '../src/modules/sa/users/api/dto/query/ban-status';
-import {Auth} from "./helpers/request/auth";
+import { Auth } from './helpers/request/auth';
 
 describe('/sa/users (e2e)', () => {
   const second = 1000;
@@ -102,28 +102,28 @@ describe('/sa/users (e2e)', () => {
     });
 
     it('User without permissions try set ban status', async () => {
-        const { userId } = expect.getState()
+      const { userId } = expect.getState();
 
-        const response = await users.setBanStatus(
-            preparedSuperUser.notValid,
-            preparedUser.updateBanStatus.banned,
-            userId
-        );
-        expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
-    })
+      const response = await users.setBanStatus(
+        preparedSuperUser.notValid,
+        preparedUser.updateBanStatus.banned,
+        userId,
+      );
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
 
     it('Shouldn`t update if input model is incorrect', async () => {
-        const { userId } = expect.getState()
-        const errorsMessages = getErrorsMessage(['banReason'])
+      const { userId } = expect.getState();
+      const errorsMessages = getErrorsMessage(['banReason']);
 
-        const response = await users.setBanStatus(
-            preparedSuperUser.valid,
-            preparedUser.updateBanStatus.notValid,
-            userId
-        );
-        expect(response.status).toBe(HttpStatus.BAD_REQUEST)
-        expect(response.body).toStrictEqual({ errorsMessages })
-    })
+      const response = await users.setBanStatus(
+        preparedSuperUser.valid,
+        preparedUser.updateBanStatus.notValid,
+        userId,
+      );
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(response.body).toStrictEqual({ errorsMessages });
+    });
 
     it('Should update ban status. Set status "true"', async () => {
       const { userId } = expect.getState();

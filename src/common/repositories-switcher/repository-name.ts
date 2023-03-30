@@ -1,4 +1,3 @@
-
 export const repositoryName = {
   BanInfoRepository: 'banInfoRepository',
   EmailConfirmation: 'emailConfirmation',

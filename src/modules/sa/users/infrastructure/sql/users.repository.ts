@@ -8,8 +8,8 @@ import { SqlCredentials } from './entity/credentials.entity';
 import { CreatedUserDb } from './pojo/created-user.db';
 import { SqlUserBanInfo } from './entity/ban-info.entity';
 import { UpdateUserBanStatusDto } from '../../api/dto/update-user-ban-status.dto';
-import { SqlEmailConfirmation } from "./entity/sql-email-confirmation.entity";
-import {IUsersRepository} from "../i-users.repository";
+import { SqlEmailConfirmation } from './entity/sql-email-confirmation.entity';
+import { IUsersRepository } from '../i-users.repository';
 
 @Injectable()
 export class UsersRepository implements IUsersRepository {
@@ -30,17 +30,20 @@ export class UsersRepository implements IUsersRepository {
         .getRepository(SqlUsers)
         .save(newUser);
 
-      await manager.getRepository(SqlCredentials).save(
-          new SqlCredentials(createdUser.id, hash)
-      );
+      await manager
+        .getRepository(SqlCredentials)
+        .save(new SqlCredentials(createdUser.id, hash));
 
-      await manager.getRepository(SqlEmailConfirmation).save(
-        new SqlEmailConfirmation(
-          createdUser.id,
-          emailConfirmation.isConfirmed,
-          emailConfirmation.confirmationCode,
-          emailConfirmation.expirationDate,
-        ))
+      await manager
+        .getRepository(SqlEmailConfirmation)
+        .save(
+          new SqlEmailConfirmation(
+            createdUser.id,
+            emailConfirmation.isConfirmed,
+            emailConfirmation.confirmationCode,
+            emailConfirmation.expirationDate,
+          ),
+        );
 
       await queryRunner.commitTransaction();
       return new CreatedUser(createdUser.id, createdUser);
@@ -76,15 +79,15 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async updateUserPassword(
-      userId: string,
-      passwordHash: string,
+    userId: string,
+    passwordHash: string,
   ): Promise<boolean> {
     const result = await this.dataSource
-        .createQueryBuilder()
-        .update(SqlUsers)
-        .set({passwordHash})
-        .where('id = :id', { id: userId })
-        .execute();
+      .createQueryBuilder()
+      .update(SqlUsers)
+      .set({ passwordHash })
+      .where('id = :id', { id: userId })
+      .execute();
 
     if (result.affected != 1) {
       return false;
@@ -99,28 +102,27 @@ export class UsersRepository implements IUsersRepository {
 
     const manager = queryRunner.manager;
     try {
+      await this.dataSource.query(this.getQuery('sql_credentials', 'userId'), [
+        userId,
+      ]);
+
       await this.dataSource.query(
-          this.getQuery('sql_credentials', 'userId'),
-          [userId]
+        this.getQuery('sql_user_ban_info', 'userId'),
+        [userId],
       );
 
       await this.dataSource.query(
-          this.getQuery('sql_user_ban_info', 'userId'),
-          [userId],
-      );
-
-      await this.dataSource.query(
-          this.getQuery('sql_email_confirmation', 'userId'),
-          [userId],
+        this.getQuery('sql_email_confirmation', 'userId'),
+        [userId],
       );
 
       const result = await this.dataSource.query(
         this.getQuery('sql_users', 'id'),
         [userId],
       );
-      console.log(result)
+      console.log(result);
       if (result[1] !== 1) {
-        return false
+        return false;
       }
       return true;
     } catch (e) {

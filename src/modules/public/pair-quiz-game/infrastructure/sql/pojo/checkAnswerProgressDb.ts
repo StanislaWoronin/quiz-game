@@ -1,3 +1,3 @@
 export class CheckAnswerProgressDb {
-  userAnswer: string
+  userAnswer: string;
 }

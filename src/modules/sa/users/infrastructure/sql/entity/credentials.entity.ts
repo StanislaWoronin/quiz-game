@@ -12,10 +12,10 @@ export class SqlCredentials {
   @OneToOne(() => SqlUsers, (u) => u.credentials)
   @JoinColumn()
   user: SqlUsers;
-  @PrimaryColumn("uuid") userId: string;
+  @PrimaryColumn('uuid') userId: string;
 
   constructor(userId: string, credentials: string) {
-    this.userId = userId
-    this.credentials = credentials
+    this.userId = userId;
+    this.credentials = credentials;
   }
 }

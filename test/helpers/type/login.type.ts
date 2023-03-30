@@ -1,5 +1,5 @@
 export type LoginType = Partial<{
-    accessToken: string
-    refreshToken: string
-    status: number
-}>
+  accessToken: string;
+  refreshToken: string;
+  status: number;
+}>;

@@ -2,9 +2,9 @@ import { ViewUser } from '../../modules/sa/users/api/view/view-user';
 import { UserWithBanInfoDb } from '../../modules/sa/users/infrastructure/sql/pojo/user-with-ban-info.db';
 
 export const toViewUser = (user: UserWithBanInfoDb): ViewUser => {
-  let isBanned = false
+  let isBanned = false;
   if (user.banDate) {
-    isBanned = true
+    isBanned = true;
   }
 
   return {

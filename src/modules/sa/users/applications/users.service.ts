@@ -6,7 +6,7 @@ import { NewUserDto } from './dto/new-user.dto';
 import * as bcrypt from 'bcrypt';
 import { settings } from '../../../../settings';
 import { UpdateUserBanStatusDto } from '../api/dto/update-user-ban-status.dto';
-import { SqlEmailConfirmation } from "../infrastructure/sql/entity/sql-email-confirmation.entity";
+import { SqlEmailConfirmation } from '../infrastructure/sql/entity/sql-email-confirmation.entity';
 
 @Injectable()
 export class UsersService {
@@ -49,17 +49,14 @@ export class UsersService {
   }
 
   async updateUserPassword(
-      userId: string,
-      newPassword: string,
+    userId: string,
+    newPassword: string,
   ): Promise<boolean> {
     try {
       const salt = await bcrypt.genSalt(Number(settings.SALT_GENERATE_ROUND));
       const hash = await bcrypt.hash(newPassword, salt);
 
-      return await this.usersRepository.updateUserPassword(
-          userId,
-          hash,
-      );
+      return await this.usersRepository.updateUserPassword(userId, hash);
     } catch (e) {
       // Error try again
     }

@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { MongoAnswers } from './answerSchema';
 import { HydratedDocument } from 'mongoose';
-import { randomUUID } from "crypto";
-import { CreateQuestionDto } from "../../../api/dto/create-question.dto";
+import { randomUUID } from 'crypto';
+import { CreateQuestionDto } from '../../../api/dto/create-question.dto';
 
 @Schema({ id: false, versionKey: false })
 export class MongoQuestion {
@@ -25,9 +25,9 @@ export class MongoQuestion {
   correctAnswers: MongoAnswers[];
 
   constructor(dto: CreateQuestionDto, answers: MongoAnswers[]) {
-    this.id = randomUUID()
-    this.body = dto.body
-    this.correctAnswers = answers
+    this.id = randomUUID();
+    this.body = dto.body;
+    this.correctAnswers = answers;
   }
 }
 

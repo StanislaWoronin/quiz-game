@@ -1,4 +1,4 @@
-import {SqlSecurity} from "./sql/entity/security";
+import { SqlSecurity } from './sql/entity/security';
 
 export interface ISecurityRepository {
   createUserDevice(createDevice: SqlSecurity): Promise<boolean>;

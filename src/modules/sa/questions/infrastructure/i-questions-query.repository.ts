@@ -4,7 +4,7 @@ import { ViewQuestion } from '../api/view/view-question';
 
 export interface IQuestionsQueryRepository {
   getQuestions(query: QuestionsQueryDto): Promise<ViewPage<ViewQuestion>>;
-  getQuestionAnswers(questionId: string): Promise<string[]>
+  getQuestionAnswers(questionId: string): Promise<string[]>;
   questionExists(questionId: string): Promise<boolean | null>;
   questionHasAnswer(questionId: string): Promise<string[] | null>;
 }

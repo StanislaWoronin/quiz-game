@@ -1,8 +1,13 @@
 import {
   Body,
   Controller,
-  ForbiddenException, Get, HttpCode, HttpStatus,
-  Inject, NotFoundException, Param,
+  ForbiddenException,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  NotFoundException,
+  Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -14,7 +19,7 @@ import { UserId } from '../../../../common/decorators/user.decorator';
 import { AuthBearerGuard } from '../../auth/guards/auth-bearer.guard';
 import { IQuizGameQueryRepository } from '../infrastructure/i-quiz-game-query.repository';
 import { ParamsId } from '../../../../common/dto/params-id';
-import {GameStatus} from "../shared/game-status";
+import { GameStatus } from '../shared/game-status';
 
 @UseGuards(AuthBearerGuard)
 @Controller('pair-game-quiz/pairs')
@@ -28,12 +33,15 @@ export class PairQuizGameController {
   @HttpCode(HttpStatus.OK)
   @Post('connection')
   async joinGame(@UserId() userId: string): Promise<ViewGame> {
-    const result = await this.gameService.joinGame(userId);
-    if (!result) {
+    const currentGame = await this.gameQueryRepository.checkUserCurrentGame(
+        userId,
+    );
+
+    if (currentGame) {
       throw new ForbiddenException();
     }
 
-    return result;
+    return await this.gameService.joinGame(userId);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -42,7 +50,10 @@ export class PairQuizGameController {
     @Body() dto: AnswerDto,
     @UserId() userId: string,
   ): Promise<ViewAnswer> {
-    const currentGame = await this.gameQueryRepository.checkUserCurrentGame(userId, GameStatus.Active)
+    const currentGame = await this.gameQueryRepository.checkUserCurrentGame(
+      userId,
+      GameStatus.Active,
+    );
     if (!currentGame) {
       throw new ForbiddenException();
     }
@@ -52,19 +63,20 @@ export class PairQuizGameController {
       throw new ForbiddenException(); // if player already answered to all questions
     }
 
-    return result
+    return result;
   }
 
   @HttpCode(HttpStatus.OK)
   @Get('my-current') // return game witch has status "Active"
   async getMyCurrentGame(@UserId() userId: string): Promise<ViewGame> {
-    const currentGame = await this.gameQueryRepository.checkUserCurrentGame(userId)
+    const currentGame = await this.gameQueryRepository.checkUserCurrentGame(
+      userId,
+    );
     if (!currentGame) {
       throw new NotFoundException();
     }
-    const res = await this.gameQueryRepository.getMyCurrentGame(currentGame);
-    console.log(res.pairCreatedDate, 'from controller')
-    return res
+
+    return await this.gameQueryRepository.getMyCurrentGame(currentGame);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -73,12 +85,12 @@ export class PairQuizGameController {
     @Param() gameId: ParamsId,
     @UserId() userId: string,
   ): Promise<ViewGame> {
-    const players = await this.gameQueryRepository.getPlayerByGameId(gameId.id)
+    const players = await this.gameQueryRepository.getPlayerByGameId(gameId.id);
     if (!players.length) {
       throw new NotFoundException();
     }
 
-    const isPlayer = players.find(el => el.playerId === userId)
+    const isPlayer = players.find((el) => el.playerId === userId);
     if (!isPlayer) {
       throw new ForbiddenException();
     }

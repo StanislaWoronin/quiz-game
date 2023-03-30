@@ -6,16 +6,18 @@ import { preparedSuperUser } from '../prepeared-data/prepared-super-user';
 import { ViewUser } from '../../../src/modules/sa/users/api/view/view-user';
 import { UpdateUserBanStatusDto } from '../../../src/modules/sa/users/api/dto/update-user-ban-status.dto';
 import { BanStatus } from '../../../src/modules/sa/users/api/dto/query/ban-status';
-import {Auth} from "../request/auth";
+import { Auth } from '../request/auth';
 
 export class UsersFactory {
-  constructor(private users: Users,
-              private auth: Auth) {}
+  constructor(private users: Users, private auth: Auth) {}
 
-  async createUsers(usersCount: number, startFrom?: number): Promise<CreatedUser[]> {
-    let start = 0
+  async createUsers(
+    usersCount: number,
+    startFrom?: number,
+  ): Promise<CreatedUser[]> {
+    let start = 0;
     if (startFrom) {
-      start = startFrom
+      start = startFrom;
     }
     const result = [];
     for (let i = start; i < start + usersCount; i++) {
@@ -35,8 +37,14 @@ export class UsersFactory {
     return result;
   }
 
-  async crateAndBanUsers(usersCount: number, startFrom?: number): Promise<ViewUser[]> {
-    const createdUsers: CreatedUser[] = await this.createUsers(usersCount, startFrom);
+  async crateAndBanUsers(
+    usersCount: number,
+    startFrom?: number,
+  ): Promise<ViewUser[]> {
+    const createdUsers: CreatedUser[] = await this.createUsers(
+      usersCount,
+      startFrom,
+    );
 
     const result = [];
     for (let i = 0; i < usersCount; i++) {
@@ -71,13 +79,14 @@ export class UsersFactory {
     return result;
   }
 
-  async createAndLoginUsers(userCount: number): Promise<{
-    user: CreatedUser;
-    accessToken: string;
-    refreshToken: string;
-  }[]
+  async createAndLoginUsers(userCount: number): Promise<
+    {
+      user: CreatedUser;
+      accessToken: string;
+      refreshToken: string;
+    }[]
   > {
-    const users = await this.createUsers(userCount)
+    const users = await this.createUsers(userCount);
 
     const result = [];
     for (let i = 0; i < userCount; i++) {
@@ -86,11 +95,11 @@ export class UsersFactory {
         password: `password${i}`,
       };
 
-      const response = await this.auth.loginUser(userLoginData)
+      const response = await this.auth.loginUser(userLoginData);
       result.push({
         user: users[i],
         accessToken: response.accessToken,
-        refreshToken: response.refreshToken
+        refreshToken: response.refreshToken,
       });
     }
 

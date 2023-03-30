@@ -1,48 +1,54 @@
-import {IQuizGameQueryRepository} from "../i-quiz-game-query.repository";
-import {GameStatus} from "../../shared/game-status";
-import {InjectDataSource} from "@nestjs/typeorm";
-import {DataSource} from "typeorm";
-import {CheckAnswerProgressDb} from "./pojo/checkAnswerProgressDb";
-import {ViewGame} from "../../api/view/view-game";
-import {toViewGame} from "../../../../../common/data-mapper/to-view-game";
-import {GameDb} from "./pojo/game.db";
-import {PlayerIdDb} from "./pojo/player-id.db";
-import {GetCorrectAnswerDb} from "./pojo/get-correct-answer.db";
+import { IQuizGameQueryRepository } from '../i-quiz-game-query.repository';
+import { GameStatus } from '../../shared/game-status';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { CheckAnswerProgressDb } from './pojo/checkAnswerProgressDb';
+import { ViewGame } from '../../api/view/view-game';
+import { toViewGame } from '../../../../../common/data-mapper/to-view-game';
+import { GameDb } from './pojo/game.db';
+import { PlayerIdDb } from './pojo/player-id.db';
+import { GetCorrectAnswerDb } from './pojo/get-correct-answer.db';
 
 export class QuizGameQueryRepository implements IQuizGameQueryRepository {
-    constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-    async getMyCurrentGame(userId): Promise<ViewGame> {
-        const query = this.getQuery() // TODO fix
-        const result: GameDb[] = await this.dataSource.query(query, [userId])
-        if (!result.length) {
-            return null
-        }
-
-        return toViewGame(result)
+  async getMyCurrentGame(gameId: string): Promise<ViewGame> {
+    const query = this.getQuery(true);
+    console.log(gameId)
+    console.log(query);
+    const result: GameDb[] = await this.dataSource.query(query, [gameId]);
+    console.log(result)
+    if (!result.length) {
+      return null;
     }
 
-    async getGameById(gameId: string): Promise<ViewGame | null> {
-        const query = this.getQuery()
-        const result: GameDb[] = await this.dataSource.query(query, [gameId])
-        if (!result.length) {
-            return null
-        }
+    return toViewGame(result);
+  }
 
-        return toViewGame(result)
+  async getGameById(gameId: string): Promise<ViewGame | null> {
+    const query = this.getQuery();
+    const result: GameDb[] = await this.dataSource.query(query, [gameId]);
+    if (!result.length) {
+      return null;
     }
 
-    async getPlayerByGameId(gameId: string): Promise<PlayerIdDb[]> {
-        const query = `
+    return toViewGame(result);
+  }
+
+  async getPlayerByGameId(gameId: string): Promise<PlayerIdDb[]> {
+    const query = `
             SELECT "userId" AS "playerId"
               FROM sql_game_progress
              WHERE "gameId" = $1;
-        `
-        return await this.dataSource.query(query, [gameId])
-    }
+        `;
+    return await this.dataSource.query(query, [gameId]);
+  }
 
-    async getCorrectAnswers(userId: string, lastQuestionNumber: number): Promise<GetCorrectAnswerDb> {
-        const query = `
+  async getCorrectAnswers(
+    userId: string,
+    lastQuestionNumber: number,
+  ): Promise<GetCorrectAnswerDb> {
+    const query = `
             SELECT gq."gameId", gq."questionId", q."correctAnswers"
               FROM sql_game_progress gp
               LEFT JOIN sql_game_questions gq
@@ -51,47 +57,57 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                 ON q.id = gq."questionId"
              WHERE gp."userId" = $1
             OFFSET $2 LIMIT 1;
-        `
-        const result = await this.dataSource.query(query, [userId, lastQuestionNumber])
+        `;
+    const result = await this.dataSource.query(query, [
+      userId,
+      lastQuestionNumber,
+    ]);
 
-        return result[0]
+    return result[0];
+  }
+
+  async checkUserCurrentGame(
+    userId: string,
+    status?: GameStatus,
+  ): Promise<string | null> {
+    let filter = `AND status != '${GameStatus.Finished}'`;
+    if (status) {
+      filter = `AND status = '${status}'`;
+    }
+    const query = `
+            SELECT gp."gameId"
+              FROM sql_game_progress gp
+              LEFT JOIN sql_game g
+                ON g.id = gp."gameId"
+             WHERE "userId" = $1
+               ${filter};
+        `;
+    const result = await this.dataSource.query(query, [userId]);
+    if (!result.length) {
+      return null;
     }
 
-    async checkUserCurrentGame(userId: string, status?: GameStatus): Promise<string | null> {
-        let filter = `WHERE status = '${GameStatus.PendingSecondPlayer}' 
-                         OR status = '${GameStatus.Active}'`
-        if (status) {
-            filter = `WHERE status = '${status}'`
-        }
-        const query = `
-            SELECT (SELECT id AS "gameId" 
-                      FROM sql_game 
-                     ${filter}) 
-              FROM sql_game_progress
-             WHERE "userId" = $1;
-        `
-        const result = await this.dataSource.query(query, [userId])
-        if(!result.length) {
-            return null
-        }
+    return result[0].gameId;
+  }
 
-        return result[0].gameId
-    }
-
-    async checkOpenGame(): Promise<string | null> {
-        const query = ` 
+  async checkOpenGame(): Promise<string | null> {
+    const query = ` 
             SELECT id FROM sql_game WHERE status = $1;
-        `
-        const result = await this.dataSource.query(query, [GameStatus.PendingSecondPlayer])
+        `;
+    const result = await this.dataSource.query(query, [
+      GameStatus.PendingSecondPlayer,
+    ]);
 
-        if (!result.length) {
-            return null
-        }
-        return result[0].id
+    if (!result.length) {
+      return null;
     }
+    return result[0].id;
+  }
 
-    async checkUserAnswerProgress(userId: string): Promise<CheckAnswerProgressDb[]> {
-        const query = `
+  async checkUserAnswerProgress(
+    userId: string,
+  ): Promise<CheckAnswerProgressDb[]> {
+    const query = `
             SELECT ua."userAnswer"
               FROM sql_user_answer ua
               LEFT JOIN sql_game_progress gp
@@ -100,16 +116,17 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                 ON g.id = gp."gameId"
              WHERE ua."userId" = $1
                AND g.status = $2; 
-        `
-        return await this.dataSource.query(query, [userId, GameStatus.Active])
+        `;
+    return await this.dataSource.query(query, [userId, GameStatus.Active]);
+  }
+
+  private getQuery(myGame?: boolean): string {
+    let filter = '';
+    if (myGame) {
+      filter = `AND g.status != '${GameStatus.Finished}'`;
     }
 
-    private getQuery(gameStatus?: GameStatus): string {
-        let filter = ''
-        if (gameStatus) {
-            filter = `AND g.status = '${gameStatus}'` // TODO fix
-        }
-        return `
+    return `
             SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
                        gp."userId", gp.score,
                        gq."questionId",
@@ -131,6 +148,6 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                  WHERE g.id = $1
                    ${filter}
                  ORDER BY login, gq.id ASC;
-        `
-    }
+        `;
+  }
 }

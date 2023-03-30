@@ -6,8 +6,8 @@ export class ViewAnswer {
   addedAt: string;
 
   constructor(questionId: string, answerStatus: AnswerStatus, addedAt: string) {
-    this.questionId = questionId
-    this.answerStatus = answerStatus
-    this.addedAt = addedAt
+    this.questionId = questionId;
+    this.answerStatus = answerStatus;
+    this.addedAt = addedAt;
   }
 }

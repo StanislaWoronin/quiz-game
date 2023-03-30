@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import {SqlSecurity} from "./entity/security";
-import {ISecurityRepository} from "../i-security.repository";
+import { SqlSecurity } from './entity/security';
+import { ISecurityRepository } from '../i-security.repository';
 
 @Injectable()
-export class SecurityRepository implements ISecurityRepository{
+export class SecurityRepository implements ISecurityRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createUserDevice(newDevice: SqlSecurity): Promise<boolean> {

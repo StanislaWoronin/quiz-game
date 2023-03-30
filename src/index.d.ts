@@ -1,4 +1,4 @@
-import {SqlEmailConfirmation} from "./modules/public/auth/infrastructure/sql/entity/email-confirmation.entity";
+import { SqlEmailConfirmation } from './modules/public/auth/infrastructure/sql/entity/email-confirmation.entity';
 
 declare global {
   declare namespace Express {

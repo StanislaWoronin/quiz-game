@@ -1,26 +1,33 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { SqlGame } from "./sql-game.entity";
-import { SqlQuestions } from "../../../../../sa/questions/infrastructure/sql/entity/questions.entity";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { SqlGame } from './sql-game.entity';
+import { SqlQuestions } from '../../../../../sa/questions/infrastructure/sql/entity/questions.entity';
 
 @Entity()
 export class SqlGameQuestions {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
-  @ManyToOne(() => SqlGame, g => g.questions)
+  @ManyToOne(() => SqlGame, (g) => g.questions)
   @JoinColumn()
-  game: SqlGame
+  game: SqlGame;
   @Column()
-  gameId: string
+  gameId: string;
 
-  @ManyToOne(() => SqlQuestions, q => q.game)
+  @ManyToOne(() => SqlQuestions, (q) => q.game)
   @JoinColumn()
-  question: SqlQuestions
+  question: SqlQuestions;
   @Column()
-  questionId: string
+  questionId: string;
 
   constructor(gameId: string, questionId: string) {
-    this.gameId = gameId
-    this.questionId = questionId
+    this.gameId = gameId;
+    this.questionId = questionId;
   }
 }

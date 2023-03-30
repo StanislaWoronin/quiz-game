@@ -4,8 +4,8 @@ import { MongoQuestion, QuestionsDocument } from './schema/question.schema';
 import { Connection, Model } from 'mongoose';
 import { CreatedQuestions } from '../../api/view/created-questions';
 import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
-import { CreateQuestionDto } from "../../api/dto/create-question.dto";
-import { MongoAnswers } from "./schema/answerSchema";
+import { CreateQuestionDto } from '../../api/dto/create-question.dto';
+import { MongoAnswers } from './schema/answerSchema';
 
 @Injectable()
 export class MQuestionsRepository {
@@ -18,9 +18,9 @@ export class MQuestionsRepository {
   async createQuestion(
     dto: CreateQuestionDto,
   ): Promise<CreatedQuestions | null> {
-    const answers = dto.correctAnswers.map(el => new MongoAnswers(el))
-    const question = new MongoQuestion(dto, answers)
-    await this.questionsRepository.create(question)
+    const answers = dto.correctAnswers.map((el) => new MongoAnswers(el));
+    const question = new MongoQuestion(dto, answers);
+    await this.questionsRepository.create(question);
 
     return new CreatedQuestions(question);
   }

@@ -14,7 +14,7 @@ import { SortDirection } from '../../../src/common/pagination/query-parameters/s
 import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
 import { TestsPaginationType } from '../type/pagination.type';
 import { BanStatus } from '../../../src/modules/sa/users/api/dto/query/ban-status';
-import { TestingRequestDto } from "../testing-request.dto";
+import { TestingRequestDto } from '../testing-request.dto';
 
 export class Users {
   constructor(private readonly server: any) {}

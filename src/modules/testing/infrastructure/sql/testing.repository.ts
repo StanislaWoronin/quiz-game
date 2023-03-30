@@ -1,20 +1,18 @@
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { SqlCredentials } from "../../../sa/users/infrastructure/sql/entity/credentials.entity";
-import {ITestingRepository} from "../i-testing.repository";
+import { SqlCredentials } from '../../../sa/users/infrastructure/sql/entity/credentials.entity';
+import { ITestingRepository } from '../i-testing.repository';
 
 @Injectable()
-export class TestingRepository implements ITestingRepository{
+export class TestingRepository implements ITestingRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async getConfirmationCode(
-      userId: string,
-  ): Promise<string> {
+  async getConfirmationCode(userId: string): Promise<string> {
     const builder = this.dataSource
-      .getRepository("sql_email_confirmation")
-      .createQueryBuilder("ec")
-      .where("ec.userId = :id", { id: userId });
+      .getRepository('sql_email_confirmation')
+      .createQueryBuilder('ec')
+      .where('ec.userId = :id', { id: userId });
     const result = await builder.getOne();
 
     return result.confirmationCode;
@@ -30,27 +28,25 @@ export class TestingRepository implements ITestingRepository{
     return result.credentials;
   }
 
-  async checkUserConfirmed(
-      userId: string,
-  ) {
+  async checkUserConfirmed(userId: string) {
     const result = await this.dataSource
-        .getRepository('email_confirmation')
-        .createQueryBuilder('ec')
-        .select('ec.isConfirmed')
-        .where('ec.userId = :id', { id: userId })
-        .getOne();
+      .getRepository('email_confirmation')
+      .createQueryBuilder('ec')
+      .select('ec.isConfirmed')
+      .where('ec.userId = :id', { id: userId })
+      .getOne();
 
     return result;
   }
 
   async makeExpired(userId: string, expirationDate: string): Promise<boolean> {
     const builder = this.dataSource
-        .getRepository('sql_email_confirmation')
-        .createQueryBuilder('ec')
-        .update()
-        .set({ expirationDate })
-        .where('userId = :id', { id: userId })
-      const result = await builder.execute();
+      .getRepository('sql_email_confirmation')
+      .createQueryBuilder('ec')
+      .update()
+      .set({ expirationDate })
+      .where('userId = :id', { id: userId });
+    const result = await builder.execute();
 
     if (result.affected !== 1) {
       return false;

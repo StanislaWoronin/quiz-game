@@ -1,5 +1,5 @@
 const authController = `/auth`;
-const pairGameQuiz = '/pair-game-quiz'
+const pairGameQuiz = '/pair-game-quiz';
 const saController = `/sa`;
 const testingController = `/testing`;
 
@@ -21,10 +21,10 @@ export const endpoints = {
       connection: `${pairGameQuiz}/pairs/connection`,
       myCurrent: {
         myCurrent: `${pairGameQuiz}/pairs/my-current`,
-        answers: `${pairGameQuiz}/pairs/my-current/answers`
-    },
+        answers: `${pairGameQuiz}/pairs/my-current/answers`,
+      },
       pairs: `${pairGameQuiz}/pairs`,
-    }
+    },
   },
   sa: {
     quiz: {
@@ -38,6 +38,6 @@ export const endpoints = {
     confirmationCode: `${testingController}/confirmation-code`,
     isConfirmed: `${testingController}/is-confirmed`,
     setExpirationDate: `${testingController}/set-expiration-date`,
-    userPassword: `${testingController}/user-password`
+    userPassword: `${testingController}/user-password`,
   },
 };

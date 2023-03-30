@@ -3,14 +3,14 @@ import {
   Entity,
   OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn
-} from "typeorm";
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { SqlUserBanInfo } from './ban-info.entity';
 import { SqlCredentials } from './credentials.entity';
 import { SqlGameProgress } from '../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-game-progress.entity';
 import { SqlUserAnswer } from '../../../../../public/pair-quiz-game/infrastructure/sql/entity/sql-user-answer.entity';
-import {SqlSecurity} from "../../../../../public/security/infrastructure/sql/entity/security";
-import { SqlEmailConfirmation } from "./sql-email-confirmation.entity";
+import { SqlSecurity } from '../../../../../public/security/infrastructure/sql/entity/security';
+import { SqlEmailConfirmation } from './sql-email-confirmation.entity';
 
 @Entity()
 export class SqlUsers {

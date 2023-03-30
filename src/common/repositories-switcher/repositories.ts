@@ -10,13 +10,11 @@ import { MQuestionsQueryRepository } from '../../modules/sa/questions/infrastruc
 import { MQuestionsRepository } from '../../modules/sa/questions/infrastructure/mongoose/m-questions.repository';
 import { QuizGameRepository } from '../../modules/public/pair-quiz-game/infrastructure/sql/quiz-game.repository';
 import { JwtRepository } from '../../modules/public/auth/infrastructure/sql/jwt.repository';
-import {SecurityRepository} from "../../modules/public/security/infrastructure/sql/security.repository";
-import { EmailConfirmationRepository } from "../../modules/sa/users/infrastructure/sql/email-confirmation.repository";
-import { UserBanInfoRepository } from "../../modules/sa/users/infrastructure/sql/ban-info.repository";
-import { SecurityQueryRepository } from "../../modules/public/security/infrastructure/sql/security-query-repository.service";
-import {
-  QuizGameQueryRepository
-} from "../../modules/public/pair-quiz-game/infrastructure/sql/quiz-game-query.repository";
+import { SecurityRepository } from '../../modules/public/security/infrastructure/sql/security.repository';
+import { EmailConfirmationRepository } from '../../modules/sa/users/infrastructure/sql/email-confirmation.repository';
+import { UserBanInfoRepository } from '../../modules/sa/users/infrastructure/sql/ban-info.repository';
+import { SecurityQueryRepository } from '../../modules/public/security/infrastructure/sql/security-query-repository.service';
+import { QuizGameQueryRepository } from '../../modules/public/pair-quiz-game/infrastructure/sql/quiz-game-query.repository';
 
 export const repositories = {
   sql: {

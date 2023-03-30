@@ -1,19 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { CreatedQuestions } from '../../api/view/created-questions';
 import { SqlQuestions } from './entity/questions.entity';
-import { SqlCorrectAnswers } from './entity/correct-answers.entity';
 import { toCreatedQuestions } from '../../../../../common/data-mapper/to-created-quesions';
 import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
-import { IQuestionsRepository } from "../i-questions.repository";
-import { CreateQuestionDto } from "../../api/dto/create-question.dto";
+import { IQuestionsRepository } from '../i-questions.repository';
+import { CreateQuestionDto } from '../../api/dto/create-question.dto';
 
 @Injectable()
 export class QuestionsRepository implements IQuestionsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource,
-  ) {
-  }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createQuestion(
     dto: CreateQuestionDto,
@@ -23,9 +20,11 @@ export class QuestionsRepository implements IQuestionsRepository {
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
-      const manager = queryRunner.manager
+      const manager = queryRunner.manager;
 
-      const createdQuestions = await manager.getRepository(SqlQuestions).save(new SqlQuestions(dto.body, dto.correctAnswers));
+      const createdQuestions = await manager
+        .getRepository(SqlQuestions)
+        .save(new SqlQuestions(dto.body, dto.correctAnswers));
 
       await queryRunner.commitTransaction();
       return toCreatedQuestions(createdQuestions, dto.correctAnswers);
@@ -92,8 +91,6 @@ export class QuestionsRepository implements IQuestionsRepository {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const manager = queryRunner.manager;
-
-      await manager.delete(SqlCorrectAnswers, { questionId });
 
       const result = await manager.delete(SqlQuestions, { id: questionId });
       if (result.affected === 0) {

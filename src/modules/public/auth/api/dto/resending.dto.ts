@@ -1,6 +1,6 @@
 import { IsEmail, Validate } from 'class-validator';
 import { Transform } from 'class-transformer';
-import {EmailResendingValidator} from "../../../../../common/validators/email-resending.validator";
+import { EmailResendingValidator } from '../../../../../common/validators/email-resending.validator';
 
 export class ResendingDto {
   @IsEmail()

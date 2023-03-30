@@ -1,4 +1,4 @@
-import { preparedUser } from "./prepared-user";
+import { preparedUser } from './prepared-user';
 
 export const preparedSecurity = {
   email: {

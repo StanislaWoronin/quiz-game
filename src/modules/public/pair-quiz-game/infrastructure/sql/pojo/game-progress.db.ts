@@ -1,5 +1,5 @@
-import {AnswerStatus} from "../../../shared/answer-status";
+import { AnswerStatus } from '../../../shared/answer-status';
 
 export class GameProgressDb {
-    score: number
+  score: number;
 }

@@ -1,3 +1,3 @@
 export class AccessToken {
-  accessToken: string
+  accessToken: string;
 }

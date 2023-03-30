@@ -1,7 +1,7 @@
-import {Questions} from '../../shared/questions';
-import {GameStatus} from '../../shared/game-status';
-import {ViewGameProgress} from './view-game-progress';
-import {SqlGame} from '../../infrastructure/sql/entity/sql-game.entity';
+import { Questions } from '../../shared/questions';
+import { GameStatus } from '../../shared/game-status';
+import { ViewGameProgress } from './view-game-progress';
+import { SqlGame } from '../../infrastructure/sql/entity/sql-game.entity';
 
 export class ViewGame {
   id: string;
@@ -18,18 +18,14 @@ export class ViewGame {
     firstPlayerProgress: ViewGameProgress,
     questions?: Questions[],
     secondPlayerId?: ViewGameProgress | null,
-    status?: GameStatus,
-    pairCreatedDate?: string,
-    startGameDate?: string,
-    finishGameDate?: string,
   ) {
     this.id = game.id;
     this.firstPlayerProgress = firstPlayerProgress;
     this.secondPlayerProgress = secondPlayerId ?? null;
     this.questions = questions ?? null;
-    this.status = status ?? GameStatus.PendingSecondPlayer;
-    this.pairCreatedDate = pairCreatedDate ?? new Date().toISOString();
-    this.startGameDate = startGameDate ?? null;
-    this.finishGameDate = finishGameDate ?? null;
+    this.status = game.status ?? GameStatus.PendingSecondPlayer;
+    this.pairCreatedDate = game.pairCreatedDate;
+    this.startGameDate = game.startGameDate ?? null;
+    this.finishGameDate = game.finishGameDate ?? null;
   }
 }

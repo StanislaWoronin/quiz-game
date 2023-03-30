@@ -43,7 +43,7 @@ export class QuestionsService {
     );
     if (isHasAnswer === null) return null;
     if (!isHasAnswer.length) {
-      return false
+      return false;
     }
 
     return await this.questionsRepository.updatePublishStatus(

@@ -13,13 +13,13 @@ export const UserId = createParamDecorator(
 );
 
 export const Email = createParamDecorator(
-    (data: string, ctx: ExecutionContext): string | null => {
-        const request = ctx.switchToHttp().getRequest();
+  (data: string, ctx: ExecutionContext): string | null => {
+    const request = ctx.switchToHttp().getRequest();
 
-        if (!request.email) {
-            return null;
-        }
+    if (!request.email) {
+      return null;
+    }
 
-        return request.email;
-    },
+    return request.email;
+  },
 );

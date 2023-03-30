@@ -1,10 +1,8 @@
 import { ViewSecurity } from '../api/view/view-security';
-import {SqlSecurity} from "./sql/entity/security";
+import { SqlSecurity } from './sql/entity/security';
 
 export interface ISecurityQueryRepository {
-  getAllActiveSessions(
-    userId: string,
-  ): Promise<ViewSecurity[] | null>;
+  getAllActiveSessions(userId: string): Promise<ViewSecurity[] | null>;
   getDeviseById(deviceId: string): Promise<SqlSecurity | null>;
 }
 

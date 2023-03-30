@@ -3,7 +3,8 @@ import {
   Delete,
   ForbiddenException,
   Get,
-  HttpCode, HttpStatus,
+  HttpCode,
+  HttpStatus,
   Inject,
   NotFoundException,
   Param,
@@ -14,9 +15,9 @@ import { Request } from 'express';
 import { SecurityService } from '../application/security.service';
 import { ViewSecurity } from './view/view-security';
 import { ISecurityQueryRepository } from '../infrastructure/i-security-query.repository';
-import {RefreshTokenValidationGuard} from "../../auth/guards/refresh-token-validation.guard";
-import {UserId} from "../../../../common/decorators/user.decorator";
-import {DeviceId} from "../../../../common/decorators/device.decorator";
+import { RefreshTokenValidationGuard } from '../../auth/guards/refresh-token-validation.guard';
+import { UserId } from '../../../../common/decorators/user.decorator';
+import { DeviceId } from '../../../../common/decorators/device.decorator';
 
 @UseGuards(RefreshTokenValidationGuard)
 @Controller('security/devices')
@@ -37,8 +38,8 @@ export class SecurityController {
   @Delete()
   @HttpCode(204)
   async deleteActiveSessions(
-      @DeviceId() deviceId: string,
-      @UserId() userId: string,
+    @DeviceId() deviceId: string,
+    @UserId() userId: string,
   ) {
     const result = await this.securityService.deleteAllActiveSessions(
       userId,

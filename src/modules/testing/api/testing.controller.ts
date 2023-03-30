@@ -4,7 +4,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Inject, Param, Put,
+  Inject,
+  Param,
+  Put,
 } from '@nestjs/common';
 import { ITestingRepository } from '../infrastructure/i-testing.repository';
 
@@ -32,7 +34,7 @@ export class TestingController {
 
   @Get('user-password/:userId')
   async getUserPassword(@Param('userId') userId: string) {
-    return await this.testingRepository.getUserPassword(userId)
+    return await this.testingRepository.getUserPassword(userId);
   }
 
   @Get('is-confirmed/:userId')

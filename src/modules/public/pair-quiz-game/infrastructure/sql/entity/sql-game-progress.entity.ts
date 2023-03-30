@@ -1,4 +1,11 @@
-import {Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { SqlUsers } from '../../../../../sa/users/infrastructure/sql/entity/users.entity';
 import { SqlGame } from './sql-game.entity';
 

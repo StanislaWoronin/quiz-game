@@ -1,4 +1,4 @@
-import { MongoQuestion } from "../../infrastructure/mongoose/schema/question.schema";
+import { MongoQuestion } from '../../infrastructure/mongoose/schema/question.schema';
 
 export class CreatedQuestions {
   readonly id: string;
@@ -11,7 +11,9 @@ export class CreatedQuestions {
   constructor(createdQuestions: MongoQuestion) {
     this.id = createdQuestions.id;
     this.body = createdQuestions.body;
-    this.correctAnswers = createdQuestions.correctAnswers.map(el => el.correctAnswer);
+    this.correctAnswers = createdQuestions.correctAnswers.map(
+      (el) => el.correctAnswer,
+    );
     this.published = false;
     this.createdAt = createdQuestions.createdAt;
     this.updatedAt = null;

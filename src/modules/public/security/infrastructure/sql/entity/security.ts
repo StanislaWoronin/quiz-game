@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import {SqlUsers} from "../../../../../sa/users/infrastructure/sql/entity/users.entity";
+import { SqlUsers } from '../../../../../sa/users/infrastructure/sql/entity/users.entity';
 
 @Entity()
 export class SqlSecurity {
@@ -18,18 +18,18 @@ export class SqlSecurity {
   @Column() userId: string;
 
   constructor(
-      userId: string,
-      deviceId: string,
-      deviceTitle: string,
-      ipAddress: string,
-      iat: string,
-      exp: string,
+    userId: string,
+    deviceId: string,
+    deviceTitle: string,
+    ipAddress: string,
+    iat: string,
+    exp: string,
   ) {
-    this.userId = userId
-    this.deviceId = deviceId
-    this.deviceTitle = deviceTitle
-    this.ipAddress = ipAddress
-    this.iat = iat
-    this.exp = exp
+    this.userId = userId;
+    this.deviceId = deviceId;
+    this.deviceTitle = deviceTitle;
+    this.ipAddress = ipAddress;
+    this.iat = iat;
+    this.exp = exp;
   }
 }

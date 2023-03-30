@@ -8,14 +8,13 @@ import { BanStatus } from '../../api/dto/query/ban-status';
 import { UserWithBanInfoDb } from './pojo/user-with-ban-info.db';
 import { toViewUser } from '../../../../../common/data-mapper/to-view-user';
 import { SqlUsers } from './entity/users.entity';
-import {SqlCredentials} from "./entity/credentials.entity";
-import { SqlUserBanInfo } from "./entity/ban-info.entity";
-import {IUsersQueryRepository} from "../i-users-query.repository";
+import { SqlCredentials } from './entity/credentials.entity';
+import { SqlUserBanInfo } from './entity/ban-info.entity';
+import { IUsersQueryRepository } from '../i-users-query.repository';
 
 @Injectable()
-export class UsersQueryRepository implements IUsersQueryRepository{
-  constructor(@InjectDataSource() private dataSource: DataSource) {
-  }
+export class UsersQueryRepository implements IUsersQueryRepository {
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getUsers(queryDto: UsersQueryDto): Promise<ViewPage<ViewUser>> {
     const filter = this.getFilter(queryDto);
@@ -51,10 +50,10 @@ export class UsersQueryRepository implements IUsersQueryRepository{
 
   async getUserByLoginOrEmail(loginOrEmail: string): Promise<SqlUsers | null> {
     const builder = this.dataSource
-        .createQueryBuilder()
-        .select('u')
-        .from(SqlUsers, 'u')
-        .where([{ login: loginOrEmail }, { email: loginOrEmail }]);
+      .createQueryBuilder()
+      .select('u')
+      .from(SqlUsers, 'u')
+      .where([{ login: loginOrEmail }, { email: loginOrEmail }]);
     const result = await builder.getOne();
 
     return result;
@@ -80,7 +79,7 @@ export class UsersQueryRepository implements IUsersQueryRepository{
                             FROM sql_user_ban_info bi
                            WHERE bi."userId" = $1));
     `;
-    const result = await this.dataSource.query(query, [userId])
+    const result = await this.dataSource.query(query, [userId]);
 
     return result[0];
   } // TODO new
@@ -101,10 +100,10 @@ export class UsersQueryRepository implements IUsersQueryRepository{
                          AND (NOT EXISTS (SELECT * 
                                             FROM sql_user_ban_info bi
                                            WHERE bi."userId" = $1)))) AS exists;
-    `
-    const result = await this.dataSource.query(query, [userId])
+    `;
+    const result = await this.dataSource.query(query, [userId]);
 
-    return result[0].exists
+    return result[0].exists;
   } // TODO new
 
   async isLoginOrEmailExist(loginOrEmail: string): Promise<boolean> {
@@ -114,14 +113,9 @@ export class UsersQueryRepository implements IUsersQueryRepository{
     return await builder.getExists();
   } // TODO new
 
-  async getCredentialByLoginOrEmail(loginOrEmail: string): Promise<SqlCredentials | null> {
-    // const builder = this.dataSource
-    //     .createQueryBuilder(SqlCredentials, 'c')
-    //     .leftJoin(SqlUsers, 'u')
-    //     .where('u.login = :loginOrEmail', {loginOrEmail: loginOrEmail})
-    //     .orWhere('u.email = :loginOrEmail', {loginOrEmail: loginOrEmail})
-    // console.log(builder.getSql()); // TODO не подтягивает зависимость
-    // const result = await builder.getOne()
+  async getCredentialByLoginOrEmail(
+    loginOrEmail: string,
+  ): Promise<SqlCredentials | null> {
     const query = `
       SELECT c."userId", c.credentials
         FROM sql_users u
@@ -129,10 +123,10 @@ export class UsersQueryRepository implements IUsersQueryRepository{
           ON c."userId" = u.id
        WHERE u.login = $1
           OR u.email = $1
-    `
-    const result = await this.dataSource.query(query, [loginOrEmail])
+    `;
+    const result = await this.dataSource.query(query, [loginOrEmail]);
 
-    return result[0]
+    return result[0];
   }
 
   private getFilter(query: UsersQueryDto): string {

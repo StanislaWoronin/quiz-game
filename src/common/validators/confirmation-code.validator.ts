@@ -4,7 +4,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import {IEmailConfirmationRepository} from "../../modules/sa/users/infrastructure/i-email-confirmation.repository";
+import { IEmailConfirmationRepository } from '../../modules/sa/users/infrastructure/i-email-confirmation.repository';
 
 @ValidatorConstraint({ name: 'ConfirmationCodeValidator', async: true })
 @Injectable()

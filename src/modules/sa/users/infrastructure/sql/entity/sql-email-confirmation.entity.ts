@@ -1,5 +1,5 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
-import {SqlUsers} from "./users.entity";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { SqlUsers } from './users.entity';
 
 @Entity()
 export class SqlEmailConfirmation {
@@ -14,10 +14,15 @@ export class SqlEmailConfirmation {
   user: SqlUsers;
   @PrimaryColumn('uuid') userId: string;
 
-  constructor(userId: string, isConfirmed: boolean, confirmationCode?: string, expirationDate?: string) {
-    this.userId = userId
-    this.isConfirmed = isConfirmed
-    this.confirmationCode = confirmationCode
-    this.expirationDate = expirationDate
+  constructor(
+    userId: string,
+    isConfirmed: boolean,
+    confirmationCode?: string,
+    expirationDate?: string,
+  ) {
+    this.userId = userId;
+    this.isConfirmed = isConfirmed;
+    this.confirmationCode = confirmationCode;
+    this.expirationDate = expirationDate;
   }
 }

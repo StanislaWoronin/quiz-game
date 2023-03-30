@@ -1,5 +1,5 @@
 import { IsString, Length, Validate } from 'class-validator';
-import {PasswordRecoveryValidator} from "../../guards/password-recovery.validator";
+import { PasswordRecoveryValidator } from '../../guards/password-recovery.validator';
 
 export class NewPasswordDto {
   @IsString()
