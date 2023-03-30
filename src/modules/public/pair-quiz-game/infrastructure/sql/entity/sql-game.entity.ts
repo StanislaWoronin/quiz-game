@@ -59,10 +59,12 @@ export class SqlGame {
   questions: SqlGameQuestions
 
   constructor() {
+    const t = new Date().toISOString();
     this.id = randomUUID();
     this.status = GameStatus.PendingSecondPlayer;
-    this.pairCreatedDate = new Date().toISOString();
+    this.pairCreatedDate = t
     this.startGameDate = null;
     this.finishGameDate = null;
+    console.log(t, 'from create')
   }
 }

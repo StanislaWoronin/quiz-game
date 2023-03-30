@@ -4,8 +4,8 @@ import { SqlQuestions } from "../../../../../sa/questions/infrastructure/sql/ent
 
 @Entity()
 export class SqlGameQuestions {
-  @PrimaryGeneratedColumn('uuid')
-  id: string
+  @PrimaryGeneratedColumn()
+  id: number
 
   @ManyToOne(() => SqlGame, g => g.questions)
   @JoinColumn()

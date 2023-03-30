@@ -23,7 +23,6 @@ export class PairQuizGameService {
 
   async joinGame(userId: string): Promise<ViewGame | null> {
     const isPlaying = await this.queryGameRepository.checkUserCurrentGame(userId);
-    console.log(isPlaying)
     if (isPlaying) {
       return null;
     }

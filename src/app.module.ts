@@ -69,6 +69,8 @@ import { PasswordRecoveryValidator } from "./modules/public/auth/guards/password
 import { SqlTokenBlackList } from "./modules/public/auth/infrastructure/sql/entity/sql-token-black-list.entity";
 import { SqlEmailConfirmation } from "./modules/sa/users/infrastructure/sql/entity/sql-email-confirmation.entity";
 import { SqlGameQuestions } from "./modules/public/pair-quiz-game/infrastructure/sql/entity/sql-game-questions.entity";
+import {APP_INTERCEPTOR} from "@nestjs/core";
+import {LoggingInterceptor} from "./common/interceptor/interceptor";
 
 const controllers = [
   AuthController,
@@ -217,6 +219,15 @@ export const mongooseModels = [
     ...configSwitcher(settings.currentRepository),
   ],
   controllers: [...controllers],
-  providers: [...repositories, ...services, ...validators, ...useCases],
+  providers: [
+      ...repositories,
+    ...services,
+    ...validators,
+    ...useCases,
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: LoggingInterceptor
+    // }
+  ],
 })
 export class AppModule {}

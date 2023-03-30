@@ -12,13 +12,13 @@ export class Game {
         const response = await request(this.server)
             .post(endpoints.pairGameQuiz.pairs.connection)
             .auth(token, {type: "bearer"})
-
+        console.log(response.body.pairCreatedDate, 'from test helper')
         return {body: response.body, status: response.status}
     }
 
     async sendAnswer(answer: string, token?: string,): Promise<TestingRequestDto<ViewAnswer>> {
         const response = await request(this.server)
-            .post(endpoints.pairGameQuiz.pairs.sendAnswers)
+            .post(endpoints.pairGameQuiz.pairs.myCurrent.answers)
             .auth(token, {type: "bearer"})
             .send({answer})
 
@@ -27,7 +27,7 @@ export class Game {
 
     async getMyCurrentGame(token?: string): Promise<TestingRequestDto<ViewGame>> {
         const response = await request(this.server)
-            .get(endpoints.pairGameQuiz.pairs.myCurrent)
+            .get(endpoints.pairGameQuiz.pairs.myCurrent.myCurrent)
             .auth(token, {type: "bearer"})
 
         return {body: response.body, status: response.status}

@@ -14,6 +14,7 @@ import { UserId } from '../../../../common/decorators/user.decorator';
 import { AuthBearerGuard } from '../../auth/guards/auth-bearer.guard';
 import { IQuizGameQueryRepository } from '../infrastructure/i-quiz-game-query.repository';
 import { ParamsId } from '../../../../common/dto/params-id';
+import {GameStatus} from "../shared/game-status";
 
 @UseGuards(AuthBearerGuard)
 @Controller('pair-game-quiz/pairs')
@@ -36,15 +37,16 @@ export class PairQuizGameController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('answers')
+  @Post('my-current/answers')
   async sendAnswer(
     @Body() dto: AnswerDto,
     @UserId() userId: string,
   ): Promise<ViewAnswer> {
-    const currentGame = await this.gameQueryRepository.checkUserCurrentGame(userId)
+    const currentGame = await this.gameQueryRepository.checkUserCurrentGame(userId, GameStatus.Active)
     if (!currentGame) {
       throw new ForbiddenException();
     }
+
     const result = await this.gameService.sendAnswer(userId, dto);
     if (!result) {
       throw new ForbiddenException(); // if player already answered to all questions
@@ -60,8 +62,9 @@ export class PairQuizGameController {
     if (!currentGame) {
       throw new NotFoundException();
     }
-
-    return await this.gameQueryRepository.getMyCurrentGame(currentGame);
+    const res = await this.gameQueryRepository.getMyCurrentGame(currentGame);
+    console.log(res.pairCreatedDate, 'from controller')
+    return res
   }
 
   @HttpCode(HttpStatus.OK)

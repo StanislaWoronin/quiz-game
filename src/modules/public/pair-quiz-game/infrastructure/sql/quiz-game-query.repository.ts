@@ -13,7 +13,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     constructor(@InjectDataSource() private dataSource: DataSource) {}
 
     async getMyCurrentGame(userId): Promise<ViewGame> {
-        const query = this.getQuery(GameStatus.Active) // TODO fix
+        const query = this.getQuery() // TODO fix
         const result: GameDb[] = await this.dataSource.query(query, [userId])
         if (!result.length) {
             return null
@@ -57,16 +57,20 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
         return result[0]
     }
 
-    async checkUserCurrentGame(userId: string): Promise<string | null> {
+    async checkUserCurrentGame(userId: string, status?: GameStatus): Promise<string | null> {
+        let filter = `WHERE status = '${GameStatus.PendingSecondPlayer}' 
+                         OR status = '${GameStatus.Active}'`
+        if (status) {
+            filter = `WHERE status = '${status}'`
+        }
         const query = `
-            SELECT g.id AS "gameId"
-              FROM sql_game g
-              LEFT JOIN sql_game_progress gp
-                ON gp."gameId" = g.id
-             WHERE gp."userId" = $1
-               AND g.status = $2;
+            SELECT (SELECT id AS "gameId" 
+                      FROM sql_game 
+                     ${filter}) 
+              FROM sql_game_progress
+             WHERE "userId" = $1;
         `
-        const result = await this.dataSource.query(query, [userId, GameStatus.Active])
+        const result = await this.dataSource.query(query, [userId])
         if(!result.length) {
             return null
         }
@@ -126,7 +130,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                    AND ua."questionId" = gq."questionId"
                  WHERE g.id = $1
                    ${filter}
-                 ORDER BY login, "addedAt" ASC;
+                 ORDER BY login, gq.id ASC;
         `
     }
 }

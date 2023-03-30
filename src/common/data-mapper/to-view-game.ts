@@ -8,6 +8,7 @@ import {GameStatus} from "../../modules/public/pair-quiz-game/shared/game-status
 export const toViewGame = (game: GameDb[]): ViewGame => {
     const questions = getQuestions(game.slice(0,5))
 
+    console.log(game[0].pairCreatedDate, 'from repo')
     return {
         id: game[0].id,
         firstPlayerProgress: getPlayerProgress(game.slice(0, 5)),

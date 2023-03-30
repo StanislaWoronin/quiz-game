@@ -28,9 +28,10 @@ export class QuizGameRepository implements IQuizGameRepository{
       await queryRunner.startTransaction();
       const manager = queryRunner.manager;
 
+      const newGame = new SqlGame()
       const game = await manager
         .getRepository(SqlGame)
-        .save(new SqlGame());
+        .save(newGame);
 
       await manager
         .getRepository(SqlGameProgress)
@@ -51,7 +52,6 @@ export class QuizGameRepository implements IQuizGameRepository{
       await queryRunner.commitTransaction()
       return new ViewGame(game, new ViewGameProgress(userId, userLogin.login));
     } catch (e) {
-      console.log(e);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
