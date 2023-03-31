@@ -79,7 +79,7 @@ export class UsersFactory {
     return result;
   }
 
-  async createAndLoginUsers(userCount: number): Promise<
+  async createAndLoginUsers(userCount: number, startWith: number = 0): Promise<
     {
       user: CreatedUser;
       accessToken: string;
@@ -89,7 +89,7 @@ export class UsersFactory {
     const users = await this.createUsers(userCount);
 
     const result = [];
-    for (let i = 0; i < userCount; i++) {
+    for (let i = startWith; i < userCount; i++) {
       const userLoginData = {
         loginOrEmail: users[i].login,
         password: `password${i}`,

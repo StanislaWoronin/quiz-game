@@ -14,10 +14,8 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
 
   async getMyCurrentGame(gameId: string): Promise<ViewGame> {
     const query = this.getQuery(true);
-    console.log(gameId)
-    console.log(query);
+
     const result: GameDb[] = await this.dataSource.query(query, [gameId]);
-    console.log(result)
     if (!result.length) {
       return null;
     }
@@ -27,7 +25,9 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
 
   async getGameById(gameId: string): Promise<ViewGame | null> {
     const query = this.getQuery();
+    console.log(query)
     const result: GameDb[] = await this.dataSource.query(query, [gameId]);
+    console.log(result)
     if (!result.length) {
       return null;
     }

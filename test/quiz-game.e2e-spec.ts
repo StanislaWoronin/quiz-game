@@ -1,27 +1,22 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { QuestionsFactory } from './helpers/factories/questions-factory';
-import { Questions } from './helpers/request/questions';
-import { Testing } from './helpers/request/testing';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../src/app.module';
-import { createApp } from '../src/config/create-app';
-import { Game } from './helpers/request/game';
-import { Users } from './helpers/request/users';
-import { UsersFactory } from './helpers/factories/users-factory';
-import { Auth } from './helpers/request/auth';
-import {
-  expectAnswer,
-  expectPlayerProgress,
-  expectQuestions,
-  expectViewGame,
-} from './helpers/expect-data/expect-game';
-import { GameStatus } from '../src/modules/public/pair-quiz-game/shared/game-status';
-import { preparedAnswer } from './helpers/prepeared-data/prepared-answer';
-import { AnswerStatus } from '../src/modules/public/pair-quiz-game/shared/answer-status';
-import { preparedGameData } from './helpers/prepeared-data/prepared-game-data';
-import { GameFactory } from './helpers/factories/game-factory';
-import { randomUUID } from 'crypto';
-import { faker } from '@faker-js/faker';
+import {HttpStatus, INestApplication} from '@nestjs/common';
+import {QuestionsFactory} from './helpers/factories/questions-factory';
+import {Questions} from './helpers/request/questions';
+import {Testing} from './helpers/request/testing';
+import {Test, TestingModule} from '@nestjs/testing';
+import {AppModule} from '../src/app.module';
+import {createApp} from '../src/config/create-app';
+import {Game} from './helpers/request/game';
+import {Users} from './helpers/request/users';
+import {UsersFactory} from './helpers/factories/users-factory';
+import {Auth} from './helpers/request/auth';
+import {expectAnswer, expectPlayerProgress, expectQuestions, expectViewGame,} from './helpers/expect-data/expect-game';
+import {GameStatus} from '../src/modules/public/pair-quiz-game/shared/game-status';
+import {preparedAnswer} from './helpers/prepeared-data/prepared-answer';
+import {AnswerStatus} from '../src/modules/public/pair-quiz-game/shared/answer-status';
+import {preparedGameData} from './helpers/prepeared-data/prepared-game-data';
+import {GameFactory} from './helpers/factories/game-factory';
+import {randomUUID} from 'crypto';
+import {faker} from '@faker-js/faker';
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -52,7 +47,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     questions = new Questions(server);
     questionsFactories = new QuestionsFactory(questions);
     game = new Game(server);
-    gameFactory = new GameFactory(game);
+    gameFactory = new GameFactory(game, usersFactory);
     testing = new Testing(server);
     users = new Users(server);
     usersFactory = new UsersFactory(users, auth);
@@ -948,6 +943,127 @@ describe('/sa/quiz/questions (e2e)', () => {
       const getSecondGame = await game.getMyCurrentGame(fourthUser.accessToken);
       expect(getSecondGame.status).toBe(HttpStatus.OK);
       expect(getSecondGame.body).toStrictEqual(secondGame.body);
+
+      expect.setState({
+          firstUser,
+          firstGame,
+          secondUser,
+          questions: firstGame.body.questions
+      })
     });
+
+    it('Send answer for fist game', async () => {
+        const {firstUser, secondUser, firstGame, questions} = expect.getState()
+
+        await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
+            1: AnswerStatus.Correct,
+            2: AnswerStatus.Correct,
+        })
+
+        await gameFactory.sendCorrectAnswer(secondUser.accessToken, questions[0])
+
+        await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
+            3: AnswerStatus.Correct,
+            4: AnswerStatus.Incorrect,
+            5: AnswerStatus.Correct
+        })
+
+        await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
+            2: AnswerStatus.Correct,
+            3: AnswerStatus.Correct,
+            4: AnswerStatus.Incorrect,
+            5: AnswerStatus.Correct
+        })
+
+        const result = await game.getGameById(firstGame.body.id, firstUser.accessToken)
+        expect(result.status).toBe(HttpStatus.OK)
+        expect(result.body).toStrictEqual(
+            expectViewGame(
+                {
+                    first: expectPlayerProgress(
+                        firstUser.user,
+                        {
+                            1: AnswerStatus.Correct,
+                            2: AnswerStatus.Correct,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Incorrect,
+                            5: AnswerStatus.Correct,
+                        },
+                        5,
+                    ),
+                    second: expectPlayerProgress(
+                        secondUser.user,
+                        {
+                            1: AnswerStatus.Correct,
+                            2: AnswerStatus.Correct,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Incorrect,
+                            5: AnswerStatus.Correct,
+                        },
+                        4,
+                    ),
+                },
+                GameStatus.Finished,
+                expectQuestions(questions),
+            ),
+        );
+    })
+
+    it('Create third game by secondUser, connect to the game by firstUser', async () => {
+        const {firstUser, secondUser} = expect.getState()
+
+        const createdGame = await gameFactory.createGame(secondUser, firstUser)
+        expect(createdGame.status).toBe(HttpStatus.OK)
+
+        const getCreatedGame = await game.getMyCurrentGame(secondUser.accessToken)
+        expect(getCreatedGame.body).toStrictEqual(
+            expectViewGame(
+                {
+                    first: expectPlayerProgress(secondUser.user),
+                    second: expectPlayerProgress(firstUser.user),
+                },
+                GameStatus.Active,
+                createdGame.body.questions
+            ),
+        );
+
+        await gameFactory.sendCorrectAnswer(secondUser.accessToken, createdGame.body.questions[0])
+
+        await gameFactory.sendManyAnswer(firstUser.accessToken, createdGame.body.questions, {
+            1: AnswerStatus.Incorrect,
+            2: AnswerStatus.Correct
+        })
+
+        const firstPlayerGetGame = await game.getGameById(createdGame.body.id, secondUser.accessToken)
+        expect(firstPlayerGetGame.status).toBe(HttpStatus.OK)
+
+        const secondPlayerGetGame = await game.getGameById(createdGame.body.id, firstUser.accessToken)
+        expect(secondPlayerGetGame.status).toBe(HttpStatus.OK)
+
+        expect(firstPlayerGetGame.body).toStrictEqual(secondPlayerGetGame.body)
+        expect(firstPlayerGetGame.body).toStrictEqual(
+            expectViewGame(
+                {
+                    first: expectPlayerProgress(
+                        secondUser.user,
+                        {
+                            1: AnswerStatus.Correct,
+                        },
+                        1,
+                    ),
+                    second: expectPlayerProgress(
+                        firstUser.user,
+                        {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Correct,
+                        },
+                        1,
+                    ),
+                },
+                GameStatus.Active,
+                createdGame.body.questions
+            ),
+        );
+    })
   });
 });

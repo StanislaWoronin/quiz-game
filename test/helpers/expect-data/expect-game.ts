@@ -50,7 +50,7 @@ export const expectAnswer = (answerStatus: AnswerStatus): ViewAnswer => {
 
 export const expectPlayerProgress = (
   user: CreatedUser,
-  answerStatus: TestAnswersType,
+  answerStatus?: TestAnswersType,
   score?,
 ): ViewGameProgress => {
   const answers = [];
