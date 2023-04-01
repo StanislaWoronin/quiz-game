@@ -927,15 +927,16 @@ describe('/sa/quiz/questions (e2e)', () => {
       const [firstUser, secondUser, thirdUser, fourthUser] =
         await usersFactory.createAndLoginUsers(4);
         await questionsFactories.createQuestions(
-        preparedGameData.length,
-        preparedGameData,
-      );
+          preparedGameData.length,
+          preparedGameData,
+        );
 
       await game.joinGame(firstUser.accessToken);
       const firstGame = await game.joinGame(secondUser.accessToken);
-
+        console.log('this is questions from FIRST created Game', firstGame.body.questions)
       await game.joinGame(thirdUser.accessToken);
       const secondGame = await game.joinGame(fourthUser.accessToken);
+        console.log('this is questions from SECOND created Game', secondGame.body.questions)
       const getFirstGame = await game.getMyCurrentGame(secondUser.accessToken);
       expect(getFirstGame.status).toBe(HttpStatus.OK);
       expect(getFirstGame.body).toStrictEqual(firstGame.body);
@@ -954,13 +955,18 @@ describe('/sa/quiz/questions (e2e)', () => {
 
     it('Send answer for fist game', async () => {
         const {firstUser, secondUser, firstGame, questions} = expect.getState()
+        console.log('Is here trabl:', questions)
+        await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[0])
+        const answer1 = await game.getMyCurrentGame(firstUser.accessToken)
+        expect(answer1.body.questions).toStrictEqual(questions)
 
-        await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
-            1: AnswerStatus.Correct,
-            2: AnswerStatus.Correct,
-        })
+        await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[1])
+        const answer2 = await game.getMyCurrentGame(firstUser.accessToken)
+        expect(answer2.body.questions).toStrictEqual(questions)
 
         await gameFactory.sendCorrectAnswer(secondUser.accessToken, questions[0])
+        const answer3 = await game.getMyCurrentGame(secondUser.accessToken)
+        expect(answer3.body.questions).toStrictEqual(questions)
 
         await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
             3: AnswerStatus.Correct,
@@ -1066,4 +1072,33 @@ describe('/sa/quiz/questions (e2e)', () => {
         );
     })
   });
+
+  describe('Test questions order', () => {
+      it('Clear data base', async () => {
+          await testing.clearDb();
+      });
+
+      it('Start', async () => {
+          const count = 5
+          const players = await usersFactory.createAndLoginUsers(count * 2)
+          await questionsFactories.createQuestions(
+              preparedGameData.length,
+              preparedGameData,
+          );
+
+          for (let i = 0; i < count; i++) {
+              const firstPlayer = players[i * 2]
+              const secondPlayer = players[i * 2 + 1]
+              await game.joinGame(firstPlayer.accessToken)
+              const joinIntoGame = await game.joinGame(secondPlayer.accessToken)
+
+              const getGameById = await game.getGameById(joinIntoGame.body.id, firstPlayer.accessToken)
+              const getMyGame = await game.getMyCurrentGame(firstPlayer.accessToken)
+
+              expect(joinIntoGame.body.questions).toStrictEqual(getMyGame.body.questions)
+              expect(joinIntoGame.body.questions).toStrictEqual(getGameById.body.questions)
+          }
+
+      })
+  })
 });

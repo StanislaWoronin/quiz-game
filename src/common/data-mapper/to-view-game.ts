@@ -8,6 +8,8 @@ import { GameStatus } from '../../modules/public/pair-quiz-game/shared/game-stat
 export const toViewGame = (game: GameDb[]): ViewGame => {
   const questions = getQuestions(game.slice(0, 5));
 
+  //const fistPlayer = game.filter()
+
   return {
     id: game[0].id,
     firstPlayerProgress: getPlayerProgress(game.slice(0, 5)),

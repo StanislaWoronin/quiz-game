@@ -29,8 +29,14 @@ export class SqlGameProgress {
   })
   score: number;
 
-  constructor(gameId: string, userId: string) {
+  @Column({
+    default: false,
+  })
+  gameHost: boolean;
+
+  constructor(gameId: string, userId: string, gameHost?: boolean) {
     this.gameId = gameId;
     this.userId = userId;
+    this.gameHost = gameHost;
   }
 }

@@ -29,26 +29,25 @@ export class PairQuizGameService {
     return await this.gameRepository.joinGame(userId, existsOpenGame);
   }
 
-  async sendAnswer(userId: string, dto: AnswerDto): Promise<ViewAnswer | null> {
+  async sendAnswer(userId: string, dto: AnswerDto, gameId: string): Promise<ViewAnswer | null> {
     const currentUserAnswerProgress =
-      await this.queryGameRepository.checkUserAnswerProgress(userId);
-    if (currentUserAnswerProgress.length === 5) {
+      await this.queryGameRepository.currentGameAnswerProgress(userId, gameId);
+    if (currentUserAnswerProgress == 5) {
       return null;
     }
 
     const correctAnswer = await this.queryGameRepository.getCorrectAnswers(
-      userId,
-      currentUserAnswerProgress.length,
+      gameId,
+      currentUserAnswerProgress,
     );
 
-    const isLastQuestions =
-      currentUserAnswerProgress.length === 4 ? true : false;
+    const isLastQuestions = currentUserAnswerProgress == 4;
     const isCorrectAnswer = correctAnswer.correctAnswers.includes(dto.answer);
 
     const sendAnswerDto = new SendAnswerDto(
       userId,
       dto.answer,
-      correctAnswer.gameId,
+      gameId,
       correctAnswer.questionId,
       isCorrectAnswer,
       isLastQuestions,

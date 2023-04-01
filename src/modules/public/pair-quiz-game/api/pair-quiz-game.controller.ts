@@ -58,7 +58,7 @@ export class PairQuizGameController {
       throw new ForbiddenException();
     }
 
-    const result = await this.gameService.sendAnswer(userId, dto);
+    const result = await this.gameService.sendAnswer(userId, dto, currentGame);
     if (!result) {
       throw new ForbiddenException(); // if player already answered to all questions
     }

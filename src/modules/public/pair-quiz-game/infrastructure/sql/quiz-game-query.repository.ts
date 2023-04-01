@@ -2,7 +2,6 @@ import { IQuizGameQueryRepository } from '../i-quiz-game-query.repository';
 import { GameStatus } from '../../shared/game-status';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { CheckAnswerProgressDb } from './pojo/checkAnswerProgressDb';
 import { ViewGame } from '../../api/view/view-game';
 import { toViewGame } from '../../../../../common/data-mapper/to-view-game';
 import { GameDb } from './pojo/game.db';
@@ -14,8 +13,10 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
 
   async getMyCurrentGame(gameId: string): Promise<ViewGame> {
     const query = this.getQuery(true);
-
+    console.log(query)
+    console.log(gameId)
     const result: GameDb[] = await this.dataSource.query(query, [gameId]);
+    console.log(result)
     if (!result.length) {
       return null;
     }
@@ -25,9 +26,8 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
 
   async getGameById(gameId: string): Promise<ViewGame | null> {
     const query = this.getQuery();
-    console.log(query)
+
     const result: GameDb[] = await this.dataSource.query(query, [gameId]);
-    console.log(result)
     if (!result.length) {
       return null;
     }
@@ -45,21 +45,19 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   }
 
   async getCorrectAnswers(
-    userId: string,
+    gameId: string,
     lastQuestionNumber: number,
   ): Promise<GetCorrectAnswerDb> {
     const query = `
-            SELECT gq."gameId", gq."questionId", q."correctAnswers"
-              FROM sql_game_progress gp
-              LEFT JOIN sql_game_questions gq
-                ON gq."gameId" = gp."gameId"
+            SELECT gq."questionId", q."correctAnswers"
+              FROM sql_game_questions gq
               LEFT JOIN sql_questions q
                 ON q.id = gq."questionId"
-             WHERE gp."userId" = $1
+             WHERE gq."gameId" = $1
             OFFSET $2 LIMIT 1;
         `;
     const result = await this.dataSource.query(query, [
-      userId,
+      gameId,
       lastQuestionNumber,
     ]);
 
@@ -83,6 +81,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                ${filter};
         `;
     const result = await this.dataSource.query(query, [userId]);
+
     if (!result.length) {
       return null;
     }
@@ -104,20 +103,19 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     return result[0].id;
   }
 
-  async checkUserAnswerProgress(
+  async currentGameAnswerProgress(
     userId: string,
-  ): Promise<CheckAnswerProgressDb[]> {
+    gameId: string,
+  ): Promise<number> {
     const query = `
-            SELECT ua."userAnswer"
-              FROM sql_user_answer ua
-              LEFT JOIN sql_game_progress gp
-                ON gp."userId" = ua."userId"
-              LEFT JOIN sql_game g
-                ON g.id = gp."gameId"
-             WHERE ua."userId" = $1
-               AND g.status = $2; 
+            SELECT COUNT(*)
+              FROM sql_user_answer
+             WHERE "userId" = $1
+               AND "gameId" = $2; 
         `;
-    return await this.dataSource.query(query, [userId, GameStatus.Active]);
+    const result = await this.dataSource.query(query, [userId, gameId]);
+
+    return result[0].count;
   }
 
   private getQuery(myGame?: boolean): string {
@@ -127,27 +125,21 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     }
 
     return `
-            SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
-                       gp."userId", gp.score,
-                       gq."questionId",
-                       ua."answerStatus", ua."addedAt",  
-                       (SELECT u.login 
-                          FROM sql_users u
-                         WHERE u.id = gp."userId"),
-                       (SELECT q.body
-                          FROM sql_questions q
-                         WHERE q.id = gq."questionId")
-                  FROM sql_game g
-                  LEFT JOIN sql_game_progress gp
-                    ON gp."gameId" = g.id
-                  LEFT JOIN sql_game_questions gq  
-                    ON gq."gameId" = g.id
-                  LEFT JOIN sql_user_answer ua
-                    ON ua."userId" = gp."userId"
-                   AND ua."questionId" = gq."questionId"
-                 WHERE g.id = $1
-                   ${filter}
-                 ORDER BY login, gq.id ASC;
-        `;
+      SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
+             gp."userId", gp.score, gq."questionId",
+             ua."answerStatus", ua."addedAt",
+             u.login,
+             q.body
+        FROM sql_game g
+        LEFT JOIN sql_game_progress gp ON gp."gameId" = g.id
+        LEFT JOIN sql_game_questions gq ON gq."gameId" = g.id
+        LEFT JOIN sql_user_answer ua ON ua."userId" = gp."userId" 
+         AND ua."questionId" = gq."questionId" 
+         AND ua."gameId" = g.id
+        LEFT JOIN sql_users u ON u.id = gp."userId"
+        LEFT JOIN sql_questions q ON q.id = gq."questionId"
+       WHERE g.id = $1 ${filter}
+       ORDER BY gp."gameHost" DESC, ua.id ASC;
+    `
   }
 }

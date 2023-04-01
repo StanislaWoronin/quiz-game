@@ -9,7 +9,7 @@ export interface IQuizGameQueryRepository {
   getGameById(gameId: string): Promise<ViewGame>;
   getPlayerByGameId(gameId: string): Promise<PlayerIdDb[]>;
   getCorrectAnswers(
-    userId: string,
+    gameId: string,
     questionNumber: number,
   ): Promise<GetCorrectAnswerDb>;
   checkUserCurrentGame(
@@ -17,7 +17,7 @@ export interface IQuizGameQueryRepository {
     status?: GameStatus,
   ): Promise<string | null>;
   checkOpenGame(): Promise<string | null>;
-  checkUserAnswerProgress(userId: string): Promise<CheckAnswerProgressDb[]>;
+  currentGameAnswerProgress(userId: string, gameId: string): Promise<number>;
 }
 
 export const IQuizGameQueryRepository = 'IQuizGameQueryRepository';

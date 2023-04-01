@@ -10,16 +10,19 @@ import {TestingRequestDto} from "../testing-request.dto";
 import {ViewGame} from "../../../src/modules/public/pair-quiz-game/api/view/view-game";
 import {expectPlayerProgress, expectViewGame} from "../expect-data/expect-game";
 import {GameStatus} from "../../../src/modules/public/pair-quiz-game/shared/game-status";
+import {ViewAnswer} from "../../../src/modules/public/pair-quiz-game/api/view/view-answer";
 
 export class GameFactory {
   constructor(private game: Game,
               private usersFactory: UsersFactory) {}
 
-  async sendCorrectAnswer(token: string, question: Questions) {
+  async sendCorrectAnswer(token: string, question: Questions): Promise<TestingRequestDto<ViewAnswer>> {
     const correctAnswer = preparedGameData.find(
       (gameData) => gameData.body === question.body,
     ).correctAnswers[0];
-    await this.game.sendAnswer(correctAnswer, token);
+    const response = await this.game.sendAnswer(correctAnswer, token);
+
+    return {body: response.body, status: response.status}
   }
 
   async sendManyAnswer(
@@ -48,18 +51,6 @@ export class GameFactory {
     await this.game.joinGame(firstPlayer.accessToken)
 
     return await this.game.joinGame(secondPlayer.accessToken)
-  }
-
-  async createGames(gameCount: number): Promise<TestingRequestDto<ViewGame>[]> {
-    const players = await this.usersFactory.createAndLoginUsers(gameCount * 2)
-
-    let games = []
-    for (let i = 0; i < gameCount; i++) {
-      const game = this.createGame(players[i * 2], players[i * 2 + 1])
-      games.push(game)
-    }
-
-    return games
   }
 
   async createFinishedGames(gamesCount: number): Promise<ViewGame[]> {

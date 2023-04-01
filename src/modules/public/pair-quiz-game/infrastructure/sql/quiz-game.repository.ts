@@ -32,9 +32,10 @@ export class QuizGameRepository implements IQuizGameRepository {
 
       await manager
         .getRepository(SqlGameProgress)
-        .save(new SqlGameProgress(game.id, userId));
+        .save(new SqlGameProgress(game.id, userId, true));
 
       const questions = await this.getQuestions();
+      console.log('This "etalon" questions:', questions)
       const mappedQuestions = questions.map(
         (q) => new SqlGameQuestions(game.id, q.id),
       );
@@ -170,6 +171,7 @@ export class QuizGameRepository implements IQuizGameRepository {
         createdAnswer.addedAt,
       );
     } catch (e) {
+      console.log(e)
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
