@@ -5,29 +5,29 @@ import { ViewAnswer } from '../../modules/public/pair-quiz-game/api/view/view-an
 import { ViewGameProgress } from '../../modules/public/pair-quiz-game/api/view/view-game-progress';
 import { GameStatus } from '../../modules/public/pair-quiz-game/shared/game-status';
 
-export const toViewGame = (game: GameDb[]): ViewGame => {
-  const questions = getQuestions(game.slice(0, 5));
+export const toViewGame = (games: GameDb[]): ViewGame => {
+  const questions = getQuestions(games.slice(0, 5));
 
-  //const fistPlayer = game.filter()
+  //const extraScore = getExtraScore(games)
 
   return {
-    id: game[0].id,
-    firstPlayerProgress: getPlayerProgress(game.slice(0, 5)),
-    secondPlayerProgress: getPlayerProgress(game.slice(5, 10)),
+    id: games[0].id,
+    firstPlayerProgress: getPlayerProgress(games.slice(0, 5)),
+    secondPlayerProgress: getPlayerProgress(games.slice(5, 10)),
     questions,
-    status: game[0].status,
-    pairCreatedDate: game[0].pairCreatedDate,
-    startGameDate: game[0].startGameDate,
-    finishGameDate: game[0].finishGameDate,
+    status: games[0].status,
+    pairCreatedDate: games[0].pairCreatedDate,
+    startGameDate: games[0].startGameDate,
+    finishGameDate: games[0].finishGameDate,
   };
 };
 
-const getQuestions = (game: GameDb[]): Questions[] => {
-  if (game[0].status === GameStatus.PendingSecondPlayer) {
+const getQuestions = (games: GameDb[]): Questions[] => {
+  if (games[0].status === GameStatus.PendingSecondPlayer) {
     return null;
   }
   const questions = [];
-  game.map((g) => {
+  games.map((g) => {
     questions.push({
       id: g.questionId,
       body: g.body,
@@ -37,26 +37,26 @@ const getQuestions = (game: GameDb[]): Questions[] => {
   return questions;
 };
 
-const getPlayerProgress = (game: GameDb[]): ViewGameProgress | null => {
-  if (!game.length) {
+const getPlayerProgress = (games: GameDb[]): ViewGameProgress | null => {
+  if (!games.length) {
     return null;
   }
 
   return {
-    answers: getAnswers(game),
+    answers: getAnswers(games),
     player: {
-      id: game[0].userId,
-      login: game[0].login,
+      id: games[0].userId,
+      login: games[0].login,
     },
-    score: game[0].score,
+    score: games[0].score,
   };
 };
 
-const getAnswers = (game: GameDb[]): ViewAnswer[] => {
-  if (!game[0].addedAt) return [];
+const getAnswers = (games: GameDb[]): ViewAnswer[] => {
+  if (!games[0].addedAt) return [];
 
   const answers = [];
-  game.map((g) => {
+  games.map((g) => {
     if (g.addedAt) {
       answers.push({
         questionId: g.questionId,
@@ -68,3 +68,23 @@ const getAnswers = (game: GameDb[]): ViewAnswer[] => {
 
   return answers;
 };
+
+// const getExtraScore = (games: GameDb[]): number[]  => {
+//   if (games.length === 5) {
+//     return [0, 0]
+//   }
+//
+//   if (!games[4].addedAt || !games[9].addedAt) {
+//     return [0, 0]
+//   }
+//
+//   if (games[0].score !== 0 && games[4].addedAt < games[9].addedAt) {
+//     return [1, 0]
+//   }
+//
+//   if (games[5].score !== 0 && games[4].addedAt > games[9].addedAt) {
+//     return [0, 1]
+//   }
+//
+//   return [0, 0]
+// }

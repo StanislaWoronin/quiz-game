@@ -20,6 +20,7 @@ import { AuthBearerGuard } from '../../auth/guards/auth-bearer.guard';
 import { IQuizGameQueryRepository } from '../infrastructure/i-quiz-game-query.repository';
 import { ParamsId } from '../../../../common/dto/params-id';
 import { GameStatus } from '../shared/game-status';
+import {ViewPage} from "../../../../common/pagination/view-page";
 
 @UseGuards(AuthBearerGuard)
 @Controller('pair-game-quiz/pairs')
@@ -64,6 +65,12 @@ export class PairQuizGameController {
     }
 
     return result;
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('my')
+  async getMyGames(@UserId() userId: string): Promise<ViewPage<ViewGame>> {
+    return await this.gameQueryRepository.getMyGames(userId)
   }
 
   @HttpCode(HttpStatus.OK)

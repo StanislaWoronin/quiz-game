@@ -764,7 +764,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                     4: AnswerStatus.Correct,
                     5: AnswerStatus.Incorrect,
                   },
-                  4,
+                  3,
                 ),
                 second: expectPlayerProgress(
                   secondUser.user,
@@ -895,7 +895,6 @@ describe('/sa/quiz/questions (e2e)', () => {
                     4: AnswerStatus.Incorrect,
                     5: AnswerStatus.Incorrect,
                   },
-                  0,
                 ),
                 second: expectPlayerProgress(
                   secondUser.user,
@@ -933,10 +932,10 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       await game.joinGame(firstUser.accessToken);
       const firstGame = await game.joinGame(secondUser.accessToken);
-        console.log('this is questions from FIRST created Game', firstGame.body.questions)
+
       await game.joinGame(thirdUser.accessToken);
       const secondGame = await game.joinGame(fourthUser.accessToken);
-        console.log('this is questions from SECOND created Game', secondGame.body.questions)
+
       const getFirstGame = await game.getMyCurrentGame(secondUser.accessToken);
       expect(getFirstGame.status).toBe(HttpStatus.OK);
       expect(getFirstGame.body).toStrictEqual(firstGame.body);
@@ -955,7 +954,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
     it('Send answer for fist game', async () => {
         const {firstUser, secondUser, firstGame, questions} = expect.getState()
-        console.log('Is here trabl:', questions)
+
         await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[0])
         const answer1 = await game.getMyCurrentGame(firstUser.accessToken)
         expect(answer1.body.questions).toStrictEqual(questions)
@@ -969,13 +968,13 @@ describe('/sa/quiz/questions (e2e)', () => {
         expect(answer3.body.questions).toStrictEqual(questions)
 
         await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
-            3: AnswerStatus.Correct,
+            3: AnswerStatus.Incorrect,
             4: AnswerStatus.Incorrect,
-            5: AnswerStatus.Correct
+            5: AnswerStatus.Incorrect
         })
-
+        console.log('last answered ID:', secondUser.user.id)
         await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
-            2: AnswerStatus.Correct,
+            2: AnswerStatus.Incorrect,
             3: AnswerStatus.Correct,
             4: AnswerStatus.Incorrect,
             5: AnswerStatus.Correct
@@ -991,22 +990,22 @@ describe('/sa/quiz/questions (e2e)', () => {
                         {
                             1: AnswerStatus.Correct,
                             2: AnswerStatus.Correct,
-                            3: AnswerStatus.Correct,
+                            3: AnswerStatus.Incorrect,
                             4: AnswerStatus.Incorrect,
-                            5: AnswerStatus.Correct,
+                            5: AnswerStatus.Incorrect,
                         },
-                        5,
+                        3,
                     ),
                     second: expectPlayerProgress(
                         secondUser.user,
                         {
                             1: AnswerStatus.Correct,
-                            2: AnswerStatus.Correct,
+                            2: AnswerStatus.Incorrect,
                             3: AnswerStatus.Correct,
                             4: AnswerStatus.Incorrect,
                             5: AnswerStatus.Correct,
                         },
-                        4,
+                        3,
                     ),
                 },
                 GameStatus.Finished,
@@ -1070,7 +1069,166 @@ describe('/sa/quiz/questions (e2e)', () => {
                 createdGame.body.questions
             ),
         );
+
+        await gameFactory.sendManyAnswer(secondUser.accessToken, createdGame.body.questions, {
+            2: AnswerStatus.Incorrect,
+            3: AnswerStatus.Correct,
+            4: AnswerStatus.Correct,
+            5: AnswerStatus.Correct,
+        })
+        console.log('Second game last answered ID:', firstUser.user.id)
+        await gameFactory.sendManyAnswer(firstUser.accessToken, createdGame.body.questions, {
+            3: AnswerStatus.Correct,
+            4: AnswerStatus.Correct,
+            5: AnswerStatus.Correct,
+        })
+
+        const response = await game.getGameById(createdGame.body.id, secondUser.accessToken)
+        expect(response.status).toBe(HttpStatus.OK)
+        expect(response.body).toStrictEqual(
+            expectViewGame(
+                {
+                    first: expectPlayerProgress(
+                        secondUser.user,
+                        {
+                            1: AnswerStatus.Correct,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Correct,
+                            5: AnswerStatus.Correct,
+                        },
+                        5,
+                    ),
+                    second: expectPlayerProgress(
+                        firstUser.user,
+                        {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Correct,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Correct,
+                            5: AnswerStatus.Correct,
+                        },
+                        4,
+                    ),
+                },
+                GameStatus.Finished,
+                createdGame.body.questions
+            ),
+        );
     })
+
+    it('Create fourth game by secondUser, connect to the game by firstUser', async () => {
+        const {firstUser, secondUser} = expect.getState()
+
+        const createdGame = await gameFactory.createGame(secondUser, firstUser)
+        expect(createdGame.status).toBe(HttpStatus.OK)
+
+        await gameFactory.sendManyAnswer(secondUser.accessToken, createdGame.body.questions, {
+            1: AnswerStatus.Incorrect,
+            2: AnswerStatus.Incorrect,
+            3: AnswerStatus.Correct,
+            4: AnswerStatus.Correct,
+            5: AnswerStatus.Incorrect,
+        })
+        console.log('fourth game last answered ID:', firstUser.user.id)
+        await gameFactory.sendManyAnswer(firstUser.accessToken, createdGame.body.questions, {
+            1: AnswerStatus.Correct,
+            2: AnswerStatus.Incorrect,
+            3: AnswerStatus.Correct,
+            4: AnswerStatus.Correct,
+            5: AnswerStatus.Correct,
+        })
+
+        const response = await game.getGameById(createdGame.body.id, firstUser.accessToken)
+        expect(response.status).toBe(HttpStatus.OK)
+        expect(response.body).toStrictEqual(
+            expectViewGame(
+                {
+                    first: expectPlayerProgress(
+                        secondUser.user,
+                        {
+                            1: AnswerStatus.Incorrect,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Correct,
+                            5: AnswerStatus.Incorrect,
+                        },
+                        3,
+                    ),
+                    second: expectPlayerProgress(
+                        firstUser.user,
+                        {
+                            1: AnswerStatus.Correct,
+                            2: AnswerStatus.Incorrect,
+                            3: AnswerStatus.Correct,
+                            4: AnswerStatus.Correct,
+                            5: AnswerStatus.Correct,
+                        },
+                        4,
+                    ),
+                },
+                GameStatus.Finished,
+                createdGame.body.questions
+            ),
+        );
+    })
+
+      it('Create fifth game by secondUser, connect to the game by firstUser', async () => {
+          const {firstUser, secondUser} = expect.getState()
+
+          const createdGame = await gameFactory.createGame(secondUser, firstUser)
+          expect(createdGame.status).toBe(HttpStatus.OK)
+
+          await gameFactory.sendManyAnswer(secondUser.accessToken, createdGame.body.questions, {
+              1: AnswerStatus.Correct,
+              2: AnswerStatus.Correct,
+              3: AnswerStatus.Correct,
+              4: AnswerStatus.Correct,
+              5: AnswerStatus.Correct,
+          })
+          console.log('fourth game last answered ID:', firstUser.user.id)
+          await gameFactory.sendManyAnswer(firstUser.accessToken, createdGame.body.questions, {
+              1: AnswerStatus.Correct,
+              2: AnswerStatus.Correct,
+              3: AnswerStatus.Correct,
+              4: AnswerStatus.Correct,
+              5: AnswerStatus.Correct,
+          })
+
+          const response = await game.getGameById(createdGame.body.id, firstUser.accessToken)
+          expect(response.status).toBe(HttpStatus.OK)
+          expect(response.body).toStrictEqual(
+              expectViewGame(
+                  {
+                      first: expectPlayerProgress(
+                          secondUser.user,
+                          {
+                              1: AnswerStatus.Correct,
+                              2: AnswerStatus.Correct,
+                              3: AnswerStatus.Correct,
+                              4: AnswerStatus.Correct,
+                              5: AnswerStatus.Correct,
+                          },
+                          6,
+                      ),
+                      second: expectPlayerProgress(
+                          firstUser.user,
+                          {
+                              1: AnswerStatus.Correct,
+                              2: AnswerStatus.Correct,
+                              3: AnswerStatus.Correct,
+                              4: AnswerStatus.Correct,
+                              5: AnswerStatus.Correct,
+                          },
+                          5,
+                      ),
+                  },
+                  GameStatus.Finished,
+                  createdGame.body.questions
+              ),
+          );
+      })
+
   });
 
   describe('Test questions order', () => {
@@ -1098,7 +1256,6 @@ describe('/sa/quiz/questions (e2e)', () => {
               expect(joinIntoGame.body.questions).toStrictEqual(getMyGame.body.questions)
               expect(joinIntoGame.body.questions).toStrictEqual(getGameById.body.questions)
           }
-
       })
   })
 });

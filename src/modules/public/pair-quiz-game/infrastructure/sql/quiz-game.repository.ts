@@ -35,7 +35,6 @@ export class QuizGameRepository implements IQuizGameRepository {
         .save(new SqlGameProgress(game.id, userId, true));
 
       const questions = await this.getQuestions();
-      console.log('This "etalon" questions:', questions)
       const mappedQuestions = questions.map(
         (q) => new SqlGameQuestions(game.id, q.id),
       );
@@ -122,26 +121,28 @@ export class QuizGameRepository implements IQuizGameRepository {
       );
       const createdAnswer = await manager.save(answer);
 
-      let score = 0;
-      if (dto.answerStatus === AnswerStatus.Correct) {
-        score = 1;
+      let score = dto.answerStatus === AnswerStatus.Correct ? 1 : 0;
+
+      if (score !== 0) {
+        await manager
+            .createQueryBuilder()
+            .update(SqlGameProgress)
+            .set({ score: () => `score + ${score}` })
+            .where('userId = :userId AND gameId = :gameId', { userId: dto.userId, gameId: dto.gameId })
+            .execute();
       }
 
-      let extraScore = 0;
       if (dto.isLastQuestions) {
         // if one item returned, then the current player was the first to answer on all questions
         const lastQuestionProgress: GameProgressDb[] = await manager.query(
           this.getQuery(),
           [dto.gameId, dto.questionsId],
         );
-        if (
-          lastQuestionProgress.length === 1 &&
-          lastQuestionProgress[0].score > 0
-        ) {
-          extraScore = 1;
-        }
 
         if (lastQuestionProgress.length === 2) {
+          const firstAnsweredPlayer = lastQuestionProgress[0]
+          const extraScore = 1
+
           await manager
             .createQueryBuilder()
             .update(SqlGame)
@@ -151,17 +152,16 @@ export class QuizGameRepository implements IQuizGameRepository {
             })
             .where('id = :gameId', { gameId: dto.gameId })
             .execute();
-        }
-      }
 
-      if (score + extraScore !== 0) {
-        await manager
-          .createQueryBuilder()
-          .update(SqlGameProgress)
-          .set({ score: () => `score + ${score} + ${extraScore}` })
-          .where('userId = :userId', { userId: dto.userId })
-          .andWhere('gameId = :gameId', { gameId: dto.gameId })
-          .execute();
+          if (firstAnsweredPlayer.score !== 0) {
+            await manager
+                .createQueryBuilder()
+                .update(SqlGameProgress)
+                .set({ score: () => `score + ${extraScore}` })
+                .where('userId = :userId AND gameId = :gameId', { userId: firstAnsweredPlayer.userId, gameId: dto.gameId })
+                .execute()
+          }
+        }
       }
 
       await queryRunner.commitTransaction();
@@ -171,7 +171,6 @@ export class QuizGameRepository implements IQuizGameRepository {
         createdAnswer.addedAt,
       );
     } catch (e) {
-      console.log(e)
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
@@ -189,12 +188,14 @@ export class QuizGameRepository implements IQuizGameRepository {
 
   private getQuery(): string {
     return `
-      SELECT gp.score
-        FROM sql_game_progress gp
-        LEFT JOIN sql_user_answer ua
-          ON ua."userId" = gp."userId"
-       WHERE gp."gameId" = $1
-         AND ua."questionId" = $2;
+        SELECT gp.score, gp."userId"
+          FROM sql_game_progress gp
+          JOIN sql_user_answer ua 
+            ON ua."questionId" = $2
+           AND ua."gameId" = $1
+           AND ua."userId" = gp."userId"
+         WHERE gp."gameId" = $1
+         ORDER BY ua."addedAt" ASC
     `;
   }
 }
