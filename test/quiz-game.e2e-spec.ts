@@ -17,6 +17,8 @@ import {preparedGameData} from './helpers/prepeared-data/prepared-game-data';
 import {GameFactory} from './helpers/factories/game-factory';
 import {randomUUID} from 'crypto';
 import {faker} from '@faker-js/faker';
+import {expectPagination} from "./helpers/expect-data/expect-pagination";
+import {ViewGame} from "../src/modules/public/pair-quiz-game/api/view/view-game";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -1267,7 +1269,7 @@ describe('/sa/quiz/questions (e2e)', () => {
           });
 
           it('Shouldn`t return game if user unauthorized', async () => {
-              const response = await game.getMyGames()
+              const response = await game.getMyGames({})
               expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
           })
 
@@ -1275,7 +1277,9 @@ describe('/sa/quiz/questions (e2e)', () => {
               const expectedGame = await gameFactory.createFinishedGames(12)
 
               const response = await game.getMyGames( {}, expectedGame.accessToken,)
-              expect(response.body).toStrictEqual(e)
+              expect(response.body).toStrictEqual(expectPagination<ViewGame>(
+                  expectedGame.expectGames, {totalCount: expectedGame.expectGames.length}
+              ))
           })
       })
 });

@@ -8,12 +8,14 @@ import { Questions } from './helpers/request/questions';
 import { preparedSuperUser } from './helpers/prepeared-data/prepared-super-user';
 import { expectCreatedQuestion } from './helpers/expect-data/expect-questions';
 import { randomUUID } from 'crypto';
-import { SortByUserField } from '../src/modules/sa/users/api/dto/query/users-sort-field';
 import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
 import { preparedQuestions } from './helpers/prepeared-data/prepared-questions';
 import { getErrorMessage } from './helpers/routing/errors-messages';
 import { getErrorsMessage } from './helpers/expect-data/expect-errors-messages';
 import { PublishedStatus } from '../src/modules/sa/questions/api/dto/query/published-status';
+import {SortByQuestionsField} from "../src/modules/sa/questions/api/dto/query/quesions-sort-field";
+import {expectPagination} from "./helpers/expect-data/expect-pagination";
+import {CreatedQuestions} from "../src/modules/sa/questions/api/view/created-questions";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -325,18 +327,15 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       const request = await questions.getQuestions(preparedSuperUser.valid, {
         publishedStatus: PublishedStatus.NotPublished,
-        sortBy: SortByUserField.Body,
+        sortBy: SortByQuestionsField.Body,
         sortDirection: SortDirection.Ascending,
         pageSize: 3,
       });
       expect(request.status).toBe(HttpStatus.OK);
-      expect(request.body).toStrictEqual({
-        pagesCount: 2,
-        page: 1,
-        pageSize: 3,
-        totalCount: 5,
-        items: [createdQuestions[0], createdQuestions[1], createdQuestions[2]],
-      });
+      expect(request.body).toStrictEqual(expectPagination<CreatedQuestions>(
+          [createdQuestions[0], createdQuestions[1], createdQuestions[2]],
+          {pagesCount: 2, pageSize: 3, totalCount: 5}
+      ))
     });
 
     it('?publishedStatus=published&sortBy=body&sortDirection=desc&pageNumber=2&pageSize=3', async () => {
@@ -344,19 +343,16 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       const request = await questions.getQuestions(preparedSuperUser.valid, {
         publishedStatus: PublishedStatus.Published,
-        sortBy: SortByUserField.Body,
+        sortBy: SortByQuestionsField.Body,
         sortDirection: SortDirection.Ascending,
         pageNumber: 2,
         pageSize: 3,
       });
       expect(request.status).toBe(HttpStatus.OK);
-      expect(request.body).toStrictEqual({
-        pagesCount: 2,
-        page: 2,
-        pageSize: 3,
-        totalCount: 5,
-        items: [publishedQuestions[3], publishedQuestions[4]],
-      });
+      expect(request.body).toStrictEqual(expectPagination<CreatedQuestions>(
+          [publishedQuestions[3], publishedQuestions[4]],
+          {pagesCount: 2, page: 2, pageSize: 3, totalCount: 5}
+      ))
     });
 
     it('Search vie "bodySearchTerm"', async () => {
