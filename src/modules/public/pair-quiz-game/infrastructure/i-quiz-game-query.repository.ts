@@ -1,14 +1,14 @@
 import { ViewGame } from '../api/view/view-game';
-import { CheckAnswerProgressDb } from './sql/pojo/checkAnswerProgressDb';
 import { PlayerIdDb } from './sql/pojo/player-id.db';
 import { GetCorrectAnswerDb } from './sql/pojo/get-correct-answer.db';
 import { GameStatus } from '../shared/game-status';
 import {ViewPage} from "../../../../common/pagination/view-page";
+import {GameQueryDto} from "../api/dto/query/game-query.dto";
 
 export interface IQuizGameQueryRepository {
   getMyCurrentGame(gameId: string): Promise<ViewGame>;
   getGameById(gameId: string): Promise<ViewGame>;
-  getMyGames(userId): Promise<ViewPage<ViewGame>>;
+  getMyGames(userId, queryDto: GameQueryDto): Promise<ViewPage<ViewGame>>;
   getPlayerByGameId(gameId: string): Promise<PlayerIdDb[]>;
   getCorrectAnswers(
     gameId: string,

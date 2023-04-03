@@ -8,12 +8,13 @@ import { getUrlWithId } from '../routing/get-url/url-with-id';
 import { UpdatePublishStatusDto } from '../../../src/modules/sa/questions/api/dto/update-publish-status.dto';
 import { getUrlForUpdatePublishStatus } from '../routing/get-url/questions-url';
 import { ErrorsMessages } from '../../../src/common/dto/errors-messages';
-import { SortByField } from '../../../src/common/pagination/query-parameters/sort-by-field';
+import { SortByUserField } from '../../../src/modules/sa/users/api/dto/query/users-sort-field';
 import { SortDirection } from '../../../src/common/pagination/query-parameters/sort-direction';
 import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
 import { TestsPaginationType } from '../type/pagination.type';
 import { TestingRequestDto } from '../testing-request.dto';
 import { CreateQuestionDto } from '../../../src/modules/sa/questions/api/dto/create-question.dto';
+import {SortByQuestionsField} from "../../../src/modules/sa/questions/api/dto/query/quesions-sort-field";
 
 export class Questions {
   constructor(private readonly server: any) {}
@@ -36,12 +37,12 @@ export class Questions {
     superUser: { login: string; password: string },
     {
       bodySearchTerm = null,
-      sortBy = SortByField.CreatedAt,
+      sortBy = SortByQuestionsField.CreatedAt,
       sortDirection = SortDirection.Descending,
       publishedStatus = PublishedStatus.All,
       pageNumber = 1,
       pageSize = 10,
-    }: TestsPaginationType,
+    }: TestsPaginationType<SortByQuestionsField>,
   ): Promise<{ body: ViewPage<CreatedQuestions>; status: number }> {
     const query = {
       bodySearchTerm,

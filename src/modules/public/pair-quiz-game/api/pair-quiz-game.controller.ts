@@ -8,7 +8,7 @@ import {
   Inject,
   NotFoundException,
   Param,
-  Post,
+  Post, Query,
   UseGuards,
 } from '@nestjs/common';
 import { ViewGame } from './view/view-game';
@@ -21,6 +21,8 @@ import { IQuizGameQueryRepository } from '../infrastructure/i-quiz-game-query.re
 import { ParamsId } from '../../../../common/dto/params-id';
 import { GameStatus } from '../shared/game-status';
 import {ViewPage} from "../../../../common/pagination/view-page";
+import {QueryDto} from "../../../../common/pagination/query-parameters/query.dto";
+import {GameQueryDto} from "./dto/query/game-query.dto";
 
 @UseGuards(AuthBearerGuard)
 @Controller('pair-game-quiz/pairs')
@@ -69,8 +71,11 @@ export class PairQuizGameController {
 
   @HttpCode(HttpStatus.OK)
   @Get('my')
-  async getMyGames(@UserId() userId: string): Promise<ViewPage<ViewGame>> {
-    return await this.gameQueryRepository.getMyGames(userId)
+  async getMyGames(
+      @Query() dto: GameQueryDto,
+      @UserId() userId: string
+  ): Promise<ViewPage<ViewGame>> {
+    return await this.gameQueryRepository.getMyGames(userId, dto)
   }
 
   @HttpCode(HttpStatus.OK)

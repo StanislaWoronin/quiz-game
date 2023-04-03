@@ -53,10 +53,10 @@ export class GameFactory {
     return await this.game.joinGame(secondPlayer.accessToken)
   }
 
-  async createFinishedGames(gamesCount: number): Promise<ViewGame[]> {
+  async createFinishedGames(gamesCount: number): Promise<{ accessToken: string, expectGames: ViewGame[] }> {
     const [firstUser] = await this.usersFactory.createAndLoginUsers(1)
 
-    const expect = []
+    const expectGames = []
     for (let i = 0; i < gamesCount; i++) {
       const [secondUser] = await this.usersFactory.createAndLoginUsers(1, i + 1)
 
@@ -92,9 +92,9 @@ export class GameFactory {
           GameStatus.Finished,
           game.body.questions
       )
-      expect.push(viewGame)
+      expectGames.push(viewGame)
     }
-    return expect
+    return { accessToken: firstUser.accessToken, expectGames }
   }
 
   private eagleAndTails(): number {

@@ -1,6 +1,5 @@
 import { giveSkipNumber } from '../helpers';
 import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
-import { SortByField } from './sort-by-field';
 import { SortDirection } from './sort-direction';
 import { Type } from 'class-transformer';
 
@@ -15,10 +14,6 @@ export class QueryDto {
       },
     });
   }
-
-  @IsEnum(SortByField)
-  @IsOptional()
-  sortBy: SortByField = SortByField.CreatedAt;
 
   @IsEnum(SortDirection)
   @IsOptional()

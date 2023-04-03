@@ -1,8 +1,8 @@
 import { TestsPaginationType } from '../../type/pagination.type';
 
-export const getUrlWithQuery = (
+export const getUrlWithQuery = <T>(
   endpoint: string,
-  query: TestsPaginationType,
+  query: TestsPaginationType<T>,
 ): string => {
   let result = `${endpoint}?`;
   if (query.searchLoginTerm) {

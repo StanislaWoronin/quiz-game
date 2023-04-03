@@ -9,7 +9,7 @@ import { ViewPage } from '../../../src/common/pagination/view-page';
 import { ViewUser } from '../../../src/modules/sa/users/api/view/view-user';
 import { getUrlWithQuery } from '../routing/get-url/url-with-query';
 import { getUrlWithId } from '../routing/get-url/url-with-id';
-import { SortByField } from '../../../src/common/pagination/query-parameters/sort-by-field';
+import { SortByUserField } from '../../../src/modules/sa/users/api/dto/query/users-sort-field';
 import { SortDirection } from '../../../src/common/pagination/query-parameters/sort-direction';
 import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
 import { TestsPaginationType } from '../type/pagination.type';
@@ -38,20 +38,18 @@ export class Users {
     {
       searchLoginTerm = null,
       searchEmailTerm = null,
-      sortBy = SortByField.CreatedAt,
+      sortBy = SortByUserField.CreatedAt,
       sortDirection = SortDirection.Descending,
-      publishedStatus = PublishedStatus.All,
       banStatus = BanStatus.All,
       pageNumber = 1,
       pageSize = 10,
-    }: TestsPaginationType,
+    }: TestsPaginationType<SortByUserField>,
   ): Promise<TestingRequestDto<ViewPage<ViewUser>>> {
     const query = {
       searchLoginTerm,
       searchEmailTerm,
       sortBy,
       sortDirection,
-      publishedStatus,
       banStatus,
       pageNumber,
       pageSize,

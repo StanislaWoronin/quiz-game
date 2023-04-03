@@ -17,13 +17,14 @@ export const endpoints = {
   },
   pairGameQuiz: {
     pairs: {
-      sendAnswers: `${pairGameQuiz}/pairs/answers`,
       connection: `${pairGameQuiz}/pairs/connection`,
+      my: `${pairGameQuiz}/pairs/my`,
       myCurrent: {
         myCurrent: `${pairGameQuiz}/pairs/my-current`,
         answers: `${pairGameQuiz}/pairs/my-current/answers`,
       },
       pairs: `${pairGameQuiz}/pairs`,
+      sendAnswers: `${pairGameQuiz}/pairs/answers`,
     },
   },
   sa: {

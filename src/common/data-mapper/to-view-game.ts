@@ -1,11 +1,11 @@
-import { GameDb } from '../../modules/public/pair-quiz-game/infrastructure/sql/pojo/game.db';
+import { SimpleGameDb } from '../../modules/public/pair-quiz-game/infrastructure/sql/pojo/simpleGameDb';
 import { ViewGame } from '../../modules/public/pair-quiz-game/api/view/view-game';
 import { Questions } from '../../modules/public/pair-quiz-game/shared/questions';
 import { ViewAnswer } from '../../modules/public/pair-quiz-game/api/view/view-answer';
 import { ViewGameProgress } from '../../modules/public/pair-quiz-game/api/view/view-game-progress';
 import { GameStatus } from '../../modules/public/pair-quiz-game/shared/game-status';
 
-export const toViewGame = (games: GameDb[]): ViewGame => {
+export const toViewGame = (games: SimpleGameDb[]): ViewGame => {
   const questions = getQuestions(games.slice(0, 5));
 
   //const extraScore = getExtraScore(games)
@@ -22,7 +22,7 @@ export const toViewGame = (games: GameDb[]): ViewGame => {
   };
 };
 
-const getQuestions = (games: GameDb[]): Questions[] => {
+const getQuestions = (games: SimpleGameDb[]): Questions[] => {
   if (games[0].status === GameStatus.PendingSecondPlayer) {
     return null;
   }
@@ -37,7 +37,7 @@ const getQuestions = (games: GameDb[]): Questions[] => {
   return questions;
 };
 
-const getPlayerProgress = (games: GameDb[]): ViewGameProgress | null => {
+const getPlayerProgress = (games: SimpleGameDb[]): ViewGameProgress | null => {
   if (!games.length) {
     return null;
   }
@@ -52,7 +52,7 @@ const getPlayerProgress = (games: GameDb[]): ViewGameProgress | null => {
   };
 };
 
-const getAnswers = (games: GameDb[]): ViewAnswer[] => {
+const getAnswers = (games: SimpleGameDb[]): ViewAnswer[] => {
   if (!games[0].addedAt) return [];
 
   const answers = [];

@@ -1258,4 +1258,24 @@ describe('/sa/quiz/questions (e2e)', () => {
           }
       })
   })
+
+  describe(
+      'GET -> "pair-game-quiz/pair/my"' +
+      'Return all games current user in status "Current" and "Finished"', () => {
+          it('Clear data base', async () => {
+              await testing.clearDb();
+          });
+
+          it('Shouldn`t return game if user unauthorized', async () => {
+              const response = await game.getMyGames()
+              expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
+          })
+
+          it('Get games without query', async () => {
+              const expectedGame = await gameFactory.createFinishedGames(12)
+
+              const response = await game.getMyGames( {}, expectedGame.accessToken,)
+              expect(response.body).toStrictEqual(e)
+          })
+      })
 });

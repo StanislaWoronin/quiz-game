@@ -1,7 +1,7 @@
-export enum SortByField {
+export enum SortByUserField {
   CreatedAt = 'createdAt',
   Body = 'body',
   Email = 'email',
   Login = 'login',
-  PublishedStatus = 'publishedStatus',
 }
+

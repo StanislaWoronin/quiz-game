@@ -30,7 +30,7 @@ export class MUsersQueryRepository {
     return new ViewPage<ViewUser>({
       items: users ?? [],
       query: query,
-      totalCount: totalCount,
+      totalCount,
     });
   }
 

@@ -8,7 +8,7 @@ import { Questions } from './helpers/request/questions';
 import { preparedSuperUser } from './helpers/prepeared-data/prepared-super-user';
 import { expectCreatedQuestion } from './helpers/expect-data/expect-questions';
 import { randomUUID } from 'crypto';
-import { SortByField } from '../src/common/pagination/query-parameters/sort-by-field';
+import { SortByUserField } from '../src/modules/sa/users/api/dto/query/users-sort-field';
 import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
 import { preparedQuestions } from './helpers/prepeared-data/prepared-questions';
 import { getErrorMessage } from './helpers/routing/errors-messages';
@@ -325,7 +325,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       const request = await questions.getQuestions(preparedSuperUser.valid, {
         publishedStatus: PublishedStatus.NotPublished,
-        sortBy: SortByField.Body,
+        sortBy: SortByUserField.Body,
         sortDirection: SortDirection.Ascending,
         pageSize: 3,
       });
@@ -344,7 +344,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       const request = await questions.getQuestions(preparedSuperUser.valid, {
         publishedStatus: PublishedStatus.Published,
-        sortBy: SortByField.Body,
+        sortBy: SortByUserField.Body,
         sortDirection: SortDirection.Ascending,
         pageNumber: 2,
         pageSize: 3,

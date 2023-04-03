@@ -11,7 +11,7 @@ import { AnswerStatus } from '../../shared/answer-status';
 import { SqlUserAnswer } from './entity/sql-user-answer.entity';
 import { ViewGameProgress } from '../../api/view/view-game-progress';
 import { SqlGameQuestions } from './entity/sql-game-questions.entity';
-import { GameDb } from './pojo/game.db';
+import { SimpleGameDb } from './pojo/simpleGameDb';
 import { toViewJoinGame } from '../../../../../common/data-mapper/to-view-join-game';
 import { SendAnswerDto } from '../../applications/dto/send-answer.dto';
 import { GameProgressDb } from './pojo/game-progress.db';
@@ -93,7 +93,7 @@ export class QuizGameRepository implements IQuizGameRepository {
             ON gq."gameId" = g.id
          WHERE g.id = $1;  
       `;
-      const game: GameDb[] = await manager.query(gameBuilder, [gameId]);
+      const game: SimpleGameDb[] = await manager.query(gameBuilder, [gameId]);
       await queryRunner.commitTransaction();
       return toViewJoinGame(game);
     } catch (e) {

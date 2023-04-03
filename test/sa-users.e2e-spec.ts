@@ -10,7 +10,7 @@ import { getErrorsMessage } from './helpers/expect-data/expect-errors-messages';
 import { expectCreatedUser } from './helpers/expect-data/expect-user';
 import { UsersFactory } from './helpers/factories/users-factory';
 import { randomUUID } from 'crypto';
-import { SortByField } from '../src/common/pagination/query-parameters/sort-by-field';
+import { SortByUserField } from '../src/modules/sa/users/api/dto/query/users-sort-field';
 import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
 import { BanStatus } from '../src/modules/sa/users/api/dto/query/ban-status';
 import { Auth } from './helpers/request/auth';
@@ -185,7 +185,7 @@ describe('/sa/users (e2e)', () => {
 
       const request = await users.getUsers(preparedSuperUser.valid, {
         banStatus: BanStatus.Banned,
-        sortBy: SortByField.Login,
+        sortBy: SortByUserField.Login,
         sortDirection: SortDirection.Ascending,
         pageSize: 3,
       });
@@ -204,7 +204,7 @@ describe('/sa/users (e2e)', () => {
 
       const request = await users.getUsers(preparedSuperUser.valid, {
         banStatus: BanStatus.NotBanned,
-        sortBy: SortByField.Email,
+        sortBy: SortByUserField.Email,
         sortDirection: SortDirection.Descending,
         pageNumber: 2,
         pageSize: 3,
