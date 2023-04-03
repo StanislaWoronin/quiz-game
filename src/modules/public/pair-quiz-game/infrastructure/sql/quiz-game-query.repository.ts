@@ -21,7 +21,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                JSON_BUILD_OBJECT('id', fp."userId", 'login', fu.login) AS "firstUser",
                JSON_BUILD_OBJECT('id', sp."userId", 'login', su.login) AS "secondUser",
                JSON_BUILD_OBJECT('id', gq."questionId", 'body', q.body) AS questions,
-               JSON_BUILD_OBJECT('answerStatus', ua."answerStatus", 'addedAt', ua."addedAt", 'questionId', gq."questionId") AS answer
+               JSON_BUILD_OBJECT('gameId', ua."gameId", 'userId', ua."userId", 'answerStatus', ua."answerStatus", 'addedAt', ua."addedAt", 'questionId', gq."questionId") AS answer
           FROM sql_game g
           JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = 'c9b93818-e50a-42c0-ba27-6af2c6e13c49'
           JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != 'c9b93818-e50a-42c0-ba27-6af2c6e13c49'
