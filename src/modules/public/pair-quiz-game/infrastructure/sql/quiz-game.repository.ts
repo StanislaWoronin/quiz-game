@@ -76,7 +76,7 @@ export class QuizGameRepository implements IQuizGameRepository {
         .where('id = :gameId', { gameId })
         .execute();
 
-      const gameBuilder = `
+      const gameQuery = `
         SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
                gp."userId", 
                gq."questionId",
@@ -93,7 +93,8 @@ export class QuizGameRepository implements IQuizGameRepository {
             ON gq."gameId" = g.id
          WHERE g.id = $1;  
       `;
-      const game: SimpleGameDb[] = await manager.query(gameBuilder, [gameId]);
+      const game: SimpleGameDb[] = await manager.query(gameQuery, [gameId]);
+
       await queryRunner.commitTransaction();
       return toViewJoinGame(game);
     } catch (e) {

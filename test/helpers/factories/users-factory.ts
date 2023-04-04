@@ -13,18 +13,14 @@ export class UsersFactory {
 
   async createUsers(
     usersCount: number,
-    startFrom?: number,
+    startWith: number = 0,
   ): Promise<CreatedUser[]> {
-    let start = 0;
-    if (startFrom) {
-      start = startFrom;
-    }
     const result = [];
-    for (let i = start; i < start + usersCount; i++) {
+    for (let i = 0; i < usersCount; i++) {
       const inputData: CreateUserDto = {
-        login: `user${i}`,
-        password: `password${i}`,
-        email: `${i}${faker.internet.email()}`,
+        login: `userLogin${i + startWith}`,
+        password: `password${i + startWith}`,
+        email: `${i + startWith}${faker.internet.email()}`,
       };
       const response = await this.users.createUser(
         preparedSuperUser.valid,
@@ -86,16 +82,17 @@ export class UsersFactory {
       refreshToken: string;
     }[]
   > {
-    const users = await this.createUsers(userCount);
+    const users = await this.createUsers(userCount, startWith);
 
     const result = [];
-    for (let i = startWith; i < userCount; i++) {
+    for (let i = 0; i < userCount; i++) {
       const userLoginData = {
-        loginOrEmail: users[i].login,
-        password: `password${i}`,
+        loginOrEmail: `userLogin${i + startWith}`,
+        password: `password${i + startWith}`,
       };
 
       const response = await this.auth.loginUser(userLoginData);
+
       result.push({
         user: users[i],
         accessToken: response.accessToken,

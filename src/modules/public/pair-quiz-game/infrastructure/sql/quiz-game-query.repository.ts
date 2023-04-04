@@ -17,47 +17,57 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   async getMyGames(userId: string, queryDto: GameQueryDto): Promise<ViewPage<ViewGame>> {
     const query = `
         SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
-            COALESCE(fp."gameHost", 'false') AS "firstUserHost",
-            fp.score AS "firstPlayerScore",
-            sp.score AS "secondPlayerScore",
-            JSON_AGG(JSON_BUILD_OBJECT('id', gq."questionId", 'body', q.body)) AS questions,
-            JSON_BUILD_OBJECT('id', fp."userId", 'login', fu.login) AS "firstUser",
-            JSON_BUILD_OBJECT('id', sp."userId", 'login', su.login) AS "secondUser",
-            (SELECT JSON_AGG(
-                JSON_BUILD_OBJECT(
-                    'answerStatus', ua."answerStatus",
-                    'addedAt', ua."addedAt",
-                    'questionId', gq."questionId"
-                ))
-               FROM sql_user_answer ua
-               JOIN sql_game_questions gq ON gq."questionId" = ua."questionId" AND gq."gameId" = ua."gameId"
-              WHERE gq."gameId" = g.id AND ua."userId" = fp."userId"
-              GROUP BY ua."userId"
-            ) AS "firstUserAnswers",
-            (SELECT JSON_AGG(JSON_BUILD_OBJECT(
-                'answerStatus', ua."answerStatus",
-                'addedAt', ua."addedAt",
-                'questionId', gq."questionId"
-            ))
-              FROM sql_user_answer ua
-              JOIN sql_game_questions gq ON gq."questionId" = ua."questionId" AND gq."gameId" = ua."gameId"
-             WHERE gq."gameId" = g.id AND ua."userId" = sp."userId"
-             GROUP BY ua."userId"
-            ) AS "secondUserAnswers"
-          FROM sql_game g
-          JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
-          JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1
-          JOIN sql_game_questions gq ON gq."gameId" = g.id
-          JOIN sql_users fu ON fp."userId" = fu.id
-          JOIN sql_users su ON sp."userId" = su.id
-          LEFT JOIN sql_questions q ON q.id = gq."questionId"
-         GROUP BY g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
-               COALESCE(fp."gameHost", 'false'),
-               fp.score, fp."userId", sp.score, sp."userId",
-               fu.login,
-               su.login;
+               COALESCE(fp."gameHost", 'false') AS "firstUserHost",
+               fp.score AS "firstPlayerScore",
+               sp.score AS "secondPlayerScore",
+               (SELECT JSON_AGG(
+                       JSON_BUILD_OBJECT(
+                            'id', gq."questionId",
+                            'body', q.body
+                       )ORDER BY gq.id
+               )
+                  FROM sql_game_questions gq
+                  JOIN sql_questions q ON q.id = gq."questionId"
+                 GROUP BY gq."gameId"
+               ) AS questions,
+               JSON_BUILD_OBJECT('id', fp."userId", 'login', fu.login) AS "firstUser",
+               JSON_BUILD_OBJECT('id', sp."userId", 'login', su.login) AS "secondUser",
+               (SELECT JSON_AGG(
+                       JSON_BUILD_OBJECT(
+                            'answerStatus', ua."answerStatus",
+                            'addedAt', ua."addedAt",
+                            'questionId', gq."questionId"
+                       )
+               )
+                  FROM sql_user_answer ua
+                  JOIN sql_game_questions gq ON gq."questionId" = ua."questionId" AND gq."gameId" = ua."gameId"
+                 WHERE gq."gameId" = g.id AND ua."userId" = fp."userId"
+                 GROUP BY ua."userId"
+               ) AS "firstUserAnswers",
+               (SELECT JSON_AGG(
+                       JSON_BUILD_OBJECT(
+                            'answerStatus', ua."answerStatus",
+                            'addedAt', ua."addedAt",
+                            'questionId', gq."questionId"
+                       )
+               )
+                  FROM sql_user_answer ua
+                  JOIN sql_game_questions gq ON gq."questionId" = ua."questionId" AND gq."gameId" = ua."gameId"
+                 WHERE gq."gameId" = g.id AND ua."userId" = sp."userId"
+                 GROUP BY ua."userId"
+               ) AS "secondUserAnswers"
+              FROM sql_game g
+              JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
+              JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1
+              JOIN sql_users fu ON fp."userId" = fu.id
+              JOIN sql_users su ON sp."userId" = su.id
+             GROUP BY g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
+                   COALESCE(fp."gameHost", 'false'),
+                   fp.score, fp."userId", sp.score, sp."userId",
+                   fu.login,
+                   su.login
     `;
-    const result: GameDb[] = await this.dataSource.query(query)
+    const result: GameDb[] = await this.dataSource.query(query, [userId])
     const games = new GameDb().toViewModel(result)
 
     const totalCountQuery = `
@@ -69,9 +79,10 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     const totalCount = await this.dataSource.query(totalCountQuery, [userId])
 
     return new ViewPage<ViewGame>({
-      items: games ?? [],
+      items: games,
       query: queryDto,
-      totalCount})
+      totalCount: Number(totalCount[0].count)
+    })
   }
 
   async getMyCurrentGame(gameId: string): Promise<ViewGame> {
@@ -205,83 +216,43 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   }
 }
 
-// SELECT
-// g.id,
-//     g.status,
-//     g."pairCreatedDate",
-//     g."startGameDate",
-//     g."finishGameDate",
-//     COALESCE(gp1."gameHost", 'false') AS "firstUserHost",
-//     fp.score AS "firstPlayerScore",
-//     sp.score AS "secondPlayerScore",
-//     JSON_BUILD_OBJECT('id', fp."userId", 'login', fu.login) AS "firstUser",
-//     JSON_BUILD_OBJECT('id', sp."userId", 'login', su.login) AS "secondUser",
-//     JSON_AGG(
-//         CASE
-// WHEN ua."userId" = fp."userId" THEN
-// JSON_BUILD_OBJECT(
-//     'gameId', ua."gameId",
-//     'userId', ua."userId",
-//     'answerStatus', ua."answerStatus",
-//     'addedAt', ua."addedAt",
-//     'questionId', gq."questionId"
-// )
-// ELSE
-// NULL
-// END
-// ) AS firstUserAnswers,
-//     JSON_AGG(
-//         CASE
-// WHEN ua."userId" = sp."userId" THEN
-// JSON_BUILD_OBJECT(
-//     'gameId', ua."gameId",
-//     'userId', ua."userId",
-//     'answerStatus', ua."answerStatus",
-//     'addedAt', ua."addedAt",
-//     'questionId', gq."questionId"
-// )
-// ELSE
-// NULL
-// END
-// ) AS secondUserAnswers
-// FROM
-// sql_game g
-// JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = 'fd875cc0-25b7-43fa-9976-baf5873abf8d'
-// JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != 'fd875cc0-25b7-43fa-9976-baf5873abf8d'
-// JOIN sql_game_questions gq ON gq."gameId" = g.id
-// LEFT JOIN sql_questions q ON q.id = gq."questionId"
-// JOIN sql_users fu ON fp."userId" = fu.id
-// JOIN sql_users su ON sp."userId" = su.id
-// LEFT JOIN sql_game_progress gp1 ON fp."userId" = gp1."userId" AND g.id = gp1."gameId"
-// JOIN sql_user_answer ua ON ua."questionId" = gq."questionId" AND ua."gameId" = g.id
-// GROUP BY
-// g.id,
-//     g.status,
-//     g."pairCreatedDate",
-//     g."startGameDate",
-//     g."finishGameDate",
-//     COALESCE(gp1."gameHost", 'false'),
-// fp.score,
-//     sp.score,
-//     fp."userId",
-//     fu.login,
-//     sp."userId",
-//     su.login;
-
 // SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
-//     COALESCE(gp1."gameHost", 'false') AS "firstUserHost",
+//     COALESCE(fp."gameHost", 'false') AS "firstUserHost",
 //     fp.score AS "firstPlayerScore",
 //     sp.score AS "secondPlayerScore",
+//     JSON_AGG(JSON_BUILD_OBJECT('id', gq."questionId", 'body', q.body)) AS questions,
 //     JSON_BUILD_OBJECT('id', fp."userId", 'login', fu.login) AS "firstUser",
 //     JSON_BUILD_OBJECT('id', sp."userId", 'login', su.login) AS "secondUser",
-//     JSON_BUILD_OBJECT('id', gq."questionId", 'body', q.body) AS questions,
-//     JSON_BUILD_OBJECT('gameId', ua."gameId", 'userId', ua."userId", 'answerStatus', ua."answerStatus", 'addedAt', ua."addedAt", 'questionId', gq."questionId") AS answer
+//     (SELECT JSON_AGG(
+//     JSON_BUILD_OBJECT(
+//         'answerStatus', ua."answerStatus",
+//     'addedAt', ua."addedAt",
+//     'questionId', gq."questionId"
+// ))
+// FROM sql_user_answer ua
+// JOIN sql_game_questions gq ON gq."questionId" = ua."questionId" AND gq."gameId" = ua."gameId"
+// WHERE gq."gameId" = g.id AND ua."userId" = fp."userId"
+// GROUP BY ua."userId"
+// ) AS "firstUserAnswers",
+//     (SELECT JSON_AGG(JSON_BUILD_OBJECT(
+//     'answerStatus', ua."answerStatus",
+//     'addedAt', ua."addedAt",
+//     'questionId', gq."questionId"
+// ))
+// FROM sql_user_answer ua
+// JOIN sql_game_questions gq ON gq."questionId" = ua."questionId" AND gq."gameId" = ua."gameId"
+// WHERE gq."gameId" = g.id AND ua."userId" = sp."userId"
+// GROUP BY ua."userId"
+// ) AS "secondUserAnswers"
 // FROM sql_game g
-// JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = 'c8445506-11fb-48bf-9a1e-326ae004cdd9'
-// JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != 'c8445506-11fb-48bf-9a1e-326ae004cdd9'
+// JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
+// JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1
 // JOIN sql_game_questions gq ON gq."gameId" = g.id
-// LEFT JOIN sql_questions q ON q.id = gq."questionId"
 // JOIN sql_users fu ON fp."userId" = fu.id
 // JOIN sql_users su ON sp."userId" = su.id
-// LEFT JOIN sql_game_progress gp1 ON fp."userId" = gp1."userId" AND g.id = gp1."gameId"
-// JOIN sql_user_answer ua ON ua."questionId" = gq."questionId" AND ua."gameId" = g.id
+// LEFT JOIN sql_questions q ON q.id = gq."questionId"
+// GROUP BY g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
+//     COALESCE(fp."gameHost", 'false'),
+// fp.score, fp."userId", sp.score, sp."userId",
+//     fu.login,
+//     su.login;

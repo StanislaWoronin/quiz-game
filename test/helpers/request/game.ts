@@ -63,7 +63,7 @@ export class Game {
       pageSize = 10,
     }: TestsPaginationType<SortByGameField>,
     token?: string
-  ): Promise<TestingRequestDto<ViewGame>> {
+  ): Promise<TestingRequestDto<ViewPage<ViewGame>>> {
     const query = {
       sortBy,
       sortDirection,

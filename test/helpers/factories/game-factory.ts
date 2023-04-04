@@ -60,8 +60,9 @@ export class GameFactory {
     for (let i = 0; i < gamesCount; i++) {
       const [secondUser] = await this.usersFactory.createAndLoginUsers(1, i + 1)
 
-      const firstPlayer = this.eagleAndTails() ? secondUser : firstUser
-      const secondPlayer = firstPlayer === firstPlayer ? secondUser : firstUser
+      const draw = this.eagleAndTails()
+      const firstPlayer = draw ? firstUser : secondUser
+      const secondPlayer =  draw ? secondUser : firstUser
 
       const game = await this.createGame(firstPlayer, secondPlayer)
 
@@ -83,7 +84,8 @@ export class GameFactory {
                 firstPlayer.user,
                 firstPlayerAnswers,
                 this.getScore(firstPlayerAnswers, true)
-            ),            second: expectPlayerProgress(
+            ),
+            second: expectPlayerProgress(
                 secondPlayer.user,
                 secondPlayerAnswers,
                 this.getScore(secondPlayerAnswers)

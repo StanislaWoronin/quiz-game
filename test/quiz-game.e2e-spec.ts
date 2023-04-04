@@ -18,7 +18,6 @@ import {GameFactory} from './helpers/factories/game-factory';
 import {randomUUID} from 'crypto';
 import {faker} from '@faker-js/faker';
 import {expectPagination} from "./helpers/expect-data/expect-pagination";
-import {ViewGame} from "../src/modules/public/pair-quiz-game/api/view/view-game";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -49,10 +48,10 @@ describe('/sa/quiz/questions (e2e)', () => {
     questions = new Questions(server);
     questionsFactories = new QuestionsFactory(questions);
     game = new Game(server);
-    gameFactory = new GameFactory(game, usersFactory);
     testing = new Testing(server);
     users = new Users(server);
     usersFactory = new UsersFactory(users, auth);
+    gameFactory = new GameFactory(game, usersFactory);
   });
 
   afterAll(async () => {
@@ -1273,12 +1272,181 @@ describe('/sa/quiz/questions (e2e)', () => {
               expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
           })
 
-          it('Get games without query', async () => {
-              const expectedGame = await gameFactory.createFinishedGames(12)
+          it('Create "Pending" game, and get all my games, should return empty array', async () => {
+              const [firstPlayer] = await usersFactory.createAndLoginUsers(1)
+              await questionsFactories.createQuestions(
+                  preparedGameData.length,
+                  preparedGameData,
+              );
+              const pendingGame = await game.joinGame(firstPlayer.accessToken)
 
-              const response = await game.getMyGames( {}, expectedGame.accessToken,)
-              expect(response.body).toStrictEqual(expectPagination<ViewGame>(
-                  expectedGame.expectGames, {totalCount: expectedGame.expectGames.length}
+              const response = await game.getMyGames({}, firstPlayer.accessToken)
+              expect(response.status).toBe(HttpStatus.OK)
+              expect(response.body).toStrictEqual(expectPagination(
+                  [], {totalCount: 0}
+              ))
+
+              expect.setState({
+                  firstPlayer,
+                  game: pendingGame,
+              })
+          })
+
+          it('Second player join into the game', async () => {
+              const {firstPlayer} = expect.getState()
+
+              const [secondPlayer] = await usersFactory.createAndLoginUsers(1, 1)
+              const activeGame = await game.joinGame(secondPlayer.accessToken)
+
+              const response = await game.getMyGames({}, firstPlayer.accessToken)
+              expect(response.status).toBe(HttpStatus.OK)
+              expect(response.body).toStrictEqual(expectPagination(
+                  [activeGame.body], {totalCount: 1}
+              ))
+
+              expect.setState({
+                  secondPlayer,
+                  firstGame: activeGame,
+                  questions: activeGame.body.questions
+              })
+          })
+
+          it('Send answer, and return my games', async () => {
+              const {firstPlayer, secondPlayer, firstGame, questions} = expect.getState()
+
+              await gameFactory.sendCorrectAnswer(firstPlayer.accessToken, questions[0])
+
+              const gameUntilFirstAnswer = await game.getMyGames({}, firstPlayer.accessToken)
+              expect(gameUntilFirstAnswer.status).toBe(HttpStatus.OK)
+              expect(gameUntilFirstAnswer.body).toStrictEqual(expectPagination(
+                  [
+                      expectViewGame(
+                          {
+                              first: expectPlayerProgress(
+                                  firstPlayer.user,
+                                  {
+                                      1: AnswerStatus.Correct,
+                                  }, 1,
+                              ),
+                              second: expectPlayerProgress(
+                                  secondPlayer.user, {},
+                              ),
+                          },
+                          GameStatus.Active,
+                          firstGame.body.questions
+                      ),
+                  ], {totalCount: 1}
+              ))
+
+              await gameFactory.sendManyAnswer(
+                  secondPlayer.accessToken,
+                  questions,
+                  {
+                      1: AnswerStatus.Incorrect,
+                      2: AnswerStatus.Correct,
+                  }
+              )
+
+              const gameUntilSecondAnswer = await game.getMyGames({}, firstPlayer.accessToken)
+              expect(gameUntilSecondAnswer.status).toBe(HttpStatus.OK)
+              expect(gameUntilSecondAnswer.body).toStrictEqual(expectPagination(
+                  [
+                      expectViewGame(
+                          {
+                              first: expectPlayerProgress(
+                                  firstPlayer.user,
+                                  {
+                                      1: AnswerStatus.Correct,
+                                  }, 1,
+                              ),
+                              second: expectPlayerProgress(
+                                  secondPlayer.user,
+                                  {
+                                      1: AnswerStatus.Incorrect,
+                                      2: AnswerStatus.Correct,
+                                  }, 1,
+                              ),
+                          },
+                          GameStatus.Active,
+                          firstGame.body.questions
+                      ),
+                  ], {totalCount: 1}
+              ))
+
+              await gameFactory.sendManyAnswer(
+                  firstPlayer.accessToken,
+                  questions,
+                  {
+                      2: AnswerStatus.Correct,
+                      3: AnswerStatus.Incorrect,
+                  }
+              )
+
+              const gameUntilThirdAnswer = await game.getMyGames({}, secondPlayer.accessToken)
+              expect(gameUntilThirdAnswer.status).toBe(HttpStatus.OK)
+              expect(gameUntilThirdAnswer.body).toStrictEqual(expectPagination(
+                  [
+                      expectViewGame(
+                          {
+                              first: expectPlayerProgress(
+                                  firstPlayer.user,
+                                  {
+                                      1: AnswerStatus.Correct,
+                                      2: AnswerStatus.Correct,
+                                      3: AnswerStatus.Incorrect,
+                                  }, 2,
+                              ),
+                              second: expectPlayerProgress(
+                                  secondPlayer.user,
+                                  {
+                                      1: AnswerStatus.Incorrect,
+                                      2: AnswerStatus.Correct,
+                                  }, 1,
+                              ),
+                          },
+                          GameStatus.Active,
+                          firstGame.body.questions
+                      ),
+                  ], {totalCount: 1}
+              ))
+
+              await gameFactory.sendManyAnswer(
+                  secondPlayer.accessToken,
+                  questions,
+                  {
+                      3: AnswerStatus.Incorrect,
+                      4: AnswerStatus.Correct,
+                  }
+              )
+
+              const gameUntilFourthAnswer = await game.getMyGames({}, secondPlayer.accessToken)
+              expect(gameUntilFourthAnswer.status).toBe(HttpStatus.OK)
+              expect(gameUntilFourthAnswer.body).toStrictEqual(expectPagination(
+                  [
+                      expectViewGame(
+                          {
+                              first: expectPlayerProgress(
+                                  firstPlayer.user,
+                                  {
+                                      1: AnswerStatus.Correct,
+                                      2: AnswerStatus.Correct,
+                                      3: AnswerStatus.Incorrect,
+                                  }, 2,
+                              ),
+                              second: expectPlayerProgress(
+                                  secondPlayer.user,
+                                  {
+                                      1: AnswerStatus.Incorrect,
+                                      2: AnswerStatus.Correct,
+                                      3: AnswerStatus.Incorrect,
+                                      4: AnswerStatus.Correct,
+                                  }, 2,
+                              ),
+                          },
+                          GameStatus.Active,
+                          firstGame.body.questions
+                      ),
+                  ], {totalCount: 1}
               ))
           })
       })

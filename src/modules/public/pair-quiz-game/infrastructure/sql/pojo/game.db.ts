@@ -37,16 +37,19 @@ export class GameDb {
     toViewModel(games: GameDb[]): ViewGame[] {
         const result = []
         for (let game of games) {
+            const firstPlayerAnswer = game.firstUserHost ? game.firstUserAnswers : game.secondUserAnswers
+            const secondPlayerAnswer = game.firstUserHost ? game.secondUserAnswers : game.firstUserAnswers
+
             result.push({
                 id: game.id,
                 firstPlayerProgress: {
                     player: game.firstUserHost ? game.firstUser : game.secondUser,
-                    answers: game.firstUserHost ? game.firstUserAnswers : game.secondUserAnswers,
+                    answers: firstPlayerAnswer ?? [],
                     score: game.firstUserHost ? game.firstPlayerScore : game.secondPlayerScore
                 },
                 secondPlayerProgress: {
                     player: game.firstUserHost ? game.secondUser : game.firstUser,
-                    answers: game.firstUserHost ? game.secondUserAnswers : game.firstUserAnswers,
+                    answers: secondPlayerAnswer ?? [],
                     score: game.firstUserHost ? game.secondPlayerScore : game.firstPlayerScore
                 },
                 questions: game.questions,
