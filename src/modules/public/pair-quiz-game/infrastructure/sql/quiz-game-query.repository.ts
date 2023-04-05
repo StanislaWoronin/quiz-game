@@ -28,6 +28,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                )
                   FROM sql_game_questions gq
                   JOIN sql_questions q ON q.id = gq."questionId"
+                 WHERE gq."gameId" = g.id
                  GROUP BY gq."gameId"
                ) AS questions,
                JSON_BUILD_OBJECT('id', fp."userId", 'login', fu.login) AS "firstUser",
@@ -65,9 +66,12 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                    COALESCE(fp."gameHost", 'false'),
                    fp.score, fp."userId", sp.score, sp."userId",
                    fu.login,
-                   su.login
+                   su.login;
     `;
+    console.log(userId)
+    console.log(query)
     const result: GameDb[] = await this.dataSource.query(query, [userId])
+    console.log(result)
     const games = new GameDb().toViewModel(result)
 
     const totalCountQuery = `
