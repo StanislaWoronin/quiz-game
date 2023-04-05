@@ -68,6 +68,7 @@ export class GameFactory {
     const draw = this.eagleAndTails()
     const firstPlayer = draw ? firstUser : secondUser
     const secondPlayer =  draw ? secondUser : firstUser
+
     const game = await this.createGame(firstPlayer, secondPlayer)
 
     const firstPlayerAnswers = this.getAnswersStatus()
@@ -76,6 +77,7 @@ export class GameFactory {
         game.body.questions,
         firstPlayerAnswers
     )
+
     const secondPlayerAnswers = this.getAnswersStatus()
     await this.sendManyAnswer(
         secondPlayer.accessToken,
@@ -105,9 +107,8 @@ export class GameFactory {
   async createFinishedGames(gamesCount: number, startFrom: number = 1, firstUser?: UserWithTokensType): Promise<{ accessToken: string, expectGames: ViewGame[] }> {
     const expectGames = []
     for (let i = 0; i < gamesCount; i++) {
-      const viewGame = await this.createFinishedGame(firstUser, startFrom)
-      console.dir(viewGame, {depth: null})
-      expectGames.unshift(viewGame.expectGame)
+      const viewGame = await this.createFinishedGame(firstUser, startFrom + i)
+      expectGames.push(viewGame.expectGame)
     }
     return { accessToken: firstUser.accessToken, expectGames: expectGames }
   }

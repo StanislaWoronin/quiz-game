@@ -18,7 +18,7 @@ export class UsersFactory {
     const result = [];
     for (let i = 0; i < usersCount; i++) {
       const inputData: CreateUserDto = {
-        login: `userLogin${i + startWith}`,
+        login: `login${i + startWith}`,
         password: `password${i + startWith}`,
         email: `${i + startWith}${faker.internet.email()}`,
       };
@@ -87,7 +87,7 @@ export class UsersFactory {
     const result = [];
     for (let i = 0; i < userCount; i++) {
       const userLoginData = {
-        loginOrEmail: `userLogin${i + startWith}`,
+        loginOrEmail: `login${i + startWith}`,
         password: `password${i + startWith}`,
       };
 

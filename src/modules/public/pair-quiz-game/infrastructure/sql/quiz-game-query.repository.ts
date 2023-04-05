@@ -68,7 +68,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                    fu.login,
                    su.login
              ORDER BY g."${queryDto.sortBy}" ${queryDto.sortDirection},
-                      g."pairCreatedDate" ${queryDto.sortDirection}
+                      g."pairCreatedDate" DESC
              LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};
     `;
     const result: GameDb[] = await this.dataSource.query(query, [userId])

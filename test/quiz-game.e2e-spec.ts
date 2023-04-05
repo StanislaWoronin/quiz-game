@@ -9,7 +9,12 @@ import {Game} from './helpers/request/game';
 import {Users} from './helpers/request/users';
 import {UsersFactory} from './helpers/factories/users-factory';
 import {Auth} from './helpers/request/auth';
-import {expectAnswer, expectPlayerProgress, expectQuestions, expectViewGame,} from './helpers/expect-data/expect-game';
+import {
+    expectAnswer,
+    expectPlayerProgress,
+    expectQuestions,
+    expectViewGame,
+} from './helpers/expect-data/expect-game';
 import {GameStatus} from '../src/modules/public/pair-quiz-game/shared/game-status';
 import {preparedAnswer} from './helpers/prepeared-data/prepared-answer';
 import {AnswerStatus} from '../src/modules/public/pair-quiz-game/shared/answer-status';
@@ -18,6 +23,8 @@ import {GameFactory} from './helpers/factories/game-factory';
 import {randomUUID} from 'crypto';
 import {faker} from '@faker-js/faker';
 import {expectPagination} from "./helpers/expect-data/expect-pagination";
+import {SortByGameField} from "../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field";
+import {SortDirection} from "../src/common/pagination/query-parameters/sort-direction";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -1712,31 +1719,44 @@ describe('/sa/quiz/questions (e2e)', () => {
           it('Testing pagination. Create some game by fist user, and return' +
               'all game without pagination', async () => {
               const { firstPlayer, endedFistGame } = expect.getState()
-              const finishedGames = await gameFactory.createFinishedGames(2, 4, firstPlayer)
-              console.log(finishedGames.expectGames[0])
+              const finishedGames = await gameFactory.createFinishedGames(12, 4, firstPlayer)
+
+              const expectGames = finishedGames.expectGames.reverse()
+
               const result = await game.getMyGames({}, firstPlayer.accessToken)
-              console.log(result.body.items[0])
               expect(result.body).toStrictEqual(
-                  expectPagination([...finishedGames.expectGames, endedFistGame], {totalCount: 3})
+                  expectPagination([...expectGames, endedFistGame], {totalCount: 13})
               )
+
+              expect.setState({
+                  accessToken: firstPlayer.accessToken,
+                  expectGames: [...finishedGames.expectGames, endedFistGame],
+                  totalCount: 13
+              })
           })
 
-          // describe('', () => {
-          //     it('Clear data base', async () => {
-          //         await testing.clearDb();
-          //     });
-          //     it('', async () => {
-          //         await questionsFactories.createQuestions(
-          //             preparedGameData.length,
-          //             preparedGameData,
-          //         );
-          //         const finishedGame = await gameFactory.createFinishedGame()
-          //
-          //         const result = await game.getMyGames({}, finishedGame.accessToken)
-          //         expect(result.body).toStrictEqual(
-          //             expectPagination([finishedGame.expectGame], {totalCount: 1})
-          //         )
-          //     })
-          // })
+          it('Start new game by fist player and return games with pagination', async () => {
+              const { firstPlayer, thirdPlayer, accessToken, expectGames, totalCount } = expect.getState()
+
+              const newGame = await gameFactory.createGame(thirdPlayer, firstPlayer)
+              const sortingGame = expectGames.sort((a, b) => {return a.startGameDate - b.startGameDate})
+
+              const result = await game.getMyGames({
+                  sortBy: SortByGameField.Status,
+                  sortDirection: SortDirection.Ascending,
+                  pageSize: 5
+              },
+                  accessToken
+              )
+              expect(result.body).toStrictEqual(
+                  expectPagination([
+                      newGame,
+                      expectGames[0],
+                      expectGames[1],
+                      expectGames[2],
+                      expectGames[3]
+                  ], { pageSize: 5, totalCount: totalCount + 1 }
+              ))
+          })
       })
 });

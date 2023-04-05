@@ -1,9 +1,6 @@
-import { SortByUserField } from '../../../src/modules/sa/users/api/dto/query/users-sort-field';
-import { SortDirection } from '../../../src/common/pagination/query-parameters/sort-direction';
-import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
-import { BanStatus } from '../../../src/modules/sa/users/api/dto/query/ban-status';
-import {SortByQuestionsField} from "../../../src/modules/sa/questions/api/dto/query/quesions-sort-field";
-import {SortByGameField} from "../../../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field";
+import {SortDirection} from '../../../src/common/pagination/query-parameters/sort-direction';
+import {PublishedStatus} from '../../../src/modules/sa/questions/api/dto/query/published-status';
+import {BanStatus} from '../../../src/modules/sa/users/api/dto/query/ban-status';
 
 export type TestsPaginationType<T> = Partial<{
   searchLoginTerm: string;
