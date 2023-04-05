@@ -24,7 +24,6 @@ export class QuestionsQueryRepository implements IQuestionsQueryRepository {
       ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
       LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};
     `;
-    console.log(query);
     const questions = await this.dataSource.query(query);
 
     const countQuery = ` 

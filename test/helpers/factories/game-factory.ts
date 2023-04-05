@@ -53,50 +53,63 @@ export class GameFactory {
     return await this.game.joinGame(secondPlayer.accessToken)
   }
 
-  async createFinishedGames(gamesCount: number): Promise<{ accessToken: string, expectGames: ViewGame[] }> {
-    const [firstUser] = await this.usersFactory.createAndLoginUsers(1)
+  async createFinishedGame(
+      first?: UserWithTokensType,
+      startFrom: number = 1,
+  ): Promise<{ accessToken: string, expectGame: ViewGame }> {
+    let firstUser = first
+    if (!firstUser) {
+      const [first] = await this.usersFactory.createAndLoginUsers(1)
+      firstUser = first
+    }
 
+    const [secondUser] = await this.usersFactory.createAndLoginUsers(1, startFrom)
+
+    const draw = this.eagleAndTails()
+    const firstPlayer = draw ? firstUser : secondUser
+    const secondPlayer =  draw ? secondUser : firstUser
+    const game = await this.createGame(firstPlayer, secondPlayer)
+
+    const firstPlayerAnswers = this.getAnswersStatus()
+    await this.sendManyAnswer(
+        firstPlayer.accessToken,
+        game.body.questions,
+        firstPlayerAnswers
+    )
+    const secondPlayerAnswers = this.getAnswersStatus()
+    await this.sendManyAnswer(
+        secondPlayer.accessToken,
+        game.body.questions,
+        secondPlayerAnswers
+    )
+
+    const viewGame = expectViewGame({
+          first: expectPlayerProgress(
+              firstPlayer.user,
+              firstPlayerAnswers,
+              this.getScore(firstPlayerAnswers, true)
+          ),
+          second: expectPlayerProgress(
+              secondPlayer.user,
+              secondPlayerAnswers,
+              this.getScore(secondPlayerAnswers)
+          )
+        },
+        GameStatus.Finished,
+        game.body.questions
+    )
+
+    return { accessToken: firstUser.accessToken, expectGame: viewGame }
+  }
+
+  async createFinishedGames(gamesCount: number, startFrom: number = 1, firstUser?: UserWithTokensType): Promise<{ accessToken: string, expectGames: ViewGame[] }> {
     const expectGames = []
     for (let i = 0; i < gamesCount; i++) {
-      const [secondUser] = await this.usersFactory.createAndLoginUsers(1, i + 1)
-
-      const draw = this.eagleAndTails()
-      const firstPlayer = draw ? firstUser : secondUser
-      const secondPlayer =  draw ? secondUser : firstUser
-
-      const game = await this.createGame(firstPlayer, secondPlayer)
-
-      const firstPlayerAnswers = this.getAnswersStatus()
-      await this.sendManyAnswer(
-          firstPlayer.accessToken,
-          game.body.questions,
-          firstPlayerAnswers
-      )
-      const secondPlayerAnswers = this.getAnswersStatus()
-      await this.sendManyAnswer(
-          secondPlayer.accessToken,
-          game.body.questions,
-          secondPlayerAnswers
-      )
-
-      const viewGame = expectViewGame({
-            first: expectPlayerProgress(
-                firstPlayer.user,
-                firstPlayerAnswers,
-                this.getScore(firstPlayerAnswers, true)
-            ),
-            second: expectPlayerProgress(
-                secondPlayer.user,
-                secondPlayerAnswers,
-                this.getScore(secondPlayerAnswers)
-            )
-          },
-          GameStatus.Finished,
-          game.body.questions
-      )
-      expectGames.push(viewGame)
+      const viewGame = await this.createFinishedGame(firstUser, startFrom)
+      console.dir(viewGame, {depth: null})
+      expectGames.unshift(viewGame.expectGame)
     }
-    return { accessToken: firstUser.accessToken, expectGames }
+    return { accessToken: firstUser.accessToken, expectGames: expectGames }
   }
 
   private eagleAndTails(): number {
@@ -120,11 +133,12 @@ export class GameFactory {
   private getScore(answers: TestAnswersType, first?: boolean): number {
     let score = 0
     for (let answer in answers) {
-      if (answer = AnswerStatus.Correct) {
+      if (answers[Number(answer)] === AnswerStatus.Correct) {
         score++
+
       }
     }
-    if (first) {
+    if (first && score !== 0) {
       score++
     }
 

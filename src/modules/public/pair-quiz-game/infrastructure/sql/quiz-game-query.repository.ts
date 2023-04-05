@@ -66,12 +66,13 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                    COALESCE(fp."gameHost", 'false'),
                    fp.score, fp."userId", sp.score, sp."userId",
                    fu.login,
-                   su.login;
+                   su.login
+             ORDER BY g."${queryDto.sortBy}" ${queryDto.sortDirection},
+                      g."pairCreatedDate" ${queryDto.sortDirection}
+             LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};
     `;
-    console.log(userId)
-    console.log(query)
     const result: GameDb[] = await this.dataSource.query(query, [userId])
-    console.log(result)
+
     const games = new GameDb().toViewModel(result)
 
     const totalCountQuery = `

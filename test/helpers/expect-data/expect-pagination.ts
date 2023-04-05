@@ -1,11 +1,11 @@
 import {ViewPage} from "../../../src/common/pagination/view-page";
-import {giveSkipNumber} from "../../../src/common/pagination/helpers";
+import {givePagesCount, giveSkipNumber} from "../../../src/common/pagination/helpers";
 
 export const expectPagination = <T>(values: T[], {
-    pagesCount = 1,
     page = 1,
     pageSize = 10,
-    totalCount
+    totalCount,
+    pagesCount = givePagesCount(totalCount, pageSize),
 }): ViewPage<T> => {
     let items = values
     if(items.length > pageSize) {
