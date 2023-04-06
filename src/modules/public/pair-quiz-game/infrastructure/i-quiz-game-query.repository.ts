@@ -4,6 +4,7 @@ import { GetCorrectAnswerDb } from './sql/pojo/get-correct-answer.db';
 import { GameStatus } from '../shared/game-status';
 import { ViewPage } from '../../../../common/pagination/view-page';
 import { GameQueryDto } from '../api/dto/query/game-query.dto';
+import {ViewUserStatistic} from "../api/view/view-user-statistic";
 
 export interface IQuizGameQueryRepository {
   getMyCurrentGame(gameId: string): Promise<ViewGame>;
@@ -14,6 +15,7 @@ export interface IQuizGameQueryRepository {
     gameId: string,
     questionNumber: number,
   ): Promise<GetCorrectAnswerDb>;
+  getUserStatistic(userId: string): Promise<ViewUserStatistic>;
   checkUserCurrentGame(
     userId: string,
     status?: GameStatus,

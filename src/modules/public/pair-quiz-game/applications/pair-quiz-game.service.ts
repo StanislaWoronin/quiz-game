@@ -6,7 +6,7 @@ import { ViewAnswer } from '../api/view/view-answer';
 import { IQuizGameQueryRepository } from '../infrastructure/i-quiz-game-query.repository';
 import { IQuestionsQueryRepository } from '../../../sa/questions/infrastructure/i-questions-query.repository';
 import { SendAnswerDto } from './dto/send-answer.dto';
-import { CheckAnswerProgressDb } from '../infrastructure/sql/pojo/checkAnswerProgressDb';
+import { CheckAnswerProgressDb } from '../infrastructure/sql/pojo/check-answer-progress.db';
 import { util } from 'prettier';
 import getAlignmentSize = util.getAlignmentSize;
 

@@ -1,4 +1,4 @@
-import { TestsPaginationType } from '../../type/pagination.type';
+import { TestsPaginationType } from '../../type/pagination/pagination.type';
 
 export const getUrlWithQuery = <T>(
   endpoint: string,

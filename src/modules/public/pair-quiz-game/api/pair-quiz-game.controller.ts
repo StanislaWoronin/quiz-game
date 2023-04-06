@@ -24,9 +24,10 @@ import { GameStatus } from '../shared/game-status';
 import { ViewPage } from '../../../../common/pagination/view-page';
 import { QueryDto } from '../../../../common/pagination/query-parameters/query.dto';
 import { GameQueryDto } from './dto/query/game-query.dto';
+import {ViewUserStatistic} from "./view/view-user-statistic";
 
 @UseGuards(AuthBearerGuard)
-@Controller('pair-game-quiz/pairs')
+@Controller('pair-game-quiz')
 export class PairQuizGameController {
   constructor(
     protected gameService: PairQuizGameService,
@@ -35,7 +36,7 @@ export class PairQuizGameController {
   ) {}
 
   @HttpCode(HttpStatus.OK)
-  @Post('connection')
+  @Post('pairs/connection')
   async joinGame(@UserId() userId: string): Promise<ViewGame> {
     const currentGame = await this.gameQueryRepository.checkUserCurrentGame(
       userId,
@@ -49,7 +50,7 @@ export class PairQuizGameController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('my-current/answers')
+  @Post('pairs/my-current/answers')
   async sendAnswer(
     @Body() dto: AnswerDto,
     @UserId() userId: string,
@@ -70,7 +71,7 @@ export class PairQuizGameController {
     return result;
   }
 
-  @Get('my')
+  @Get('pairs/my')
   async getMyGames(
     @Query() dto: GameQueryDto,
     @UserId() userId: string,
@@ -78,7 +79,7 @@ export class PairQuizGameController {
     return await this.gameQueryRepository.getMyGames(userId, dto);
   }
 
-  @Get('my-current') // return game witch has status "Active"
+  @Get('pairs/my-current') // return game witch has status "Active"
   async getMyCurrentGame(@UserId() userId: string): Promise<ViewGame> {
     const currentGame = await this.gameQueryRepository.checkUserCurrentGame(
       userId,
@@ -90,7 +91,7 @@ export class PairQuizGameController {
     return await this.gameQueryRepository.getMyCurrentGame(currentGame);
   }
 
-  @Get(':id') // return the game with any status
+  @Get('pairs/:id') // return the game with any status
   async getGameById(
     @Param() gameId: ParamsId,
     @UserId() userId: string,
@@ -108,5 +109,10 @@ export class PairQuizGameController {
     return await this.gameQueryRepository.getGameById(gameId.id);
   }
 
-
+  @Get('users/my-statistic')
+  async getMyStatistic(
+      @UserId() userId: string,
+  ): Promise<ViewUserStatistic> {
+    return await this.gameQueryRepository.getUserStatistic(userId);
+  }
 }

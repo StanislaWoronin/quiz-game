@@ -1,4 +1,4 @@
-import { giveSkipNumber } from '../helpers';
+import { giveSkipNumber } from '../../helpers';
 import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
 import { SortDirection } from './sort-direction';
 import { Type } from 'class-transformer';

@@ -1945,7 +1945,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       it('Shouldn`t return statistic if user unauthorized', async () => {
           const response = await game.getStatistic()
-          expect(response.body).toBe(HttpStatus.UNAUTHORIZED)
+          expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
       })
 
       it('Create and return statistic', async () => {
@@ -1954,8 +1954,8 @@ describe('/sa/quiz/questions (e2e)', () => {
               preparedGameData,
           );
 
-          const expectStats = await gameFactory.createFinishedGames(10)
-          console.log(expectStats.playerStats)
+          const expectStats = await gameFactory.createFinishedGames(11)
+
           const response = await game.getStatistic(expectStats.accessToken)
           expect(response.status).toBe(HttpStatus.OK)
           expect(response.body).toStrictEqual(expectStats.playerStats)

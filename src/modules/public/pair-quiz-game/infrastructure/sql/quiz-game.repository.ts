@@ -11,7 +11,7 @@ import { AnswerStatus } from '../../shared/answer-status';
 import { SqlUserAnswer } from './entity/sql-user-answer.entity';
 import { ViewGameProgress } from '../../api/view/view-game-progress';
 import { SqlGameQuestions } from './entity/sql-game-questions.entity';
-import { SimpleGameDb } from './pojo/simpleGameDb';
+import { SimpleGameDb } from './pojo/simple-game.db';
 import { toViewJoinGame } from '../../../../../common/data-mapper/to-view-join-game';
 import { SendAnswerDto } from '../../applications/dto/send-answer.dto';
 import { GameProgressDb } from './pojo/game-progress.db';

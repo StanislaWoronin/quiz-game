@@ -4,7 +4,7 @@ import { AnswerStatus } from '../../../src/modules/public/pair-quiz-game/shared/
 import { TestAnswersType } from '../type/anwers.type';
 import { CreatedUser } from '../../../src/modules/sa/users/api/view/created-user';
 import { ViewGameProgress } from '../../../src/modules/public/pair-quiz-game/api/view/view-game-progress';
-import { MemberType } from '../type/member.type';
+import { MemberType } from '../type/pagination/member.type';
 import { Questions } from '../../../src/modules/public/pair-quiz-game/shared/questions';
 import { GameStatus } from '../../../src/modules/public/pair-quiz-game/shared/game-status';
 import { CreatedQuestions } from '../../../src/modules/sa/questions/api/view/created-questions';

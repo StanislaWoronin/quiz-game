@@ -1,4 +1,4 @@
-import { SimpleGameDb } from '../../modules/public/pair-quiz-game/infrastructure/sql/pojo/simpleGameDb';
+import { SimpleGameDb } from '../../modules/public/pair-quiz-game/infrastructure/sql/pojo/simple-game.db';
 import { ViewGame } from '../../modules/public/pair-quiz-game/api/view/view-game';
 import { Questions } from '../../modules/public/pair-quiz-game/shared/questions';
 

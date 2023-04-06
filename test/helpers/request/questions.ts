@@ -11,7 +11,7 @@ import { ErrorsMessages } from '../../../src/common/dto/errors-messages';
 import { SortByUserField } from '../../../src/modules/sa/users/api/dto/query/users-sort-field';
 import { SortDirection } from '../../../src/common/pagination/query-parameters/sort-direction';
 import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
-import { TestsPaginationType } from '../type/pagination.type';
+import { TestsPaginationType } from '../type/pagination/pagination.type';
 import { TestingRequestDto } from '../testing-request.dto';
 import { CreateQuestionDto } from '../../../src/modules/sa/questions/api/dto/create-question.dto';
 import { SortByQuestionsField } from '../../../src/modules/sa/questions/api/dto/query/quesions-sort-field';

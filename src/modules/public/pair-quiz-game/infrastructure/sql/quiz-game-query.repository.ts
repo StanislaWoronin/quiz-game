@@ -4,12 +4,14 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ViewGame } from '../../api/view/view-game';
 import { toViewGame } from '../../../../../common/data-mapper/to-view-game';
-import { SimpleGameDb } from './pojo/simpleGameDb';
+import { SimpleGameDb } from './pojo/simple-game.db';
 import { PlayerIdDb } from './pojo/player-id.db';
 import { GetCorrectAnswerDb } from './pojo/get-correct-answer.db';
 import { ViewPage } from '../../../../../common/pagination/view-page';
 import { GameDb } from './pojo/game.db';
 import { GameQueryDto } from '../../api/dto/query/game-query.dto';
+import {ViewUserStatistic} from "../../api/view/view-user-statistic";
+import {UserStatisticDb} from "./pojo/user-statistic.db";
 
 export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -144,6 +146,22 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     return result[0];
   }
 
+  async getUserStatistic(userId: string): Promise<ViewUserStatistic> {
+    const query = `
+      SELECT COUNT(g.id) AS "gamesCount",
+             SUM(fp.score) AS "sumScore",
+             SUM(CASE WHEN fp.score - sp.score > 0 THEN 1 ELSE 0 END) AS "winsCount",
+             SUM(CASE WHEN fp.score - sp.score < 0 THEN 1 ELSE 0 END) AS "lossesCount",
+             SUM(CASE WHEN fp.score - sp.score = 0 THEN 1 ELSE 0 END) AS "drawsCount"
+        FROM sql_game g
+        JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
+        JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1;
+    `;
+    const result: UserStatisticDb = await this.dataSource.query(query, [userId])
+
+    return new ViewUserStatistic(result[0])
+  }
+
   async checkUserCurrentGame(
     userId: string,
     status?: GameStatus,
@@ -223,44 +241,3 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     `;
   }
 }
-
-// SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
-//     COALESCE(fp."gameHost", 'false') AS "firstUserHost",
-//     fp.score AS "firstPlayerScore",
-//     sp.score AS "secondPlayerScore",
-//     JSON_AGG(JSON_BUILD_OBJECT('id', gq."questionId", 'body', q.body)) AS questions,
-//     JSON_BUILD_OBJECT('id', fp."userId", 'login', fu.login) AS "firstUser",
-//     JSON_BUILD_OBJECT('id', sp."userId", 'login', su.login) AS "secondUser",
-//     (SELECT JSON_AGG(
-//     JSON_BUILD_OBJECT(
-//         'answerStatus', ua."answerStatus",
-//     'addedAt', ua."addedAt",
-//     'questionId', gq."questionId"
-// ))
-// FROM sql_user_answer ua
-// JOIN sql_game_questions gq ON gq."questionId" = ua."questionId" AND gq."gameId" = ua."gameId"
-// WHERE gq."gameId" = g.id AND ua."userId" = fp."userId"
-// GROUP BY ua."userId"
-// ) AS "firstUserAnswers",
-//     (SELECT JSON_AGG(JSON_BUILD_OBJECT(
-//     'answerStatus', ua."answerStatus",
-//     'addedAt', ua."addedAt",
-//     'questionId', gq."questionId"
-// ))
-// FROM sql_user_answer ua
-// JOIN sql_game_questions gq ON gq."questionId" = ua."questionId" AND gq."gameId" = ua."gameId"
-// WHERE gq."gameId" = g.id AND ua."userId" = sp."userId"
-// GROUP BY ua."userId"
-// ) AS "secondUserAnswers"
-// FROM sql_game g
-// JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
-// JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1
-// JOIN sql_game_questions gq ON gq."gameId" = g.id
-// JOIN sql_users fu ON fp."userId" = fu.id
-// JOIN sql_users su ON sp."userId" = su.id
-// LEFT JOIN sql_questions q ON q.id = gq."questionId"
-// GROUP BY g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
-//     COALESCE(fp."gameHost", 'false'),
-// fp.score, fp."userId", sp.score, sp."userId",
-//     fu.login,
-//     su.login;

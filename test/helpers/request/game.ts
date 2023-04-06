@@ -6,7 +6,7 @@ import { ViewAnswer } from '../../../src/modules/public/pair-quiz-game/api/view/
 import { getUrlWithId } from '../routing/get-url/url-with-id';
 import { ViewPage } from '../../../src/common/pagination/view-page';
 import { GameQueryDto } from '../../../src/modules/public/pair-quiz-game/api/dto/query/game-query.dto';
-import { TestsPaginationType } from '../type/pagination.type';
+import { TestsPaginationType } from '../type/pagination/pagination.type';
 import { SortByGameField } from '../../../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
 import { SortDirection } from '../../../src/common/pagination/query-parameters/sort-direction';
 import { getUrlWithQuery } from '../routing/get-url/url-with-query';

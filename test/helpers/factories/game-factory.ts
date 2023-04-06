@@ -5,7 +5,7 @@ import { faker } from '@faker-js/faker';
 import { preparedGameData } from '../prepeared-data/prepared-game-data';
 import { Questions } from '../../../src/modules/public/pair-quiz-game/shared/questions';
 import { UsersFactory } from './users-factory';
-import { UserWithTokensType } from '../type/user-with-token-type';
+import { UserWithTokensType } from '../type/auth/user-with-token-type';
 import { TestingRequestDto } from '../testing-request.dto';
 import { ViewGame } from '../../../src/modules/public/pair-quiz-game/api/view/view-game';
 import {
@@ -15,6 +15,9 @@ import {
 import { GameStatus } from '../../../src/modules/public/pair-quiz-game/shared/game-status';
 import { ViewAnswer } from '../../../src/modules/public/pair-quiz-game/api/view/view-answer';
 import {ViewUserStatistic} from "../../../src/modules/public/pair-quiz-game/api/view/view-user-statistic";
+import {getAvgScore} from "../../../src/common/helpers";
+import {FinishedGamesType, FinishedGameType, GameStats} from "../type/finished-game.type";
+import {GameStatsType} from "../type/game-stats.type";
 
 export class GameFactory {
   constructor(private game: Game, private usersFactory: UsersFactory) {}
@@ -66,7 +69,7 @@ export class GameFactory {
   async createFinishedGame(
     first?: UserWithTokensType,
     startFrom = 1,
-  ): Promise<{ accessToken: string; expectGame: ViewGame, fistUserStat: {score: number, gameStats: GameStats} }> {
+  ): Promise<FinishedGameType> {
     let firstUser = first;
     if (!firstUser) {
       const [first] = await this.usersFactory.createAndLoginUsers(1);
@@ -124,7 +127,7 @@ export class GameFactory {
     gamesCount: number,
     startFrom = 1,
     first?: UserWithTokensType,
-  ): Promise<{ accessToken: string; expectGames: ViewGame[], playerStats: ViewUserStatistic}> {
+  ): Promise<FinishedGamesType> {
     const expectGames = [];
     const playerStats: ViewUserStatistic = {
       sumScore: 0,
@@ -158,7 +161,7 @@ export class GameFactory {
           playerStats.drawsCount++
       }
     }
-    playerStats.avgScores = this.getAvgScore(playerStats.sumScore, playerStats.gamesCount)
+    playerStats.avgScores = getAvgScore(playerStats.sumScore, playerStats.gamesCount)
 
     return { accessToken: firstUser.accessToken, expectGames: expectGames, playerStats };
   }
@@ -195,7 +198,7 @@ export class GameFactory {
     return score;
   }
 
-  private checkStat(game: ViewGame, userLogin: string): {score: number, gameStats: GameStats} {
+  private checkStat(game: ViewGame, userLogin: string): GameStatsType {
     let firstUserScore
     let secondUserScore
     if (game.firstPlayerProgress.player.login === userLogin) {
@@ -217,19 +220,4 @@ export class GameFactory {
 
     return {score: firstUserScore, gameStats: firstUserGameStats}
   }
-
-  getAvgScore(score: number, gamesCount: number): number {
-    const avg = parseFloat((score / gamesCount).toFixed(2))
-
-    // if (avg - Math.floor(avg) === 0) {
-    //   return Math.floor(avg)
-    // }
-    return avg
-  }
-}
-
-enum GameStats {
-  Win = 'win',
-  Lose = 'lose',
-  Draw = 'draw'
 }

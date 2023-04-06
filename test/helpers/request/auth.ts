@@ -10,7 +10,7 @@ import { faker } from '@faker-js/faker';
 import { TokensDto } from '../tokens.dto';
 import { TestingRequestDto } from '../testing-request.dto';
 import { ViewAboutMe } from '../../../src/modules/public/auth/api/view/view-about-me';
-import { LoginType } from '../type/login.type';
+import { LoginType } from '../type/auth/login.type';
 import { HttpStatus } from '@nestjs/common';
 
 export class Auth {
