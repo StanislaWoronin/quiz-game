@@ -14,7 +14,7 @@ import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query
 import { TestsPaginationType } from '../type/pagination.type';
 import { TestingRequestDto } from '../testing-request.dto';
 import { CreateQuestionDto } from '../../../src/modules/sa/questions/api/dto/create-question.dto';
-import {SortByQuestionsField} from "../../../src/modules/sa/questions/api/dto/query/quesions-sort-field";
+import { SortByQuestionsField } from '../../../src/modules/sa/questions/api/dto/query/quesions-sort-field';
 
 export class Questions {
   constructor(private readonly server: any) {}

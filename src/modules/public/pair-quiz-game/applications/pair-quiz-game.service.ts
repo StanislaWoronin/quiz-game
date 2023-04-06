@@ -29,7 +29,11 @@ export class PairQuizGameService {
     return await this.gameRepository.joinGame(userId, existsOpenGame);
   }
 
-  async sendAnswer(userId: string, dto: AnswerDto, gameId: string): Promise<ViewAnswer | null> {
+  async sendAnswer(
+    userId: string,
+    dto: AnswerDto,
+    gameId: string,
+  ): Promise<ViewAnswer | null> {
     const currentUserAnswerProgress =
       await this.queryGameRepository.currentGameAnswerProgress(userId, gameId);
     if (currentUserAnswerProgress == 5) {

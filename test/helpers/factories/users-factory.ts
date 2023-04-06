@@ -11,10 +11,7 @@ import { Auth } from '../request/auth';
 export class UsersFactory {
   constructor(private users: Users, private auth: Auth) {}
 
-  async createUsers(
-    usersCount: number,
-    startWith: number = 0,
-  ): Promise<CreatedUser[]> {
+  async createUsers(usersCount: number, startWith = 0): Promise<CreatedUser[]> {
     const result = [];
     for (let i = 0; i < usersCount; i++) {
       const inputData: CreateUserDto = {
@@ -75,7 +72,10 @@ export class UsersFactory {
     return result;
   }
 
-  async createAndLoginUsers(userCount: number, startWith: number = 0): Promise<
+  async createAndLoginUsers(
+    userCount: number,
+    startWith = 0,
+  ): Promise<
     {
       user: CreatedUser;
       accessToken: string;

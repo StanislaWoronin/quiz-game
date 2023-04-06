@@ -1,5 +1,5 @@
 export enum SortByQuestionsField {
-    CreatedAt = 'createdAt',
-    Body = 'body',
-    PublishedStatus = 'publishedStatus',
+  CreatedAt = 'createdAt',
+  Body = 'body',
+  PublishedStatus = 'publishedStatus',
 }

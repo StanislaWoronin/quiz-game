@@ -26,6 +26,9 @@ export const endpoints = {
       pairs: `${pairGameQuiz}/pairs`,
       sendAnswers: `${pairGameQuiz}/pairs/answers`,
     },
+    users: {
+      myStatistic: `${pairGameQuiz}/users/my-statistic`
+    }
   },
   sa: {
     quiz: {

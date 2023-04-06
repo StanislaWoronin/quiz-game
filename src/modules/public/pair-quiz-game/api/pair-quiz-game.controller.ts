@@ -8,7 +8,8 @@ import {
   Inject,
   NotFoundException,
   Param,
-  Post, Query,
+  Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ViewGame } from './view/view-game';
@@ -20,9 +21,9 @@ import { AuthBearerGuard } from '../../auth/guards/auth-bearer.guard';
 import { IQuizGameQueryRepository } from '../infrastructure/i-quiz-game-query.repository';
 import { ParamsId } from '../../../../common/dto/params-id';
 import { GameStatus } from '../shared/game-status';
-import {ViewPage} from "../../../../common/pagination/view-page";
-import {QueryDto} from "../../../../common/pagination/query-parameters/query.dto";
-import {GameQueryDto} from "./dto/query/game-query.dto";
+import { ViewPage } from '../../../../common/pagination/view-page';
+import { QueryDto } from '../../../../common/pagination/query-parameters/query.dto';
+import { GameQueryDto } from './dto/query/game-query.dto';
 
 @UseGuards(AuthBearerGuard)
 @Controller('pair-game-quiz/pairs')
@@ -37,7 +38,7 @@ export class PairQuizGameController {
   @Post('connection')
   async joinGame(@UserId() userId: string): Promise<ViewGame> {
     const currentGame = await this.gameQueryRepository.checkUserCurrentGame(
-        userId,
+      userId,
     );
 
     if (currentGame) {
@@ -69,16 +70,14 @@ export class PairQuizGameController {
     return result;
   }
 
-  @HttpCode(HttpStatus.OK)
   @Get('my')
   async getMyGames(
-      @Query() dto: GameQueryDto,
-      @UserId() userId: string
+    @Query() dto: GameQueryDto,
+    @UserId() userId: string,
   ): Promise<ViewPage<ViewGame>> {
-    return await this.gameQueryRepository.getMyGames(userId, dto)
+    return await this.gameQueryRepository.getMyGames(userId, dto);
   }
 
-  @HttpCode(HttpStatus.OK)
   @Get('my-current') // return game witch has status "Active"
   async getMyCurrentGame(@UserId() userId: string): Promise<ViewGame> {
     const currentGame = await this.gameQueryRepository.checkUserCurrentGame(
@@ -91,7 +90,6 @@ export class PairQuizGameController {
     return await this.gameQueryRepository.getMyCurrentGame(currentGame);
   }
 
-  @HttpCode(HttpStatus.OK)
   @Get(':id') // return the game with any status
   async getGameById(
     @Param() gameId: ParamsId,
@@ -109,4 +107,6 @@ export class PairQuizGameController {
 
     return await this.gameQueryRepository.getGameById(gameId.id);
   }
+
+
 }

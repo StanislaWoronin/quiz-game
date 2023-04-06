@@ -15,7 +15,7 @@ import { SimpleGameDb } from './pojo/simpleGameDb';
 import { toViewJoinGame } from '../../../../../common/data-mapper/to-view-join-game';
 import { SendAnswerDto } from '../../applications/dto/send-answer.dto';
 import { GameProgressDb } from './pojo/game-progress.db';
-import {log} from "util";
+import { log } from 'util';
 
 export class QuizGameRepository implements IQuizGameRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -123,15 +123,18 @@ export class QuizGameRepository implements IQuizGameRepository {
       );
       const createdAnswer = await manager.save(answer);
 
-      let score = dto.answerStatus === AnswerStatus.Correct ? 1 : 0;
+      const score = dto.answerStatus === AnswerStatus.Correct ? 1 : 0;
 
       if (score !== 0) {
         await manager
-            .createQueryBuilder()
-            .update(SqlGameProgress)
-            .set({ score: () => `score + ${score}` })
-            .where('userId = :userId AND gameId = :gameId', { userId: dto.userId, gameId: dto.gameId })
-            .execute();
+          .createQueryBuilder()
+          .update(SqlGameProgress)
+          .set({ score: () => `score + ${score}` })
+          .where('userId = :userId AND gameId = :gameId', {
+            userId: dto.userId,
+            gameId: dto.gameId,
+          })
+          .execute();
       }
 
       if (dto.isLastQuestions) {
@@ -142,8 +145,8 @@ export class QuizGameRepository implements IQuizGameRepository {
         );
 
         if (lastQuestionProgress.length === 2) {
-          const firstAnsweredPlayer = lastQuestionProgress[0]
-          const extraScore = 1
+          const firstAnsweredPlayer = lastQuestionProgress[0];
+          const extraScore = 1;
 
           await manager
             .createQueryBuilder()
@@ -157,11 +160,14 @@ export class QuizGameRepository implements IQuizGameRepository {
 
           if (firstAnsweredPlayer.score !== 0) {
             await manager
-                .createQueryBuilder()
-                .update(SqlGameProgress)
-                .set({ score: () => `score + ${extraScore}` })
-                .where('userId = :userId AND gameId = :gameId', { userId: firstAnsweredPlayer.userId, gameId: dto.gameId })
-                .execute()
+              .createQueryBuilder()
+              .update(SqlGameProgress)
+              .set({ score: () => `score + ${extraScore}` })
+              .where('userId = :userId AND gameId = :gameId', {
+                userId: firstAnsweredPlayer.userId,
+                gameId: dto.gameId,
+              })
+              .execute();
           }
         }
       }

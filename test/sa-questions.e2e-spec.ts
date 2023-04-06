@@ -13,9 +13,9 @@ import { preparedQuestions } from './helpers/prepeared-data/prepared-questions';
 import { getErrorMessage } from './helpers/routing/errors-messages';
 import { getErrorsMessage } from './helpers/expect-data/expect-errors-messages';
 import { PublishedStatus } from '../src/modules/sa/questions/api/dto/query/published-status';
-import {SortByQuestionsField} from "../src/modules/sa/questions/api/dto/query/quesions-sort-field";
-import {expectPagination} from "./helpers/expect-data/expect-pagination";
-import {CreatedQuestions} from "../src/modules/sa/questions/api/view/created-questions";
+import { SortByQuestionsField } from '../src/modules/sa/questions/api/dto/query/quesions-sort-field';
+import { expectPagination } from './helpers/expect-data/expect-pagination';
+import { CreatedQuestions } from '../src/modules/sa/questions/api/view/created-questions';
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -332,10 +332,12 @@ describe('/sa/quiz/questions (e2e)', () => {
         pageSize: 3,
       });
       expect(request.status).toBe(HttpStatus.OK);
-      expect(request.body).toStrictEqual(expectPagination<CreatedQuestions>(
+      expect(request.body).toStrictEqual(
+        expectPagination<CreatedQuestions>(
           [createdQuestions[0], createdQuestions[1], createdQuestions[2]],
-          {pagesCount: 2, pageSize: 3, totalCount: 5}
-      ))
+          { pagesCount: 2, pageSize: 3, totalCount: 5 },
+        ),
+      );
     });
 
     it('?publishedStatus=published&sortBy=body&sortDirection=desc&pageNumber=2&pageSize=3', async () => {
@@ -349,10 +351,12 @@ describe('/sa/quiz/questions (e2e)', () => {
         pageSize: 3,
       });
       expect(request.status).toBe(HttpStatus.OK);
-      expect(request.body).toStrictEqual(expectPagination<CreatedQuestions>(
+      expect(request.body).toStrictEqual(
+        expectPagination<CreatedQuestions>(
           [publishedQuestions[3], publishedQuestions[4]],
-          {pagesCount: 2, page: 2, pageSize: 3, totalCount: 5}
-      ))
+          { pagesCount: 2, page: 2, pageSize: 3, totalCount: 5 },
+        ),
+      );
     });
 
     it('Search vie "bodySearchTerm"', async () => {

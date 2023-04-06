@@ -14,8 +14,8 @@ import { SortByUserField } from '../src/modules/sa/users/api/dto/query/users-sor
 import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
 import { BanStatus } from '../src/modules/sa/users/api/dto/query/ban-status';
 import { Auth } from './helpers/request/auth';
-import {expectPagination} from "./helpers/expect-data/expect-pagination";
-import {CreatedUser} from "../src/modules/sa/users/api/view/created-user";
+import { expectPagination } from './helpers/expect-data/expect-pagination';
+import { CreatedUser } from '../src/modules/sa/users/api/view/created-user';
 
 describe('/sa/users (e2e)', () => {
   const second = 1000;
@@ -192,10 +192,13 @@ describe('/sa/users (e2e)', () => {
         pageSize: 3,
       });
       expect(request.status).toBe(HttpStatus.OK);
-      expect(request.body).toStrictEqual(expectPagination(
-          [bannedUsers[0], bannedUsers[1], bannedUsers[2]],
-          {pagesCount: 2, pageSize: 3, totalCount: 5})
-      )
+      expect(request.body).toStrictEqual(
+        expectPagination([bannedUsers[0], bannedUsers[1], bannedUsers[2]], {
+          pagesCount: 2,
+          pageSize: 3,
+          totalCount: 5,
+        }),
+      );
     });
 
     it('?banStatus=notBanned&sortBy=email&sortDirection=desc&pageNumber=2&pageSize=3', async () => {
@@ -209,10 +212,14 @@ describe('/sa/users (e2e)', () => {
         pageSize: 3,
       });
       expect(request.status).toBe(HttpStatus.OK);
-      expect(request.body).toStrictEqual(expectPagination<CreatedUser>(
-          [createdUsers[1], createdUsers[0]],
-          {pagesCount: 2, page: 2, pageSize: 3, totalCount: 5})
-      )
+      expect(request.body).toStrictEqual(
+        expectPagination<CreatedUser>([createdUsers[1], createdUsers[0]], {
+          pagesCount: 2,
+          page: 2,
+          pageSize: 3,
+          totalCount: 5,
+        }),
+      );
     });
   });
 

@@ -7,14 +7,17 @@ import { toViewGame } from '../../../../../common/data-mapper/to-view-game';
 import { SimpleGameDb } from './pojo/simpleGameDb';
 import { PlayerIdDb } from './pojo/player-id.db';
 import { GetCorrectAnswerDb } from './pojo/get-correct-answer.db';
-import {ViewPage} from "../../../../../common/pagination/view-page";
-import {GameDb} from "./pojo/game.db";
-import {GameQueryDto} from "../../api/dto/query/game-query.dto";
+import { ViewPage } from '../../../../../common/pagination/view-page';
+import { GameDb } from './pojo/game.db';
+import { GameQueryDto } from '../../api/dto/query/game-query.dto';
 
 export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async getMyGames(userId: string, queryDto: GameQueryDto): Promise<ViewPage<ViewGame>> {
+  async getMyGames(
+    userId: string,
+    queryDto: GameQueryDto,
+  ): Promise<ViewPage<ViewGame>> {
     const query = `
         SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
                COALESCE(fp."gameHost", 'false') AS "firstUserHost",
@@ -71,9 +74,9 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                       g."pairCreatedDate" DESC
              LIMIT ${queryDto.pageSize} OFFSET ${queryDto.skip};
     `;
-    const result: GameDb[] = await this.dataSource.query(query, [userId])
+    const result: GameDb[] = await this.dataSource.query(query, [userId]);
 
-    const games = new GameDb().toViewModel(result)
+    const games = new GameDb().toViewModel(result);
 
     const totalCountQuery = `
       SELECT COUNT(*)
@@ -81,13 +84,13 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
         JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
         JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1;
     `;
-    const totalCount = await this.dataSource.query(totalCountQuery, [userId])
+    const totalCount = await this.dataSource.query(totalCountQuery, [userId]);
 
     return new ViewPage<ViewGame>({
       items: games,
       query: queryDto,
-      totalCount: Number(totalCount[0].count)
-    })
+      totalCount: Number(totalCount[0].count),
+    });
   }
 
   async getMyCurrentGame(gameId: string): Promise<ViewGame> {
@@ -217,7 +220,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
         LEFT JOIN sql_questions q ON q.id = gq."questionId"
        WHERE g.id = $1 ${filter}
        ORDER BY gp."gameHost" DESC, gq.id ASC;
-    `
+    `;
   }
 }
 

@@ -4,4 +4,3 @@ export enum SortByUserField {
   Email = 'email',
   Login = 'login',
 }
-
