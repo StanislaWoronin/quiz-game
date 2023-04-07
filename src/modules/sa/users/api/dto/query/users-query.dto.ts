@@ -2,6 +2,7 @@ import { QueryDto } from '../../../../../../common/pagination/query-parameters/q
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { BanStatus } from './ban-status';
 import { SortByUserField } from './users-sort-field';
+import {SortDirection} from "../../../../../../common/pagination/query-parameters/sort-direction";
 
 export class UsersQueryDto extends QueryDto {
   @IsEnum(BanStatus)
@@ -19,4 +20,8 @@ export class UsersQueryDto extends QueryDto {
   @IsEnum(SortByUserField)
   @IsOptional()
   sortBy: SortByUserField = SortByUserField.CreatedAt;
+
+  @IsEnum(SortDirection)
+  @IsOptional()
+  sortDirection: SortDirection = SortDirection.Descending;
 }

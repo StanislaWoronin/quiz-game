@@ -18,6 +18,9 @@ import {ViewUserStatistic} from "../../../src/modules/public/pair-quiz-game/api/
 import {getAvgScore} from "../../../src/common/helpers";
 import {FinishedGamesType, FinishedGameType, GameStats} from "../type/finished-game.type";
 import {GameStatsType} from "../type/game-stats.type";
+import {CreateFinishedGameType} from "../type/create-finished-game.type";
+import {ViewTopUsers} from "../../../src/modules/public/pair-quiz-game/api/view/view-top-users";
+import {ViewPlayer} from "../../../src/modules/public/pair-quiz-game/api/view/view-player";
 
 export class GameFactory {
   constructor(private game: Game, private usersFactory: UsersFactory) {}
@@ -67,8 +70,11 @@ export class GameFactory {
   }
 
   async createFinishedGame(
-    first?: UserWithTokensType,
-    startFrom = 1,
+      {
+        first,
+        second,
+        startFrom = 1
+      }: CreateFinishedGameType,
   ): Promise<FinishedGameType> {
     let firstUser = first;
     if (!firstUser) {
@@ -76,14 +82,22 @@ export class GameFactory {
       firstUser = first;
     }
 
-    const [secondUser] = await this.usersFactory.createAndLoginUsers(
-      1,
-      startFrom,
-    );
+    let secondUser = second
+    if (!second) {
+      const [second] = await this.usersFactory.createAndLoginUsers(
+          1,
+          startFrom,
+      );
+      secondUser = second
+    }
 
-    const draw = this.eagleAndTails();
-    const firstPlayer = draw ? firstUser : secondUser;
-    const secondPlayer = draw ? secondUser : firstUser;
+    let firstPlayer = firstUser
+    let secondPlayer = secondUser
+    if (!first && !second) {
+      const draw = this.eagleAndTails();
+      firstPlayer = draw ? firstUser : secondUser;
+      secondPlayer = draw ? secondUser : firstUser;
+    }
 
     const game = await this.createGame(firstPlayer, secondPlayer);
 
@@ -145,7 +159,7 @@ export class GameFactory {
     }
 
     for (let i = 0; i < gamesCount; i++) {
-      const viewGame = await this.createFinishedGame(firstUser, startFrom + i);
+      const viewGame = await this.createFinishedGame({first: firstUser, startFrom: startFrom +i});
       expectGames.push(viewGame.expectGame);
 
       playerStats.sumScore += viewGame.fistUserStat.score
@@ -166,8 +180,32 @@ export class GameFactory {
     return { accessToken: firstUser.accessToken, expectGames: expectGames, playerStats };
   }
 
-  private eagleAndTails(): number {
-    return Math.round(Math.random());
+  async createPlayersTop(playersCount: number, gameRound: number): Promise<ViewTopUsers[]> {
+    const players = await this.usersFactory.createAndLoginUsers(playersCount)
+
+    let gamesStats = []
+    for (let i = 0; i < gameRound; i++) {
+      const startFrom = (playersCount - 1) * (i + 1)
+      const playerStats = await this.createFinishedGames(gameRound, startFrom, players[i])
+
+      const userStats: ViewTopUsers = {
+        sumScore: playerStats.playerStats.sumScore,
+        avgScores: playerStats.playerStats.avgScores,
+        gamesCount: playerStats.playerStats.gamesCount,
+        winsCount: playerStats.playerStats.winsCount,
+        lossesCount: playerStats.playerStats.lossesCount,
+        drawsCount: playerStats.playerStats.drawsCount,
+        player: new ViewPlayer(players[i].user.id, players[i].user.login)
+      }
+      console.log(userStats)
+      gamesStats.push(userStats)
+    }
+
+    return gamesStats
+  }
+
+  private eagleAndTails(randomRange: number = 2): number {
+    return Math.round(Math.random() * (randomRange - 1));
   }
 
   private getAnswerStatus(): AnswerStatus {

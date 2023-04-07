@@ -1,6 +1,5 @@
 import { giveSkipNumber } from '../../helpers';
-import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
-import { SortDirection } from './sort-direction';
+import { IsInt, IsOptional, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class QueryDto {
@@ -14,10 +13,6 @@ export class QueryDto {
       },
     });
   }
-
-  @IsEnum(SortDirection)
-  @IsOptional()
-  sortDirection: SortDirection = SortDirection.Descending;
 
   @Type(() => Number)
   @IsInt()

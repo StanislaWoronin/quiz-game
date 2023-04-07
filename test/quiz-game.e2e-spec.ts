@@ -28,7 +28,7 @@ import { SortDirection } from '../src/common/pagination/query-parameters/sort-di
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
-  jest.setTimeout(5 * second);
+  jest.setTimeout(15 * second);
 
   let app: INestApplication;
   let server;
@@ -1961,4 +1961,22 @@ describe('/sa/quiz/questions (e2e)', () => {
           expect(response.body).toStrictEqual(expectStats.playerStats)
       })
   })
+
+  describe('GET -> Top players', () => {
+      it('Clear data base', async () => {
+          await testing.clearDb();
+      });
+
+      it('Create data and return top players', async () => {
+          await questionsFactories.createQuestions(
+              preparedGameData.length,
+              preparedGameData,
+          );
+
+          const gamesStat = await gameFactory.createPlayersTop(5, 5)
+          //sortingStats
+          const response = await game.
+      })
+  })
+
 });
