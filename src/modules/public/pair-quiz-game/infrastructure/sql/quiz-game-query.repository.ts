@@ -12,6 +12,8 @@ import { GameDb } from './pojo/game.db';
 import { GameQueryDto } from '../../api/dto/query/game-query.dto';
 import {ViewUserStatistic} from "../../api/view/view-user-statistic";
 import {UserStatisticDb} from "./pojo/user-statistic.db";
+import {ViewTopPlayers} from "../../api/view/view-top-players";
+import {TopPlayersQueryDto} from "../../api/dto/query/top-players-query.dto";
 
 export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -160,6 +162,33 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     const result: UserStatisticDb = await this.dataSource.query(query, [userId])
 
     return new ViewUserStatistic(result[0])
+  }
+
+  async getTopPlayers(queryDto: TopPlayersQueryDto): Promise<ViewPage<ViewTopPlayers>> {
+    const query = `
+      SELECT COUNT(g.id) AS "gamesCount",
+             SUM(fp.score) AS "sumScore",
+             SUM(CASE WHEN fp.score - sp.score > 0 THEN 1 ELSE 0 END) AS "winsCount",
+             SUM(CASE WHEN fp.score - sp.score < 0 THEN 1 ELSE 0 END) AS "lossesCount",
+             SUM(CASE WHEN fp.score - sp.score = 0 THEN 1 ELSE 0 END) AS "drawsCount"
+        FROM sql_game g
+        JOIN sql_game_progress fp ON g.id = fp."gameId"
+        JOIN sql_game_progress sp ON g.id = sp."gameId";
+    `;
+    const result: UserStatisticDb[] = await this.dataSource.query(query)
+    const items = result.map(r => new ViewUserStatistic(r))
+
+    const totalCountQuery = `
+      SELECT COUNT(*)
+        FROM sql_game g
+        JOIN sql_game_progress fp ON g.id = fp."gameId"
+        JOIN sql_game_progress sp ON g.id = sp."gameId";
+    `;
+    const totalCount = await this.dataSource.query(totalCountQuery)
+
+    return new ViewPage<ViewTopPlayers>({
+      items, query: queryDto, totalCount
+    })
   }
 
   async checkUserCurrentGame(

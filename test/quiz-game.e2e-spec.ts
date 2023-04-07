@@ -1967,7 +1967,7 @@ describe('/sa/quiz/questions (e2e)', () => {
           await testing.clearDb();
       });
 
-      it('Create data and return top players', async () => {
+      it('Create data', async () => {
           await questionsFactories.createQuestions(
               preparedGameData.length,
               preparedGameData,
@@ -1975,8 +1975,11 @@ describe('/sa/quiz/questions (e2e)', () => {
 
           const gamesStat = await gameFactory.createPlayersTop(5, 5)
           //sortingStats
-          const response = await game.
+
+      })
+
+      it('Return statistic without pagination', async () => {
+          const response = await game.getTopPlayers({})
       })
   })
-
 });

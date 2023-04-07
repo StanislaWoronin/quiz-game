@@ -11,7 +11,7 @@ import { SortByGameField } from '../../../src/modules/public/pair-quiz-game/api/
 import { SortDirection } from '../../../src/common/pagination/query-parameters/sort-direction';
 import { getUrlWithQuery } from '../routing/get-url/url-with-query';
 import {ViewUserStatistic} from "../../../src/modules/public/pair-quiz-game/api/view/view-user-statistic";
-import {ViewTopUsers} from "../../../src/modules/public/pair-quiz-game/api/view/view-top-users";
+import {ViewTopPlayers} from "../../../src/modules/public/pair-quiz-game/api/view/view-top-players";
 import {TopPlayersSortField} from "../../../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field";
 
 export class Game {
@@ -97,7 +97,12 @@ export class Game {
         pageNumber = 1,
         pageSize = 10,
       }: TestsPaginationType<TopPlayersSortField>
-  ): Promise<TestingRequestDto<ViewTopUsers>> {
+  ): Promise<TestingRequestDto<ViewTopPlayers>> {
+    const query = {
+      sort,
+      pageNumber,
+      pageSize
+    }
 
     const url = getUrlWithQuery(endpoints.pairGameQuiz.users.top, {})
 

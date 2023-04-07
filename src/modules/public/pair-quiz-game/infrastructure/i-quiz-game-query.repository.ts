@@ -5,6 +5,8 @@ import { GameStatus } from '../shared/game-status';
 import { ViewPage } from '../../../../common/pagination/view-page';
 import { GameQueryDto } from '../api/dto/query/game-query.dto';
 import {ViewUserStatistic} from "../api/view/view-user-statistic";
+import {ViewTopPlayers} from "../api/view/view-top-players";
+import {TopPlayersQueryDto} from "../api/dto/query/top-players-query.dto";
 
 export interface IQuizGameQueryRepository {
   getMyCurrentGame(gameId: string): Promise<ViewGame>;
@@ -16,6 +18,7 @@ export interface IQuizGameQueryRepository {
     questionNumber: number,
   ): Promise<GetCorrectAnswerDb>;
   getUserStatistic(userId: string): Promise<ViewUserStatistic>;
+  getTopPlayers(query: TopPlayersQueryDto): Promise<ViewPage<ViewTopPlayers>>;
   checkUserCurrentGame(
     userId: string,
     status?: GameStatus,

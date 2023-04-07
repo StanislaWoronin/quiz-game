@@ -19,7 +19,7 @@ import {getAvgScore} from "../../../src/common/helpers";
 import {FinishedGamesType, FinishedGameType, GameStats} from "../type/finished-game.type";
 import {GameStatsType} from "../type/game-stats.type";
 import {CreateFinishedGameType} from "../type/create-finished-game.type";
-import {ViewTopUsers} from "../../../src/modules/public/pair-quiz-game/api/view/view-top-users";
+import {ViewTopPlayers} from "../../../src/modules/public/pair-quiz-game/api/view/view-top-players";
 import {ViewPlayer} from "../../../src/modules/public/pair-quiz-game/api/view/view-player";
 
 export class GameFactory {
@@ -180,7 +180,7 @@ export class GameFactory {
     return { accessToken: firstUser.accessToken, expectGames: expectGames, playerStats };
   }
 
-  async createPlayersTop(playersCount: number, gameRound: number): Promise<ViewTopUsers[]> {
+  async createPlayersTop(playersCount: number, gameRound: number): Promise<ViewTopPlayers[]> {
     const players = await this.usersFactory.createAndLoginUsers(playersCount)
 
     let gamesStats = []
@@ -188,7 +188,7 @@ export class GameFactory {
       const startFrom = (playersCount - 1) * (i + 1)
       const playerStats = await this.createFinishedGames(gameRound, startFrom, players[i])
 
-      const userStats: ViewTopUsers = {
+      const userStats: ViewTopPlayers = {
         sumScore: playerStats.playerStats.sumScore,
         avgScores: playerStats.playerStats.avgScores,
         gamesCount: playerStats.playerStats.gamesCount,

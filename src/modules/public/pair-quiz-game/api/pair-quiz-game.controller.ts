@@ -25,6 +25,8 @@ import { ViewPage } from '../../../../common/pagination/view-page';
 import { QueryDto } from '../../../../common/pagination/query-parameters/query.dto';
 import { GameQueryDto } from './dto/query/game-query.dto';
 import {ViewUserStatistic} from "./view/view-user-statistic";
+import {TopPlayersQueryDto} from "./dto/query/top-players-query.dto";
+import {ViewTopPlayers} from "./view/view-top-players";
 
 @UseGuards(AuthBearerGuard)
 @Controller('pair-game-quiz')
@@ -114,5 +116,12 @@ export class PairQuizGameController {
       @UserId() userId: string,
   ): Promise<ViewUserStatistic> {
     return await this.gameQueryRepository.getUserStatistic(userId);
+  }
+
+  @Get('users/top')
+  async getTopPlayers(
+      @Query() query: TopPlayersQueryDto
+  ): Promise<ViewPage<ViewTopPlayers>> {
+    return await this.gameQueryRepository.getTopPlayers(query)
   }
 }
