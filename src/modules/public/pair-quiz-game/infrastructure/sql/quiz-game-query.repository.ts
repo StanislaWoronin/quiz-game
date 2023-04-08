@@ -11,7 +11,6 @@ import { ViewPage } from '../../../../../common/pagination/view-page';
 import { GameDb } from './pojo/game.db';
 import { GameQueryDto } from '../../api/dto/query/game-query.dto';
 import {ViewUserStatistic} from "../../api/view/view-user-statistic";
-import {UserStatisticDb} from "./pojo/user-statistic.db";
 import {ViewTopPlayers} from "../../api/view/view-top-players";
 import {TopPlayersQueryDto} from "../../api/dto/query/top-players-query.dto";
 
@@ -151,43 +150,58 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   async getUserStatistic(userId: string): Promise<ViewUserStatistic> {
     const query = `
       SELECT COUNT(g.id) AS "gamesCount",
-             SUM(fp.score) AS "sumScore",
-             SUM(CASE WHEN fp.score - sp.score > 0 THEN 1 ELSE 0 END) AS "winsCount",
-             SUM(CASE WHEN fp.score - sp.score < 0 THEN 1 ELSE 0 END) AS "lossesCount",
-             SUM(CASE WHEN fp.score - sp.score = 0 THEN 1 ELSE 0 END) AS "drawsCount"
+             CAST(COUNT(DISTINCT fp."gameId") AS INTEGER) AS "gamesCount",
+             CAST(SUM(fp.score) AS INTEGER) AS "sumScore",
+             CAST(SUM(CASE WHEN fp.score > sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "winsCount",
+             CAST(SUM(CASE WHEN fp.score < sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "lossesCount",
+             CAST(SUM(CASE WHEN fp.score = sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "drawsCount",
+             CASE 
+                WHEN AVG(fp.score) % 1 = 0 
+                THEN CAST(AVG(fp.score) AS INTEGER)
+                ELSE CAST(ROUND(AVG(fp.score), 2) AS NUMERIC(10,2))
+             END AS "avgScores"
         FROM sql_game g
         JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
         JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1;
     `;
-    const result: UserStatisticDb = await this.dataSource.query(query, [userId])
+    const result: ViewUserStatistic[] = await this.dataSource.query(query, [userId])
 
-    return new ViewUserStatistic(result[0])
+    return result[0]
   }
 
   async getTopPlayers(queryDto: TopPlayersQueryDto): Promise<ViewPage<ViewTopPlayers>> {
+    const sortBy = this.getSortBy(queryDto.sort)
+
     const query = `
-      SELECT COUNT(g.id) AS "gamesCount",
-             SUM(fp.score) AS "sumScore",
-             SUM(CASE WHEN fp.score - sp.score > 0 THEN 1 ELSE 0 END) AS "winsCount",
-             SUM(CASE WHEN fp.score - sp.score < 0 THEN 1 ELSE 0 END) AS "lossesCount",
-             SUM(CASE WHEN fp.score - sp.score = 0 THEN 1 ELSE 0 END) AS "drawsCount"
-        FROM sql_game g
-        JOIN sql_game_progress fp ON g.id = fp."gameId"
-        JOIN sql_game_progress sp ON g.id = sp."gameId";
+      SELECT JSON_BUILD_OBJECT('id', fp."userId", 'login', u.login) AS player,
+             CAST(COUNT(DISTINCT fp."gameId") AS INTEGER) AS "gamesCount",
+             CAST(SUM(fp.score) AS INTEGER) AS "sumScore",
+             CAST(SUM(CASE WHEN fp.score > sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "winsCount",
+             CAST(SUM(CASE WHEN fp.score < sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "lossesCount",
+             CAST(SUM(CASE WHEN fp.score = sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "drawsCount",
+             CASE 
+                WHEN AVG(fp.score) % 1 = 0 
+                THEN CAST(AVG(fp.score) AS INTEGER)
+                ELSE CAST(ROUND(AVG(fp.score), 2) AS NUMERIC(10,2))
+             END AS "avgScores"
+        FROM sql_game_progress fp
+        JOIN sql_game_progress sp ON sp."gameId" = fp."gameId" AND sp."userId" != fp."userId"
+        JOIN sql_users u ON u.id = fp."userId"
+       GROUP BY fp."userId", u.login
+       ${sortBy}
+      OFFSET $1 LIMIT $2;
     `;
-    const result: UserStatisticDb[] = await this.dataSource.query(query)
-    const items = result.map(r => new ViewUserStatistic(r))
+    console.log(query)
+    const result: ViewTopPlayers[] = await this.dataSource.query(query, [queryDto.skip, queryDto.pageSize])
 
     const totalCountQuery = `
       SELECT COUNT(*)
-        FROM sql_game g
-        JOIN sql_game_progress fp ON g.id = fp."gameId"
-        JOIN sql_game_progress sp ON g.id = sp."gameId";
+        FROM sql_game gp;   
     `;
     const totalCount = await this.dataSource.query(totalCountQuery)
 
     return new ViewPage<ViewTopPlayers>({
-      items, query: queryDto, totalCount
+      items: result, query: queryDto, totalCount
     })
   }
 
@@ -268,5 +282,19 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
        WHERE g.id = $1 ${filter}
        ORDER BY gp."gameHost" DESC, gq.id ASC;
     `;
+  }
+
+  private getSortBy(sortBy: string[]) {
+    if (!sortBy) {
+      return ''
+    }
+    let result = 'ORDER BY '
+    for (let value in sortBy) {
+      const [field, direction] = sortBy[value].split(' ')
+
+      result += `"${field}" ${direction},`;
+    }
+
+    return result.slice(0, -1);
   }
 }

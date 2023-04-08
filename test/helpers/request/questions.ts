@@ -8,7 +8,6 @@ import { getUrlWithId } from '../routing/get-url/url-with-id';
 import { UpdatePublishStatusDto } from '../../../src/modules/sa/questions/api/dto/update-publish-status.dto';
 import { getUrlForUpdatePublishStatus } from '../routing/get-url/questions-url';
 import { ErrorsMessages } from '../../../src/common/dto/errors-messages';
-import { SortByUserField } from '../../../src/modules/sa/users/api/dto/query/users-sort-field';
 import { SortDirection } from '../../../src/common/pagination/query-parameters/sort-direction';
 import { PublishedStatus } from '../../../src/modules/sa/questions/api/dto/query/published-status';
 import { TestsPaginationType } from '../type/pagination/pagination.type';

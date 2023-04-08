@@ -21,6 +21,8 @@ import {GameStatsType} from "../type/game-stats.type";
 import {CreateFinishedGameType} from "../type/create-finished-game.type";
 import {ViewTopPlayers} from "../../../src/modules/public/pair-quiz-game/api/view/view-top-players";
 import {ViewPlayer} from "../../../src/modules/public/pair-quiz-game/api/view/view-player";
+import {TestsPaginationType} from "../type/pagination/pagination.type";
+import {TopPlayersSortField} from "../../../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field";
 
 export class GameFactory {
   constructor(private game: Game, private usersFactory: UsersFactory) {}
@@ -185,7 +187,7 @@ export class GameFactory {
 
     let gamesStats = []
     for (let i = 0; i < gameRound; i++) {
-      const startFrom = (playersCount - 1) * (i + 1)
+      const startFrom = playersCount * (i + 1)
       const playerStats = await this.createFinishedGames(gameRound, startFrom, players[i])
 
       const userStats: ViewTopPlayers = {
@@ -197,11 +199,29 @@ export class GameFactory {
         drawsCount: playerStats.playerStats.drawsCount,
         player: new ViewPlayer(players[i].user.id, players[i].user.login)
       }
-      console.log(userStats)
+
       gamesStats.push(userStats)
     }
 
     return gamesStats
+  }
+
+  sortStats(
+    gamesStat: ViewTopPlayers[],
+    sort: TopPlayersSortField[]
+  ): ViewTopPlayers[] {
+    return gamesStat.sort((a, b) => {
+      let result = 0;
+      for (let i = 0; i < sort.length; i++) {
+        const [field, direction] = sort[i].split(' ');
+        const aValue = a[field];
+        const bValue = b[field];
+        result = direction.toLowerCase() === 'asc' ? aValue - bValue : bValue - aValue;
+        if (result !== 0) break;
+      }
+
+      return result;
+    });
   }
 
   private eagleAndTails(randomRange: number = 2): number {

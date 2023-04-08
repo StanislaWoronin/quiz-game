@@ -1,30 +1,26 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { QuestionsFactory } from './helpers/factories/questions-factory';
-import { Questions } from './helpers/request/questions';
-import { Testing } from './helpers/request/testing';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../src/app.module';
-import { createApp } from '../src/config/create-app';
-import { Game } from './helpers/request/game';
-import { Users } from './helpers/request/users';
-import { UsersFactory } from './helpers/factories/users-factory';
-import { Auth } from './helpers/request/auth';
-import {
-  expectAnswer,
-  expectPlayerProgress,
-  expectQuestions,
-  expectViewGame,
-} from './helpers/expect-data/expect-game';
-import { GameStatus } from '../src/modules/public/pair-quiz-game/shared/game-status';
-import { preparedAnswer } from './helpers/prepeared-data/prepared-answer';
-import { AnswerStatus } from '../src/modules/public/pair-quiz-game/shared/answer-status';
-import { preparedGameData } from './helpers/prepeared-data/prepared-game-data';
-import { GameFactory } from './helpers/factories/game-factory';
-import { randomUUID } from 'crypto';
-import { faker } from '@faker-js/faker';
-import { expectPagination } from './helpers/expect-data/expect-pagination';
-import { SortByGameField } from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
-import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
+import {HttpStatus, INestApplication} from '@nestjs/common';
+import {QuestionsFactory} from './helpers/factories/questions-factory';
+import {Questions} from './helpers/request/questions';
+import {Testing} from './helpers/request/testing';
+import {Test, TestingModule} from '@nestjs/testing';
+import {AppModule} from '../src/app.module';
+import {createApp} from '../src/config/create-app';
+import {Game} from './helpers/request/game';
+import {Users} from './helpers/request/users';
+import {UsersFactory} from './helpers/factories/users-factory';
+import {Auth} from './helpers/request/auth';
+import {expectAnswer, expectPlayerProgress, expectQuestions, expectViewGame,} from './helpers/expect-data/expect-game';
+import {GameStatus} from '../src/modules/public/pair-quiz-game/shared/game-status';
+import {preparedAnswer} from './helpers/prepeared-data/prepared-answer';
+import {AnswerStatus} from '../src/modules/public/pair-quiz-game/shared/answer-status';
+import {preparedGameData} from './helpers/prepeared-data/prepared-game-data';
+import {GameFactory} from './helpers/factories/game-factory';
+import {randomUUID} from 'crypto';
+import {faker} from '@faker-js/faker';
+import {expectPagination} from './helpers/expect-data/expect-pagination';
+import {SortByGameField} from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
+import {SortDirection} from '../src/common/pagination/query-parameters/sort-direction';
+import {TopPlayersSortField} from "../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -1974,12 +1970,31 @@ describe('/sa/quiz/questions (e2e)', () => {
           );
 
           const gamesStat = await gameFactory.createPlayersTop(5, 5)
-          //sortingStats
 
+          expect.setState({gamesStat})
       })
 
       it('Return statistic without pagination', async () => {
-          const response = await game.getTopPlayers({})
+          const { gamesStat } = expect.getState()
+
+          const expectStats = gameFactory.sortStats(
+              gamesStat,
+              [
+                  TopPlayersSortField.AvgScoresDESC,
+                  TopPlayersSortField.SumScoreDESC
+              ]
+          ) // нужно будет отсортировать по кол-ву игр
+
+          const response = await game.getTopPlayers({pageSize: 5})  // Only the first five players play several games, the rest is just for fun.
+          console.log(response.body)
+           console.log('expect --->',expectStats)
+          expect(response.status).toBe(HttpStatus.OK)
+          expect(response.body).toStrictEqual(
+              expectPagination(
+                  expectStats,
+                  {pageSize: 5, totalCount: 25}
+              )
+          )
       })
   })
 });

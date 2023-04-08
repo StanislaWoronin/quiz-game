@@ -29,8 +29,8 @@ import {TopPlayersQueryDto} from "./dto/query/top-players-query.dto";
 import {ViewTopPlayers} from "./view/view-top-players";
 
 @UseGuards(AuthBearerGuard)
-@Controller('pair-game-quiz')
-export class PairQuizGameController {
+@Controller('pair-game-quiz/pairs')
+export class PairQuizGamePairsController {
   constructor(
     protected gameService: PairQuizGameService,
     @Inject(IQuizGameQueryRepository)
@@ -38,7 +38,7 @@ export class PairQuizGameController {
   ) {}
 
   @HttpCode(HttpStatus.OK)
-  @Post('pairs/connection')
+  @Post('connection')
   async joinGame(@UserId() userId: string): Promise<ViewGame> {
     const currentGame = await this.gameQueryRepository.checkUserCurrentGame(
       userId,
@@ -52,7 +52,7 @@ export class PairQuizGameController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('pairs/my-current/answers')
+  @Post('my-current/answers')
   async sendAnswer(
     @Body() dto: AnswerDto,
     @UserId() userId: string,
@@ -73,7 +73,7 @@ export class PairQuizGameController {
     return result;
   }
 
-  @Get('pairs/my')
+  @Get('my')
   async getMyGames(
     @Query() dto: GameQueryDto,
     @UserId() userId: string,
@@ -81,7 +81,7 @@ export class PairQuizGameController {
     return await this.gameQueryRepository.getMyGames(userId, dto);
   }
 
-  @Get('pairs/my-current') // return game witch has status "Active"
+  @Get('my-current') // return game witch has status "Active"
   async getMyCurrentGame(@UserId() userId: string): Promise<ViewGame> {
     const currentGame = await this.gameQueryRepository.checkUserCurrentGame(
       userId,
@@ -93,7 +93,7 @@ export class PairQuizGameController {
     return await this.gameQueryRepository.getMyCurrentGame(currentGame);
   }
 
-  @Get('pairs/:id') // return the game with any status
+  @Get(':id') // return the game with any status
   async getGameById(
     @Param() gameId: ParamsId,
     @UserId() userId: string,
@@ -109,19 +109,5 @@ export class PairQuizGameController {
     }
 
     return await this.gameQueryRepository.getGameById(gameId.id);
-  }
-
-  @Get('users/my-statistic')
-  async getMyStatistic(
-      @UserId() userId: string,
-  ): Promise<ViewUserStatistic> {
-    return await this.gameQueryRepository.getUserStatistic(userId);
-  }
-
-  @Get('users/top')
-  async getTopPlayers(
-      @Query() query: TopPlayersQueryDto
-  ): Promise<ViewPage<ViewTopPlayers>> {
-    return await this.gameQueryRepository.getTopPlayers(query)
   }
 }

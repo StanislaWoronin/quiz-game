@@ -5,7 +5,6 @@ import { endpoints } from '../routing/routing';
 import { ViewAnswer } from '../../../src/modules/public/pair-quiz-game/api/view/view-answer';
 import { getUrlWithId } from '../routing/get-url/url-with-id';
 import { ViewPage } from '../../../src/common/pagination/view-page';
-import { GameQueryDto } from '../../../src/modules/public/pair-quiz-game/api/dto/query/game-query.dto';
 import { TestsPaginationType } from '../type/pagination/pagination.type';
 import { SortByGameField } from '../../../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
 import { SortDirection } from '../../../src/common/pagination/query-parameters/sort-direction';
@@ -93,19 +92,20 @@ export class Game {
 
   async getTopPlayers(
       {
-        sort,
+        sort = [TopPlayersSortField.AvgScoresDESC, TopPlayersSortField.SumScoreDESC],
         pageNumber = 1,
         pageSize = 10,
       }: TestsPaginationType<TopPlayersSortField>
   ): Promise<TestingRequestDto<ViewTopPlayers>> {
+
     const query = {
       sort,
       pageNumber,
       pageSize
     }
 
-    const url = getUrlWithQuery(endpoints.pairGameQuiz.users.top, {})
-
+    const url = getUrlWithQuery<string>(endpoints.pairGameQuiz.users.top, query)
+    console.log(url)
     const response = await request(this.server)
         .get(url)
 

@@ -1,9 +1,13 @@
 import {QueryDto} from "../../../../../../common/pagination/query-parameters/query.dto";
-import {IsEnum, IsOptional} from "class-validator";
+import {IsArray, IsEnum, IsOptional, IsString} from "class-validator";
 import {TopPlayersSortField} from "./top-players-sort-field";
 
 export class TopPlayersQueryDto extends QueryDto {
-  @IsEnum(TopPlayersSortField)
+  // @IsEnum(TopPlayersSortField)
+  // @IsOptional()
+  // sort: TopPlayersSortField | TopPlayersSortField[] = [TopPlayersSortField.AvgScoresDESC, TopPlayersSortField.SumScoreDESC]
+
+  @IsArray()
   @IsOptional()
-  sort: TopPlayersSortField | TopPlayersSortField[]
+  sort: string[]
 }

@@ -5,11 +5,22 @@ export const getUrlWithQuery = <T>(
   query: TestsPaginationType<T>,
 ): string => {
   let url = `${endpoint}?`;
-  for (const key in query) {
-    if (query[key]) {
+
+  for (let key in query) {
+    if (Array.isArray(query[key])) {
+      for (let val of query[key]) {
+        url += `${key}=${val}&`;
+      }
+    } else {
       url += `${key}=${query[key]}&`;
     }
   }
+
+  // for (const key in query) {
+  //   if (query[key]) {
+  //     url += `${key}=${query[key]}&`;
+  //   }
+  // }
 
   return url.slice(0, -1);
 };
