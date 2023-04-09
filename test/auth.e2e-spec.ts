@@ -72,6 +72,7 @@ describe('/auth', () => {
 
     it('Should registrate user', async () => {
       const response = await auth.registrationUser(preparedUser.valid);
+
       expect(response.status).toBe(HttpStatus.NO_CONTENT);
 
       const user = await users.getUsers(preparedSuperUser.valid, {});

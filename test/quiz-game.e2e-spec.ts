@@ -973,7 +973,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         4: AnswerStatus.Incorrect,
         5: AnswerStatus.Incorrect,
       });
-      console.log('last answered ID:', secondUser.user.id);
+
       await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
         2: AnswerStatus.Incorrect,
         3: AnswerStatus.Correct,
@@ -1099,7 +1099,7 @@ describe('/sa/quiz/questions (e2e)', () => {
           5: AnswerStatus.Correct,
         },
       );
-      console.log('Second game last answered ID:', firstUser.user.id);
+
       await gameFactory.sendManyAnswer(
         firstUser.accessToken,
         createdGame.body.questions,
@@ -1164,7 +1164,7 @@ describe('/sa/quiz/questions (e2e)', () => {
           5: AnswerStatus.Incorrect,
         },
       );
-      console.log('fourth game last answered ID:', firstUser.user.id);
+
       await gameFactory.sendManyAnswer(
         firstUser.accessToken,
         createdGame.body.questions,
@@ -1231,7 +1231,7 @@ describe('/sa/quiz/questions (e2e)', () => {
           5: AnswerStatus.Correct,
         },
       );
-      console.log('fourth game last answered ID:', firstUser.user.id);
+
       await gameFactory.sendManyAnswer(
         firstUser.accessToken,
         createdGame.body.questions,
@@ -1859,8 +1859,7 @@ describe('/sa/quiz/questions (e2e)', () => {
           const { firstPlayer, endedFistGame } = expect.getState();
           const finishedGames = await gameFactory.createFinishedGames(
             12,
-            4,
-            firstPlayer,
+              {first: firstPlayer, startFrom: 4},
           );
 
           const expectGames = finishedGames.expectGames.reverse();
@@ -1950,7 +1949,7 @@ describe('/sa/quiz/questions (e2e)', () => {
               preparedGameData,
           );
 
-          const expectStats = await gameFactory.createFinishedGames(11)
+          const expectStats = await gameFactory.createFinishedGames(11, {})
 
           const response = await game.getStatistic(expectStats.accessToken)
           expect(response.status).toBe(HttpStatus.OK)
@@ -1970,7 +1969,6 @@ describe('/sa/quiz/questions (e2e)', () => {
           );
 
           const gamesStat = await gameFactory.createPlayersTop(5, 5)
-
           expect.setState({gamesStat})
       })
 
@@ -1983,18 +1981,114 @@ describe('/sa/quiz/questions (e2e)', () => {
                   TopPlayersSortField.AvgScoresDESC,
                   TopPlayersSortField.SumScoreDESC
               ]
-          ) // нужно будет отсортировать по кол-ву игр
+          )
 
-          const response = await game.getTopPlayers({pageSize: 5})  // Only the first five players play several games, the rest is just for fun.
-          console.log(response.body)
-           console.log('expect --->',expectStats)
+          const response = await game.getTopPlayers({})
           expect(response.status).toBe(HttpStatus.OK)
-          expect(response.body).toStrictEqual(
+          expect(response.body).toEqual(
               expectPagination(
                   expectStats,
-                  {pageSize: 5, totalCount: 25}
+                  {totalCount: 5}
               )
           )
+      })
+
+      it('Return statistic with pagination', async () => {
+          const { gamesStat } = expect.getState()
+
+          const expectStats = gameFactory.sortStats(
+              gamesStat,
+              [
+                  TopPlayersSortField.LossesCountASC,
+                  TopPlayersSortField.GamesCountDESC
+              ]
+          )
+
+          const response = await game.getTopPlayers({
+              sort: [
+                  TopPlayersSortField.LossesCountASC,
+                  TopPlayersSortField.GamesCountDESC
+              ],
+              pageNumber: 2,
+              pageSize: 3
+          })
+
+          expect(response.status).toBe(HttpStatus.OK)
+          expect(response.body).toEqual(
+              expectPagination(
+                  [
+                      expectStats[3],
+                      expectStats[4],
+                  ],
+                  {page: 2, pageSize: 3,totalCount: 5}
+              )
+          )
+      })
+
+      it('Return statistic with one sort parametr', async () => {
+          const { gamesStat } = expect.getState()
+
+          const expectStats = gameFactory.sortStats(
+              gamesStat,
+              [
+                  TopPlayersSortField.AvgScoresDESC
+              ]
+          )
+
+          const response = await game.getTopPlayers({
+              sort: [
+                  TopPlayersSortField.AvgScoresDESC
+              ]
+          })
+
+          expect(response.status).toBe(HttpStatus.OK)
+          expect(response.body).toEqual(
+              expectPagination(
+                  expectStats,
+                  {totalCount: 5}
+              )
+          )
+      })
+
+      it('Return statistic with pagination', async () => {
+          const { gamesStat } = expect.getState()
+
+          const expectStats = gameFactory.sortStats(
+              gamesStat,
+              [
+                  TopPlayersSortField.LossesCountASC,
+                  TopPlayersSortField.GamesCountDESC
+              ]
+          )
+
+          const response = await game.getTopPlayers({
+              sort: [
+                  TopPlayersSortField.LossesCountASC,
+                  TopPlayersSortField.GamesCountDESC
+              ],
+              pageNumber: 2,
+              pageSize: 3
+          })
+
+          expect(response.status).toBe(HttpStatus.OK)
+          expect(response.body).toEqual(
+              expectPagination(
+                  [
+                      expectStats[3],
+                      expectStats[4],
+                  ],
+                  {page: 2, pageSize: 3,totalCount: 5}
+              )
+          )
+      })
+
+      it('Test validation query parametrs', async () => {
+          const response = await game.getTopPlayers({
+              sort: [
+                  'avgScoresAsc', 'gamesCountAsc'
+              ]
+          })
+          expect(response.status).toBe(HttpStatus.BAD_REQUEST)
       })
   })
 });

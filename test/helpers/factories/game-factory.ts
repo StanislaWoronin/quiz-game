@@ -93,13 +93,9 @@ export class GameFactory {
       secondUser = second
     }
 
-    let firstPlayer = firstUser
-    let secondPlayer = secondUser
-    if (!first && !second) {
-      const draw = this.eagleAndTails();
-      firstPlayer = draw ? firstUser : secondUser;
-      secondPlayer = draw ? secondUser : firstUser;
-    }
+    const draw = this.eagleAndTails();
+    const firstPlayer = draw ? firstUser : secondUser;
+    const secondPlayer = draw ? secondUser : firstUser;
 
     const game = await this.createGame(firstPlayer, secondPlayer);
 
@@ -141,8 +137,11 @@ export class GameFactory {
 
   async createFinishedGames(
     gamesCount: number,
-    startFrom = 1,
-    first?: UserWithTokensType,
+    {
+      first,
+      second,
+      startFrom = 1
+    }: CreateFinishedGameType,
   ): Promise<FinishedGamesType> {
     const expectGames = [];
     const playerStats: ViewUserStatistic = {
@@ -155,13 +154,19 @@ export class GameFactory {
     }
 
     let firstUser = first;
-    if (!firstUser) {
+    if (!first) {
       const [first] = await this.usersFactory.createAndLoginUsers(1);
       firstUser = first;
     }
 
+    let secondUser = second;
+    if (!second) {
+      const [first] = await this.usersFactory.createAndLoginUsers(1, startFrom);
+      secondUser = first;
+    }
+
     for (let i = 0; i < gamesCount; i++) {
-      const viewGame = await this.createFinishedGame({first: firstUser, startFrom: startFrom +i});
+      const viewGame = await this.createFinishedGame({first: firstUser, second: secondUser});
       expectGames.push(viewGame.expectGame);
 
       playerStats.sumScore += viewGame.fistUserStat.score
@@ -187,19 +192,28 @@ export class GameFactory {
 
     let gamesStats = []
     for (let i = 0; i < gameRound; i++) {
-      const startFrom = playersCount * (i + 1)
-      const playerStats = await this.createFinishedGames(gameRound, startFrom, players[i])
-
-      const userStats: ViewTopPlayers = {
-        sumScore: playerStats.playerStats.sumScore,
-        avgScores: playerStats.playerStats.avgScores,
-        gamesCount: playerStats.playerStats.gamesCount,
-        winsCount: playerStats.playerStats.winsCount,
-        lossesCount: playerStats.playerStats.lossesCount,
-        drawsCount: playerStats.playerStats.drawsCount,
-        player: new ViewPlayer(players[i].user.id, players[i].user.login)
+      let secondPlayerNumber = this.eagleAndTails(playersCount)
+      while (secondPlayerNumber === i) {
+        secondPlayerNumber = this.eagleAndTails(playersCount)
       }
 
+      await this.createFinishedGames(gameRound, {
+        first: players[i],
+        second: players[secondPlayerNumber]
+      })
+    }
+
+    for (let player of players) {
+      const stat = await this.game.getStatistic(player.accessToken)
+      let userStats = {
+        player: new ViewPlayer(player.user.id, player.user.login),
+        gamesCount: stat.body.gamesCount,
+        avgScores: stat.body.avgScores,
+        sumScore: stat.body.sumScore,
+        lossesCount: stat.body.lossesCount,
+        winsCount: stat.body.winsCount,
+        drawsCount: stat.body.drawsCount
+      }
       gamesStats.push(userStats)
     }
 

@@ -26,7 +26,6 @@ export class PairQuizGameUsersController {
   async getTopPlayers(
       @Query() query: TopPlayersQueryDto
   ): Promise<ViewPage<ViewTopPlayers>> {
-    console.log(query)
     return await this.gameQueryRepository.getTopPlayers(query)
   }
 }

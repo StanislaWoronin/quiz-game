@@ -95,8 +95,8 @@ export class Game {
         sort = [TopPlayersSortField.AvgScoresDESC, TopPlayersSortField.SumScoreDESC],
         pageNumber = 1,
         pageSize = 10,
-      }: TestsPaginationType<TopPlayersSortField>
-  ): Promise<TestingRequestDto<ViewTopPlayers>> {
+      }: TestsPaginationType<TopPlayersSortField>,
+  ): Promise<TestingRequestDto<ViewPage<ViewTopPlayers>>> {
 
     const query = {
       sort,
@@ -105,7 +105,7 @@ export class Game {
     }
 
     const url = getUrlWithQuery<string>(endpoints.pairGameQuiz.users.top, query)
-    console.log(url)
+
     const response = await request(this.server)
         .get(url)
 

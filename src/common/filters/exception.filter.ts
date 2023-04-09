@@ -28,7 +28,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
     } else if (status === 500) {
       const responseBody: any = exception.getResponse();
-      console.log(responseBody.message);
+      // console.log(responseBody.message);
       // console.log(responseBody.errors)
       return response.sendStatus(400);
     } else {

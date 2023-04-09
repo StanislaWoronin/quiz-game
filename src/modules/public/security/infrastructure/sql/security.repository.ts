@@ -43,7 +43,6 @@ export class SecurityRepository implements ISecurityRepository {
     userId: string,
     deviceId: string,
   ): Promise<boolean> {
-    console.log(userId, deviceId);
     const builder = this.dataSource
       .createQueryBuilder()
       .delete()

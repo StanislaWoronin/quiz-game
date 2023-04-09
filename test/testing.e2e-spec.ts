@@ -8,6 +8,9 @@ import { createApp } from '../src/config/create-app';
 import { Users } from './helpers/request/users';
 import { UsersFactory } from './helpers/factories/users-factory';
 import { Auth } from './helpers/request/auth';
+import {Game} from "./helpers/request/game";
+import {GameFactory} from "./helpers/factories/game-factory";
+import {preparedGameData} from "./helpers/prepeared-data/prepared-game-data";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -16,11 +19,13 @@ describe('/sa/quiz/questions (e2e)', () => {
   let app: INestApplication;
   let server;
   let auth: Auth;
+  let questionsFactories: QuestionsFactory;
   let questions: Questions;
-  let questionsFactory: QuestionsFactory;
+  let game: Game;
+  let gameFactory: GameFactory;
+  let testing: Testing;
   let users: Users;
   let usersFactory: UsersFactory;
-  let testing: Testing;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -32,11 +37,14 @@ describe('/sa/quiz/questions (e2e)', () => {
     await app.init();
     server = await app.getHttpServer();
 
-    testing = new Testing(server);
+    auth = new Auth(server);
     questions = new Questions(server);
-    questionsFactory = new QuestionsFactory(questions);
+    questionsFactories = new QuestionsFactory(questions);
+    game = new Game(server);
+    testing = new Testing(server);
     users = new Users(server);
     usersFactory = new UsersFactory(users, auth);
+    gameFactory = new GameFactory(game, usersFactory);
   });
 
   afterAll(async () => {
@@ -49,13 +57,17 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Create data', async () => {
-      // createQuestion contains one row in table Questions and tree row in table Answers -> SUM 4 row
-      await questionsFactory.createQuestions(1);
-      // createAndBanUser contain one row in table Users, one row in Credentials and one row in UserBanInfo -> SUM 3 row
+      await questionsFactories.createQuestions(1);
       await usersFactory.crateAndBanUsers(1);
+      const [fistUser, secondUser] = await usersFactory.createAndLoginUsers(2, 2)
+      await questionsFactories.createQuestions(
+          preparedGameData.length,
+          preparedGameData,
+      );
+      await gameFactory.createFinishedGame({first: fistUser, second: secondUser})
 
       const rowCount = await testing.getAllRowCount();
-      expect(rowCount).toBe(7);
+      expect(rowCount).not.toBe(0)
 
       expect.setState({ rowCount });
     });

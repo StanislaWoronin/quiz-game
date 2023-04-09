@@ -36,8 +36,8 @@ export class Users {
   async getUsers(
     superUser: { login: string; password: string },
     {
-      searchLoginTerm = null,
-      searchEmailTerm = null,
+      searchLoginTerm = '',
+      searchEmailTerm = '',
       sortBy = SortByUserField.CreatedAt,
       sortDirection = SortDirection.Descending,
       banStatus = BanStatus.All,

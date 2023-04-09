@@ -1,16 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { MongoQuestion, QuestionsDocument } from './schema/question.schema';
-import { Connection, Model } from 'mongoose';
-import { CreatedQuestions } from '../../api/view/created-questions';
-import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
-import { CreateQuestionDto } from '../../api/dto/create-question.dto';
-import { MongoAnswers } from './schema/answerSchema';
+import {Injectable} from '@nestjs/common';
+import {InjectModel} from '@nestjs/mongoose';
+import {MongoQuestion, QuestionsDocument} from './schema/question.schema';
+import {Model} from 'mongoose';
+import {CreatedQuestions} from '../../api/view/created-questions';
+import {UpdateQuestionDto} from '../../api/dto/update-question.dto';
+import {CreateQuestionDto} from '../../api/dto/create-question.dto';
+import {MongoAnswers} from './schema/answerSchema';
 
 @Injectable()
 export class MQuestionsRepository {
   constructor(
-    @InjectConnection() private readonly connection: Connection,
     @InjectModel(MongoQuestion.name)
     private questionsRepository: Model<QuestionsDocument>,
   ) {}

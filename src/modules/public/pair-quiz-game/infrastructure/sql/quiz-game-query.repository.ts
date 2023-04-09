@@ -164,7 +164,9 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
         JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
         JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1;
     `;
+
     const result: ViewUserStatistic[] = await this.dataSource.query(query, [userId])
+    result[0].avgScores = Number(result[0].avgScores) // TODO FIXIT
 
     return result[0]
   }
@@ -191,17 +193,26 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
        ${sortBy}
       OFFSET $1 LIMIT $2;
     `;
-    console.log(query)
     const result: ViewTopPlayers[] = await this.dataSource.query(query, [queryDto.skip, queryDto.pageSize])
+    const res = result.map(r => {return {
+      player: r.player,
+      gamesCount: r.gamesCount,
+      sumScore: r.sumScore,
+      avgScores: Number(r.avgScores),
+      winsCount: r.winsCount,
+      lossesCount: r.lossesCount,
+      drawsCount: r.drawsCount,
+    }}) // TODO FIXIT
 
     const totalCountQuery = `
-      SELECT COUNT(*)
-        FROM sql_game gp;   
+      SELECT CAST(COUNT(*) AS INTEGER)
+        FROM sql_users
+       WHERE EXISTS(SELECT FROM sql_game_progress);   
     `;
     const totalCount = await this.dataSource.query(totalCountQuery)
 
     return new ViewPage<ViewTopPlayers>({
-      items: result, query: queryDto, totalCount
+      items: res, query: queryDto, totalCount: totalCount[0].count
     })
   }
 
@@ -284,14 +295,22 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     `;
   }
 
-  private getSortBy(sortBy: string[]) {
+  private getSortBy(sortBy: string | string[]) {
     if (!sortBy) {
       return ''
     }
-    let result = 'ORDER BY '
-    for (let value in sortBy) {
-      const [field, direction] = sortBy[value].split(' ')
 
+    let parametrs = []
+    if (typeof sortBy === 'string') {
+      parametrs.push(sortBy)
+
+    } else {
+      parametrs = sortBy
+    }
+
+    let result = 'ORDER BY '
+    for (let parametr of parametrs) {
+      const [field, direction] = parametr.split(' ')
       result += `"${field}" ${direction},`;
     }
 

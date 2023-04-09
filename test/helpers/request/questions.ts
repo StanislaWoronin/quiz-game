@@ -35,7 +35,7 @@ export class Questions {
   async getQuestions(
     superUser: { login: string; password: string },
     {
-      bodySearchTerm = null,
+      bodySearchTerm = '',
       sortBy = SortByQuestionsField.CreatedAt,
       sortDirection = SortDirection.Descending,
       publishedStatus = PublishedStatus.All,

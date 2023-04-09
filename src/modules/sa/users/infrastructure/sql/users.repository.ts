@@ -120,7 +120,7 @@ export class UsersRepository implements IUsersRepository {
         this.getQuery('sql_users', 'id'),
         [userId],
       );
-      console.log(result);
+
       if (result[1] !== 1) {
         return false;
       }

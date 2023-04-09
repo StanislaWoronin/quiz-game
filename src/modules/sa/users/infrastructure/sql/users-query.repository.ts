@@ -60,17 +60,6 @@ export class UsersQueryRepository implements IUsersQueryRepository {
   }
 
   async getUserById(userId: string): Promise<SqlUsers | null> {
-    // const builder = this.dataSource
-    //     .createQueryBuilder()
-    //     .select('u')
-    //     .from(SqlUsers, 'u')
-    //     .leftJoin('u.banInfo', 'bi')
-    //     .where('u.id = :id', { id: userId })
-    //     .andWhere('bi.banStatus = :banStatus', { banStatus: false });
-    // console.log(builder.getSql());
-    // console.log(userId);
-    // const result = await builder.getOne();
-
     const query = `
       SELECT * 
         FROM sql_users u
@@ -85,14 +74,6 @@ export class UsersQueryRepository implements IUsersQueryRepository {
   } // TODO new
 
   async checkUserExists(userId: string): Promise<boolean> {
-    // const builder = this.dataSource
-    //   .getRepository('sql_users')
-    //   .createQueryBuilder('u')
-    //   .leftJoin(SqlUserBanInfo, 'bi')
-    //   .where('u.id = : id', { id: userId })
-    //   .andWhere('bi.banStatus = :banStatus', { banStatus: false })
-    // console.log(builder.getSql());
-    // return await builder.getExists();
     const query = `
       SELECT (EXISTS (SELECT * 
                         FROM sql_users u

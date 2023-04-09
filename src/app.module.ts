@@ -57,6 +57,7 @@ import {SqlEmailConfirmation} from './modules/sa/users/infrastructure/sql/entity
 import {SqlGameQuestions} from './modules/public/pair-quiz-game/infrastructure/sql/entity/sql-game-questions.entity';
 import {PairQuizGameUsersController} from "./modules/public/pair-quiz-game/api/pair-quiz-game-users.controller";
 import {PairQuizGamePairsController} from "./modules/public/pair-quiz-game/api/pair-quiz-game-pairs.controller";
+import {Connection} from "mongoose";
 
 const controllers = [
   AuthController,
@@ -107,14 +108,14 @@ const repositories = [
   {
     provide: IQuestionsRepository,
     useClass: repositorySwitcher(
-      settings.currentRepository,
+      settings.repositoryType.mongoose,
       repositoryName.QuestionsRepository,
     ),
   },
   {
     provide: IQuestionsQueryRepository,
     useClass: repositorySwitcher(
-      settings.currentRepository,
+      settings.repositoryType.mongoose,
       repositoryName.QuestionsQueryRepository,
     ),
   },
@@ -149,7 +150,7 @@ const repositories = [
   {
     provide: ITestingRepository,
     useClass: repositorySwitcher(
-      settings.currentRepository,
+      settings.repositoryType.mongoose,
       repositoryName.TestingRepository,
     ),
   },
@@ -170,14 +171,14 @@ const repositories = [
   {
     provide: IUsersRepository,
     useClass: repositorySwitcher(
-      settings.currentRepository,
+      settings.repositoryType.mongoose,
       repositoryName.UsersRepository,
     ),
   },
   {
     provide: IUsersQueryRepository,
     useClass: repositorySwitcher(
-      settings.currentRepository,
+      settings.repositoryType.mongoose,
       repositoryName.UsersQueryRepository,
     ),
   },
@@ -212,6 +213,7 @@ export const mongooseModels = [
   ],
   controllers: [...controllers],
   providers: [
+    Connection,
     ...repositories,
     ...services,
     ...validators,
