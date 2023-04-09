@@ -15,7 +15,6 @@ import { SimpleGameDb } from './pojo/simple-game.db';
 import { toViewJoinGame } from '../../../../../common/data-mapper/to-view-join-game';
 import { SendAnswerDto } from '../../applications/dto/send-answer.dto';
 import { GameProgressDb } from './pojo/game-progress.db';
-import { log } from 'util';
 
 export class QuizGameRepository implements IQuizGameRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
