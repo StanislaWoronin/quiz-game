@@ -63,9 +63,11 @@ export class PairQuizGameService {
 
     if (isLastQuestions) {
       //await this.schedulerRegistry.getTimeout('delayedJob')
-      await this.taskService.handleTimeout(gameId, correctAnswer.questionId)
+      //await this.taskService.handleTimeout(gameId, correctAnswer.questionId)
+      this.schedulerRegistry.getCronJob('')
     }
 
     return await this.gameRepository.sendAnswer(sendAnswerDto);
   }
+
 }
