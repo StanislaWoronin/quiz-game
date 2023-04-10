@@ -71,7 +71,7 @@ export class UsersQueryRepository implements IUsersQueryRepository {
     const result = await this.dataSource.query(query, [userId]);
 
     return result[0];
-  } // TODO new
+  }
 
   async checkUserExists(userId: string): Promise<boolean> {
     const query = `
@@ -85,14 +85,14 @@ export class UsersQueryRepository implements IUsersQueryRepository {
     const result = await this.dataSource.query(query, [userId]);
 
     return result[0].exists;
-  } // TODO new
+  }
 
   async isLoginOrEmailExist(loginOrEmail: string): Promise<boolean> {
     const builder = this.dataSource
       .createQueryBuilder(SqlUsers, 'u')
       .where([{ login: loginOrEmail }, { email: loginOrEmail }]);
     return await builder.getExists();
-  } // TODO new
+  }
 
   async getCredentialByLoginOrEmail(
     loginOrEmail: string,

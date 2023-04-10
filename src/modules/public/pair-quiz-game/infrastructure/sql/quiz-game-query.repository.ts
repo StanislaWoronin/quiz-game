@@ -155,17 +155,19 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
              CAST(SUM(CASE WHEN fp.score > sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "winsCount",
              CAST(SUM(CASE WHEN fp.score < sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "lossesCount",
              CAST(SUM(CASE WHEN fp.score = sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "drawsCount",
-             CASE 
+             CAST(CASE 
                 WHEN AVG(fp.score) % 1 = 0 
                 THEN CAST(AVG(fp.score) AS INTEGER)
                 ELSE CAST(ROUND(AVG(fp.score), 2) AS NUMERIC(10,2))
-             END AS "avgScores"
+             END AS NUMERIC) AS "avgScores"
         FROM sql_game g
         JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
         JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1;
     `;
-
+    console.log(userId)
     const result: ViewUserStatistic[] = await this.dataSource.query(query, [userId])
+    console.log('typeof avgScores --->', typeof result[0].avgScores)
+    console.log(result[0].avgScores)
     result[0].avgScores = Number(result[0].avgScores) // TODO FIXIT
 
     return result[0]

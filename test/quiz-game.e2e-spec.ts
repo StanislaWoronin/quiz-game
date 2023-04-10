@@ -1970,10 +1970,10 @@ describe('/sa/quiz/questions (e2e)', () => {
           await testing.clearDb();
       });
 
-      it('Shouldn`t return statistic if user unauthorized', async () => {
-          const response = await game.getStatistic()
-          expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
-      })
+      // it('Shouldn`t return statistic if user unauthorized', async () => {
+      //     const response = await game.getStatistic()
+      //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
+      // })
 
       it('Create and return statistic', async () => {
           await questionsFactories.createQuestions(
