@@ -236,8 +236,8 @@ describe('/sa/quiz/questions (e2e)', () => {
             2: AnswerStatus.Correct
         })
 
-        jest.setTimeout(10 * second);
-        for (let i = 0; i < 10; i++) {
+        jest.setTimeout(11 * second);
+        for (let i = 0; i < 11; i++) {
             setTimeout(() => console.log(i), 1)
         }
         const secondPlayerTryAnswered = await gameFactory.sendCorrectAnswer(secondPlayer.accessToken, activeGame.body.questions[1])
