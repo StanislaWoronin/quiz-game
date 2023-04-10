@@ -58,6 +58,8 @@ import {SqlGameQuestions} from './modules/public/pair-quiz-game/infrastructure/s
 import {PairQuizGameUsersController} from "./modules/public/pair-quiz-game/api/pair-quiz-game-users.controller";
 import {PairQuizGamePairsController} from "./modules/public/pair-quiz-game/api/pair-quiz-game-pairs.controller";
 import {Connection} from "mongoose";
+import {ScheduleModule} from "@nestjs/schedule";
+import {TaskService} from "./modules/public/pair-quiz-game/applications/task.service";
 
 const controllers = [
   AuthController,
@@ -77,6 +79,7 @@ const services = [
   NestJwtService,
   PairQuizGameService,
   SecurityService,
+  TaskService,
   UsersService,
 ];
 
@@ -108,17 +111,31 @@ const repositories = [
   {
     provide: IQuestionsRepository,
     useClass: repositorySwitcher(
-      settings.repositoryType.mongoose,
+      settings.currentRepository,
       repositoryName.QuestionsRepository,
     ),
   },
   {
     provide: IQuestionsQueryRepository,
     useClass: repositorySwitcher(
-      settings.repositoryType.mongoose,
+      settings.currentRepository,
       repositoryName.QuestionsQueryRepository,
     ),
   },
+  // {
+  //   provide: IQuestionsRepository,
+  //   useClass: repositorySwitcher(
+  //       settings.repositoryType.mongoose,
+  //       repositoryName.QuestionsRepository,
+  //   ),
+  // },
+  // {
+  //   provide: IQuestionsQueryRepository,
+  //   useClass: repositorySwitcher(
+  //       settings.repositoryType.mongoose,
+  //       repositoryName.QuestionsQueryRepository,
+  //   ),
+  // },
   {
     provide: IQuizGameRepository,
     useClass: repositorySwitcher(
@@ -150,10 +167,17 @@ const repositories = [
   {
     provide: ITestingRepository,
     useClass: repositorySwitcher(
-      settings.repositoryType.mongoose,
+      settings.currentRepository,
       repositoryName.TestingRepository,
     ),
   },
+  // {
+  //   provide: ITestingRepository,
+  //   useClass: repositorySwitcher(
+  //       settings.repositoryType.mongoose,
+  //       repositoryName.TestingRepository,
+  //   ),
+  // },
   {
     provide: ISecurityRepository,
     useClass: repositorySwitcher(
@@ -171,17 +195,31 @@ const repositories = [
   {
     provide: IUsersRepository,
     useClass: repositorySwitcher(
-      settings.repositoryType.mongoose,
-      repositoryName.UsersRepository,
+        settings.currentRepository,
+        repositoryName.UsersRepository,
     ),
   },
   {
     provide: IUsersQueryRepository,
     useClass: repositorySwitcher(
-      settings.repositoryType.mongoose,
-      repositoryName.UsersQueryRepository,
+        settings.currentRepository,
+        repositoryName.UsersQueryRepository,
     ),
   },
+  // {
+  //   provide: IUsersRepository,
+  //   useClass: repositorySwitcher(
+  //     settings.repositoryType.mongoose,
+  //     repositoryName.UsersRepository,
+  //   ),
+  // },
+  // {
+  //   provide: IUsersQueryRepository,
+  //   useClass: repositorySwitcher(
+  //     settings.repositoryType.mongoose,
+  //     repositoryName.UsersQueryRepository,
+  //   ),
+  // },
 ];
 
 export const entity = [
@@ -210,6 +248,7 @@ export const mongooseModels = [
   imports: [
     ConfigModule.forRoot(),
     ...configSwitcher(settings.currentRepository),
+    ScheduleModule.forRoot()
   ],
   controllers: [...controllers],
   providers: [

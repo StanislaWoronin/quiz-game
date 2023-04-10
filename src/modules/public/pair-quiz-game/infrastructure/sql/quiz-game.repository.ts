@@ -21,10 +21,10 @@ export class QuizGameRepository implements IQuizGameRepository {
 
   async createGame(userId: string): Promise<ViewGame> {
     const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
     try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
       const manager = queryRunner.manager;
 
       const newGame = new SqlGame();
@@ -57,10 +57,10 @@ export class QuizGameRepository implements IQuizGameRepository {
 
   async joinGame(userId: string, gameId: string): Promise<ViewGame> {
     const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
     try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
       const manager = queryRunner.manager;
 
       const gameProgress = new SqlGameProgress(gameId, userId);
@@ -106,10 +106,10 @@ export class QuizGameRepository implements IQuizGameRepository {
 
   async sendAnswer(dto: SendAnswerDto): Promise<ViewAnswer> {
     const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
     try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
       const manager = queryRunner.manager;
 
       const answer = new SqlUserAnswer(
@@ -138,7 +138,7 @@ export class QuizGameRepository implements IQuizGameRepository {
       if (dto.isLastQuestions) {
         // if one item returned, then the current player was the first to answer on all questions
         const lastQuestionProgress: GameProgressDb[] = await manager.query(
-          this.getQuery(),
+          this.getLastQuestionsProgressQuery(),
           [dto.gameId, dto.questionsId],
         );
 
@@ -183,6 +183,59 @@ export class QuizGameRepository implements IQuizGameRepository {
     }
   }
 
+  async forceGameOver(userId: string, gameId: string, nextQuestionNumber: number) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const manager = queryRunner.manager;
+
+      const unansweredQuestions: {questionId: string}[] = await this.dataSource.query(this.getLastQuestionsIdQuery(), [nextQuestionNumber])
+      const answers = unansweredQuestions.map(a => new SqlUserAnswer(userId, gameId, a.questionId))
+
+      await manager.save(answers)
+
+      const lastQuestionsId = unansweredQuestions.pop().questionId
+      const lastQuestionProgress: GameProgressDb[] = await manager.query(
+          this.getLastQuestionsProgressQuery(),
+          [gameId, lastQuestionsId],
+      );
+
+      const firstAnsweredPlayer = lastQuestionProgress[0];
+      const extraScore = 1;
+
+      await manager
+          .createQueryBuilder()
+          .update(SqlGame)
+          .set({
+            status: GameStatus.Finished,
+            finishGameDate: new Date().toISOString(),
+          })
+          .where('id = :gameId', { gameId: gameId })
+          .execute();
+
+      if (firstAnsweredPlayer.score !== 0) {
+        await manager
+            .createQueryBuilder()
+            .update(SqlGameProgress)
+            .set({ score: () => `score + ${extraScore}` })
+            .where('userId = :userId AND gameId = :gameId', {
+              userId: firstAnsweredPlayer.userId,
+              gameId: gameId,
+            })
+            .execute();
+      }
+
+      await queryRunner.commitTransaction();
+      return
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   private async getQuestions(): Promise<{ id: string }[]> {
     const query = `
       SELECT id FROM sql_questions
@@ -192,7 +245,7 @@ export class QuizGameRepository implements IQuizGameRepository {
     return await this.dataSource.query(query);
   }
 
-  private getQuery(): string {
+  private getLastQuestionsProgressQuery(): string {
     return `
         SELECT gp.score, gp."userId"
           FROM sql_game_progress gp
@@ -203,5 +256,14 @@ export class QuizGameRepository implements IQuizGameRepository {
          WHERE gp."gameId" = $1
          ORDER BY ua."addedAt" ASC
     `;
+  }
+
+  private getLastQuestionsIdQuery(): string {
+    return `
+        SELECT "questionId"
+          FROM sql_game_questions 
+         WHERE "gameId" = '1b0989f3-48b6-426d-b937-b5fdc8390073'
+        OFFSET $1;
+    `
   }
 }

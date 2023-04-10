@@ -9,6 +9,8 @@ import { SendAnswerDto } from './dto/send-answer.dto';
 import { CheckAnswerProgressDb } from '../infrastructure/sql/pojo/check-answer-progress.db';
 import { util } from 'prettier';
 import getAlignmentSize = util.getAlignmentSize;
+import {TaskService} from "./task.service";
+import {SchedulerRegistry} from "@nestjs/schedule";
 
 @Injectable()
 export class PairQuizGameService {
@@ -19,6 +21,8 @@ export class PairQuizGameService {
     protected queryGameRepository: IQuizGameQueryRepository,
     @Inject(IQuestionsQueryRepository)
     protected questionsQueryRepository: IQuestionsQueryRepository,
+    protected taskService: TaskService,
+    private schedulerRegistry: SchedulerRegistry
   ) {}
 
   async joinGame(userId: string): Promise<ViewGame | null> {
@@ -56,6 +60,11 @@ export class PairQuizGameService {
       isCorrectAnswer,
       isLastQuestions,
     );
+
+    if (isLastQuestions) {
+      //await this.schedulerRegistry.getTimeout('delayedJob')
+      await this.taskService.handleTimeout(gameId, correctAnswer.questionId)
+    }
 
     return await this.gameRepository.sendAnswer(sendAnswerDto);
   }

@@ -1,17 +1,8 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { SqlUsers } from '../../../../../sa/users/infrastructure/sql/entity/users.entity';
-import { SqlQuestions } from '../../../../../sa/questions/infrastructure/sql/entity/questions.entity';
-import { SqlGame } from './sql-game.entity';
-import { SendAnswerDto } from '../../../applications/dto/send-answer.dto';
-import { randomUUID } from 'crypto';
-import { AnswerStatus } from '../../../shared/answer-status';
+import {Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,} from 'typeorm';
+import {SqlUsers} from '../../../../../sa/users/infrastructure/sql/entity/users.entity';
+import {SqlQuestions} from '../../../../../sa/questions/infrastructure/sql/entity/questions.entity';
+import {SqlGame} from './sql-game.entity';
+import {AnswerStatus} from '../../../shared/answer-status';
 
 @Entity()
 export class SqlUserAnswer {
@@ -48,8 +39,8 @@ export class SqlUserAnswer {
     userId: string,
     gameId: string,
     questionsId: string,
-    answer: string,
-    answerStatus: AnswerStatus,
+    answer: string = null,
+    answerStatus: AnswerStatus = AnswerStatus.Incorrect,
   ) {
     this.userId = userId;
     this.gameId = gameId;

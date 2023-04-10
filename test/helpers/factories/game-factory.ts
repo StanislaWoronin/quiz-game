@@ -238,15 +238,7 @@ export class GameFactory {
     });
   }
 
-  private eagleAndTails(randomRange: number = 2): number {
-    return Math.round(Math.random() * (randomRange - 1));
-  }
-
-  private getAnswerStatus(): AnswerStatus {
-    return this.eagleAndTails() ? AnswerStatus.Correct : AnswerStatus.Incorrect;
-  }
-
-  private getAnswersStatus(): TestAnswersType {
+  getAnswersStatus(): TestAnswersType {
     return {
       1: this.getAnswerStatus(),
       2: this.getAnswerStatus(),
@@ -254,6 +246,14 @@ export class GameFactory {
       4: this.getAnswerStatus(),
       5: this.getAnswerStatus(),
     };
+  }
+
+  private eagleAndTails(randomRange: number = 2): number {
+    return Math.round(Math.random() * (randomRange - 1));
+  }
+
+  private getAnswerStatus(): AnswerStatus {
+    return this.eagleAndTails() ? AnswerStatus.Correct : AnswerStatus.Incorrect;
   }
 
   private getScore(answers: TestAnswersType, first?: boolean): number {
