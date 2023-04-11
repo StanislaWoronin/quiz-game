@@ -21,6 +21,7 @@ import {expectPagination} from './helpers/expect-data/expect-pagination';
 import {SortByGameField} from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
 import {SortDirection} from '../src/common/pagination/query-parameters/sort-direction';
 import {TopPlayersSortField} from "../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field";
+import {logger, magicLogger} from "./helpers/helpers";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -227,19 +228,15 @@ describe('/sa/quiz/questions (e2e)', () => {
       it('Game over if the second player hasn`t answered all the questions', async () => {
         const [fistPlayer, secondPlayer] = await usersFactory.createAndLoginUsers(2, 3)
         const activeGame = await gameFactory.createGame(fistPlayer, secondPlayer)
-          console.log('gameId:', activeGame.body.id)
-          console.log('firstUserId:', fistPlayer.user.id)
         const answers = gameFactory.getAnswersStatus()
         await gameFactory.sendManyAnswer(fistPlayer.accessToken, activeGame.body.questions, answers)
         await gameFactory.sendManyAnswer(secondPlayer.accessToken, activeGame.body.questions, {
             1: AnswerStatus.Correct,
             2: AnswerStatus.Correct
         })
+          logger(activeGame.body.id)
+        await new Promise((r) => setTimeout(r, 10000));
 
-        jest.setTimeout(11 * second);
-        for (let i = 0; i < 11; i++) {
-            setTimeout(() => console.log(i), 1)
-        }
         const secondPlayerTryAnswered = await gameFactory.sendCorrectAnswer(secondPlayer.accessToken, activeGame.body.questions[1])
         expect(secondPlayerTryAnswered.status).toBe(HttpStatus.FORBIDDEN)
 

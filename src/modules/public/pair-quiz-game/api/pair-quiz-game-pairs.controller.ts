@@ -27,6 +27,8 @@ import { GameQueryDto } from './dto/query/game-query.dto';
 import {ViewUserStatistic} from "./view/view-user-statistic";
 import {TopPlayersQueryDto} from "./dto/query/top-players-query.dto";
 import {ViewTopPlayers} from "./view/view-top-players";
+import {Cron, CronExpression} from "@nestjs/schedule";
+import {CronTime} from "cron";
 
 @UseGuards(AuthBearerGuard)
 @Controller('pair-game-quiz/pairs')
