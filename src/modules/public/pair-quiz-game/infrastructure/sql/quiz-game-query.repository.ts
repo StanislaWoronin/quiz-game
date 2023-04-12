@@ -13,6 +13,8 @@ import { GameQueryDto } from '../../api/dto/query/game-query.dto';
 import {ViewUserStatistic} from "../../api/view/view-user-statistic";
 import {ViewTopPlayers} from "../../api/view/view-top-players";
 import {TopPlayersQueryDto} from "../../api/dto/query/top-players-query.dto";
+import {GameWhichNeedComplete} from "./pojo/game-which-need-complete";
+import {settings} from "../../../../../settings";
 
 export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -270,6 +272,24 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     const result = await this.dataSource.query(query, [userId, gameId]);
 
     return result[0].count;
+  }
+
+  async findGamesWhichNeedComplete(currentTime: string): Promise<GameWhichNeedComplete[]> {
+    const query = `
+      SELECT g.id AS game_id, ua."userId" AS user_id, MAX(ua."addedAt") AS last_answer_time
+        FROM sql_game g
+        JOIN sql_user_answer ua ON ua."gameId" = g.id 
+       WHERE ua."userId" IN (
+             SELECT "userId"
+               FROM sql_user_answer
+              WHERE "gameId" = g.id
+              GROUP BY "userId"
+             HAVING COUNT(*) = $1
+       )
+       AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') - to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') >= interval '10 seconds')
+       GROUP BY g.id, ua."userId", ua."addedAt"; 
+    `
+    return await this.dataSource.query(query, [Number(settings.gameRules.questionsCount), currentTime])
   }
 
   private getQuery(myGame?: boolean): string {

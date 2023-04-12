@@ -2,8 +2,7 @@ import {Inject, Injectable} from "@nestjs/common";
 import {Cron, CronExpression, Timeout} from "@nestjs/schedule";
 import {IQuizGameQueryRepository} from "../infrastructure/i-quiz-game-query.repository";
 import {IQuizGameRepository} from "../infrastructure/i-quiz-game.repository";
-import {CronJob} from "cron";
-import {UserId} from "../../../../common/decorators/user.decorator";
+import {logger} from "../../../../../test/helpers/helpers";
 
 @Injectable()
 export class TaskService {
@@ -15,34 +14,22 @@ export class TaskService {
     ) {
     }
 
-    // @Cron(CronExpression.EVERY_SECOND, {name: 'delayed_finished_game'})
-    // forceGameOver(
-    // ) {
-    //     console.log('Cron running')
-    // }
+    @Cron(CronExpression.EVERY_SECOND, {name: 'delayed_finished_game'})
+    async forceGameOver() {
+        console.log(new Date().toISOString())
+        const games = await this.quizGameQueryRepository.findGamesWhichNeedComplete(new Date().toISOString());
+        console.log(games)
+        const fitGames = games.filter(obj => {
+            const addedAtDate = Number(new Date(obj.fistPlayerAnsweredTime));
+            return Date.now() - addedAtDate >= 10 * 1000
+        });
 
-    // @Timeout('delayedJob',10 * 1000)
-    // async handleTimeout(gameId: string, userId: string) {
-    //     console.log('start task')
-    //     const lastUserAnswerProgress = await this.quizGameQueryRepository.currentGameAnswerProgress(userId, gameId)
-    //
-    //     if (lastUserAnswerProgress !== 5) {
-    //       await this.quizGameRepository.forceGameOver(userId, gameId, lastUserAnswerProgress)
-    //     }
-    //     console.log('task end')
-    //     return
-    // }
-    //
-    // addCronJob(gameId: string, userId: string) {
-    //     const job = new CronJob(`10 * * * * *`, async () => {
-    //         console.log('start task')
-    //         const lastUserAnswerProgress = await this.quizGameQueryRepository.currentGameAnswerProgress(userId, gameId)
-    //
-    //         if (lastUserAnswerProgress !== 5) {
-    //             await this.quizGameRepository.forceGameOver(userId, gameId, lastUserAnswerProgress).then()
-    //         }
-    //         console.log('task end')
-    //         return
-    //     })
-    // }
+        if (fitGames.length) {
+            logger(1)
+            for (let game of fitGames) {
+                logger(2)
+                await this.quizGameRepository.forceGameOver(game.fistAnsweredPlayerId, game.gameId, game.secondPlayerAnswerProgress)
+            }
+        }
+    }
 }

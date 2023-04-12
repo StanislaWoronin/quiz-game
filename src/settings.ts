@@ -25,4 +25,7 @@ export const settings = {
     sql: 'sql',
   },
   currentRepository: 'sql',
+  gameRules: {
+    questionsCount: '5'
+  }
 };

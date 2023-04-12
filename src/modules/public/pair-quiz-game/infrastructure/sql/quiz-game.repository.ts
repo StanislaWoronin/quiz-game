@@ -232,8 +232,10 @@ export class QuizGameRepository implements IQuizGameRepository {
       }
 
       await queryRunner.commitTransaction();
+      console.log('commit')
       return
     } catch (e) {
+      console.log(e)
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();

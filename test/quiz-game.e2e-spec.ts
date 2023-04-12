@@ -11,7 +11,6 @@ import {UsersFactory} from './helpers/factories/users-factory';
 import {Auth} from './helpers/request/auth';
 import {expectAnswer, expectPlayerProgress, expectQuestions, expectViewGame,} from './helpers/expect-data/expect-game';
 import {GameStatus} from '../src/modules/public/pair-quiz-game/shared/game-status';
-import {preparedAnswer} from './helpers/prepeared-data/prepared-answer';
 import {AnswerStatus} from '../src/modules/public/pair-quiz-game/shared/answer-status';
 import {preparedGameData} from './helpers/prepeared-data/prepared-game-data';
 import {GameFactory} from './helpers/factories/game-factory';
@@ -21,11 +20,11 @@ import {expectPagination} from './helpers/expect-data/expect-pagination';
 import {SortByGameField} from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
 import {SortDirection} from '../src/common/pagination/query-parameters/sort-direction';
 import {TopPlayersSortField} from "../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field";
-import {logger, magicLogger} from "./helpers/helpers";
+import {logger, sleep} from "./helpers/helpers";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
-  jest.setTimeout(15 * second);
+  jest.setTimeout(30 * second);
 
   let app: INestApplication;
   let server;
@@ -228,15 +227,24 @@ describe('/sa/quiz/questions (e2e)', () => {
       it('Game over if the second player hasn`t answered all the questions', async () => {
         const [fistPlayer, secondPlayer] = await usersFactory.createAndLoginUsers(2, 3)
         const activeGame = await gameFactory.createGame(fistPlayer, secondPlayer)
-        const answers = gameFactory.getAnswersStatus()
-        await gameFactory.sendManyAnswer(fistPlayer.accessToken, activeGame.body.questions, answers)
-        await gameFactory.sendManyAnswer(secondPlayer.accessToken, activeGame.body.questions, {
+        const questions = activeGame.body.questions;
+        await gameFactory.sendCorrectAnswer(fistPlayer.accessToken, questions[0])
+
+        await sleep(10)
+          console.log('fist timer end')
+        await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
+            2: AnswerStatus.Incorrect,
+            3: AnswerStatus.Incorrect,
+            4: AnswerStatus.Correct,
+            5: AnswerStatus.Correct
+        })
+        await gameFactory.sendManyAnswer(secondPlayer.accessToken, questions, {
             1: AnswerStatus.Correct,
             2: AnswerStatus.Correct
         })
-          logger(activeGame.body.id)
-        await new Promise((r) => setTimeout(r, 10000));
 
+        await sleep(11);
+        console.log('second timer end')
         const secondPlayerTryAnswered = await gameFactory.sendCorrectAnswer(secondPlayer.accessToken, activeGame.body.questions[1])
         expect(secondPlayerTryAnswered.status).toBe(HttpStatus.FORBIDDEN)
 

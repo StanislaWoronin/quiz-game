@@ -11,6 +11,7 @@ import { util } from 'prettier';
 import getAlignmentSize = util.getAlignmentSize;
 import {TaskService} from "./task.service";
 import {SchedulerRegistry} from "@nestjs/schedule";
+import {settings} from "../../../../settings";
 
 @Injectable()
 export class PairQuizGameService {
@@ -21,8 +22,6 @@ export class PairQuizGameService {
     protected queryGameRepository: IQuizGameQueryRepository,
     @Inject(IQuestionsQueryRepository)
     protected questionsQueryRepository: IQuestionsQueryRepository,
-    protected taskService: TaskService,
-    private schedulerRegistry: SchedulerRegistry
   ) {}
 
   async joinGame(userId: string): Promise<ViewGame | null> {
@@ -38,9 +37,10 @@ export class PairQuizGameService {
     dto: AnswerDto,
     gameId: string,
   ): Promise<ViewAnswer | null> {
+    const questionsCount = Number(settings.gameRules.questionsCount)
     const currentUserAnswerProgress =
       await this.queryGameRepository.currentGameAnswerProgress(userId, gameId);
-    if (currentUserAnswerProgress == 5) {
+    if (currentUserAnswerProgress == questionsCount) {
       return null;
     }
 
@@ -49,7 +49,7 @@ export class PairQuizGameService {
       currentUserAnswerProgress,
     );
 
-    const isLastQuestions = currentUserAnswerProgress == 4;
+    const isLastQuestions = currentUserAnswerProgress == questionsCount - 1;
     const isCorrectAnswer = correctAnswer.correctAnswers.includes(dto.answer);
 
     const sendAnswerDto = new SendAnswerDto(
@@ -60,12 +60,6 @@ export class PairQuizGameService {
       isCorrectAnswer,
       isLastQuestions,
     );
-
-    // if (isLastQuestions) {
-    //   //await this.schedulerRegistry.getTimeout('delayedJob')
-    //   //await this.taskService.handleTimeout(gameId, correctAnswer.questionId)
-    //   this.schedulerRegistry.getCronJob('')
-    // }
 
     return await this.gameRepository.sendAnswer(sendAnswerDto);
   }
