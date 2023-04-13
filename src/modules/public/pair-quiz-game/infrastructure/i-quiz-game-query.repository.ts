@@ -10,8 +10,8 @@ import {TopPlayersQueryDto} from "../api/dto/query/top-players-query.dto";
 import {GameWhichNeedComplete} from "./sql/pojo/game-which-need-complete";
 
 export interface IQuizGameQueryRepository {
-  getMyCurrentGame(gameId: string): Promise<ViewGame>;
-  getGameById(gameId: string): Promise<ViewGame>;
+  getMyCurrentGame(userId: string): Promise<ViewGame | null>;
+  getGameById(userId: string, gameId: string): Promise<ViewGame>;
   getMyGames(userId, queryDto: GameQueryDto): Promise<ViewPage<ViewGame>>;
   getPlayerByGameId(gameId: string): Promise<PlayerIdDb[]>;
   getCorrectAnswers(

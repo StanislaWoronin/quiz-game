@@ -12,23 +12,17 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ViewGame } from './view/view-game';
-import { AnswerDto } from './dto/answer.dto';
-import { ViewAnswer } from './view/view-answer';
-import { PairQuizGameService } from '../applications/pair-quiz-game.service';
-import { UserId } from '../../../../common/decorators/user.decorator';
-import { AuthBearerGuard } from '../../auth/guards/auth-bearer.guard';
-import { IQuizGameQueryRepository } from '../infrastructure/i-quiz-game-query.repository';
-import { ParamsId } from '../../../../common/dto/params-id';
-import { GameStatus } from '../shared/game-status';
-import { ViewPage } from '../../../../common/pagination/view-page';
-import { QueryDto } from '../../../../common/pagination/query-parameters/query.dto';
-import { GameQueryDto } from './dto/query/game-query.dto';
-import {ViewUserStatistic} from "./view/view-user-statistic";
-import {TopPlayersQueryDto} from "./dto/query/top-players-query.dto";
-import {ViewTopPlayers} from "./view/view-top-players";
-import {Cron, CronExpression} from "@nestjs/schedule";
-import {CronTime} from "cron";
+import {ViewGame} from './view/view-game';
+import {AnswerDto} from './dto/answer.dto';
+import {ViewAnswer} from './view/view-answer';
+import {PairQuizGameService} from '../applications/pair-quiz-game.service';
+import {UserId} from '../../../../common/decorators/user.decorator';
+import {AuthBearerGuard} from '../../auth/guards/auth-bearer.guard';
+import {IQuizGameQueryRepository} from '../infrastructure/i-quiz-game-query.repository';
+import {ParamsId} from '../../../../common/dto/params-id';
+import {GameStatus} from '../shared/game-status';
+import {ViewPage} from '../../../../common/pagination/view-page';
+import {GameQueryDto} from './dto/query/game-query.dto';
 
 @UseGuards(AuthBearerGuard)
 @Controller('pair-game-quiz/pairs')
@@ -85,14 +79,14 @@ export class PairQuizGamePairsController {
 
   @Get('my-current') // return game witch has status "Active"
   async getMyCurrentGame(@UserId() userId: string): Promise<ViewGame> {
-    const currentGame = await this.gameQueryRepository.checkUserCurrentGame(
+    const hasCurrentGame = await this.gameQueryRepository.checkUserCurrentGame(
       userId,
     );
-    if (!currentGame) {
+    if (!hasCurrentGame) {
       throw new NotFoundException();
     }
 
-    return await this.gameQueryRepository.getMyCurrentGame(currentGame);
+    return await this.gameQueryRepository.getMyCurrentGame(userId);
   }
 
   @Get(':id') // return the game with any status
@@ -110,6 +104,6 @@ export class PairQuizGamePairsController {
       throw new ForbiddenException();
     }
 
-    return await this.gameQueryRepository.getGameById(gameId.id);
+    return await this.gameQueryRepository.getGameById(userId, gameId.id);
   }
 }

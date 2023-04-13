@@ -16,18 +16,11 @@ export class TaskService {
 
     @Cron(CronExpression.EVERY_SECOND, {name: 'delayed_finished_game'})
     async forceGameOver() {
-        console.log(new Date().toISOString())
         const games = await this.quizGameQueryRepository.findGamesWhichNeedComplete(new Date().toISOString());
         console.log(games)
-        const fitGames = games.filter(obj => {
-            const addedAtDate = Number(new Date(obj.fistPlayerAnsweredTime));
-            return Date.now() - addedAtDate >= 10 * 1000
-        });
 
-        if (fitGames.length) {
-            logger(1)
-            for (let game of fitGames) {
-                logger(2)
+        if (games.length) {
+            for (let game of games) {
                 await this.quizGameRepository.forceGameOver(game.fistAnsweredPlayerId, game.gameId, game.secondPlayerAnswerProgress)
             }
         }

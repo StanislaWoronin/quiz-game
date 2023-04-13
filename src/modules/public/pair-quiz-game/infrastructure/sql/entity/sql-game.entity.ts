@@ -1,18 +1,9 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { SqlQuestions } from '../../../../../sa/questions/infrastructure/sql/entity/questions.entity';
-import { GameStatus } from '../../../shared/game-status';
-import { SqlGameProgress } from './sql-game-progress.entity';
-import { randomUUID } from 'crypto';
-import { Questions } from '../../../shared/questions';
-import { SqlUserAnswer } from './sql-user-answer.entity';
-import { SqlGameQuestions } from './sql-game-questions.entity';
+import {Column, Entity, OneToMany, PrimaryGeneratedColumn,} from 'typeorm';
+import {GameStatus} from '../../../shared/game-status';
+import {SqlGameProgress} from './sql-game-progress.entity';
+import {randomUUID} from 'crypto';
+import {SqlUserAnswer} from './sql-user-answer.entity';
+import {SqlGameQuestions} from './sql-game-questions.entity';
 
 @Entity()
 export class SqlGame {

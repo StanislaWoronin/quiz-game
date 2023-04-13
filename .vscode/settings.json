@@ -1,5 +1,6 @@
 {
     "workbench.list.smoothScrolling": false,
     "editor.smoothScrolling": true,
-    "editor.minimap.enabled": false
+    "editor.minimap.enabled": false,
+    "jest.rootPath": "C:\\Incubator\\HomeTasks\\quiz-game\\test\\jest-e2e.json"
 }

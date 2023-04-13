@@ -195,19 +195,16 @@ export class QuizGameRepository implements IQuizGameRepository {
     try {
       const manager = queryRunner.manager;
 
-      const unansweredQuestions: {questionId: string}[] = await this.dataSource.query(this.getLastQuestionsIdQuery(), [nextQuestionNumber])
-      const answers = unansweredQuestions.map(a => new SqlUserAnswer(userId, gameId, a.questionId))
-
-      await manager.save(answers)
-
-      const lastQuestionsId = unansweredQuestions.pop().questionId
+      const unansweredQuestions: {questionId: string, userId: string}[] = await this.dataSource.query(this.getLastQuestionsIdQuery(), [userId, gameId, nextQuestionNumber])
+      const lastQuestionsId = unansweredQuestions[unansweredQuestions.length - 1].questionId
       const lastQuestionProgress: GameProgressDb[] = await manager.query(
           this.getLastQuestionsProgressQuery(),
           [gameId, lastQuestionsId],
       );
-
       const firstAnsweredPlayer = lastQuestionProgress[0];
-      const extraScore = 1;
+
+      const answers = unansweredQuestions.map(q => new SqlUserAnswer(q.userId, gameId, q.questionId, null))
+      await manager.save(answers)
 
       await manager
           .createQueryBuilder()
@@ -219,6 +216,7 @@ export class QuizGameRepository implements IQuizGameRepository {
           .where('id = :gameId', { gameId: gameId })
           .execute();
 
+      const extraScore = 1;
       if (firstAnsweredPlayer.score !== 0) {
         await manager
             .createQueryBuilder()
@@ -266,10 +264,12 @@ export class QuizGameRepository implements IQuizGameRepository {
 
   private getLastQuestionsIdQuery(): string {
     return `
-        SELECT "questionId"
-          FROM sql_game_questions 
-         WHERE "gameId" = '1b0989f3-48b6-426d-b937-b5fdc8390073'
-        OFFSET $1;
+        SELECT gq."questionId", gp."userId"
+          FROM sql_game_questions gq
+          JOIN sql_game_progress gp ON gp."gameId" = gq."gameId" 
+           AND gp."userId" != $1
+         WHERE gq."gameId" = $2 
+        OFFSET $3;
     `
   }
 }

@@ -26,13 +26,17 @@ export class SqlUserAnswer {
   @Column()
   gameId: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   userAnswer: string;
 
   @Column()
   answerStatus: AnswerStatus;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   addedAt: string;
 
   constructor(
@@ -47,6 +51,6 @@ export class SqlUserAnswer {
     this.questionId = questionsId;
     this.userAnswer = answer;
     this.answerStatus = answerStatus;
-    this.addedAt = new Date().toISOString();
+    this.addedAt = !answer ? null : new Date().toISOString();
   }
 }
