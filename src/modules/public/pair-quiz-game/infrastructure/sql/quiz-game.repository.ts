@@ -15,8 +15,8 @@ import { SimpleGameDb } from './pojo/simple-game.db';
 import { toViewJoinGame } from '../../../../../common/data-mapper/to-view-join-game';
 import { SendAnswerDto } from '../../applications/dto/send-answer.dto';
 import { GameProgressDb } from './pojo/game-progress.db';
-import {settings} from "../../../../../settings";
-import {GameWhichNeedComplete} from "./pojo/game-which-need-complete";
+import { settings } from '../../../../../settings';
+import { GameWhichNeedComplete } from './pojo/game-which-need-complete';
 
 export class QuizGameRepository implements IQuizGameRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -30,7 +30,7 @@ export class QuizGameRepository implements IQuizGameRepository {
       const manager = queryRunner.manager;
 
       const newGame = new SqlGame();
-      const game = await manager.getRepository(SqlGame).save(newGame);
+      const game = await manager.save(newGame);
 
       await manager
         .getRepository(SqlGameProgress)
@@ -172,7 +172,6 @@ export class QuizGameRepository implements IQuizGameRepository {
         }
 
         if (lastQuestionProgress.length === 1) {
-
         }
       }
 
@@ -197,52 +196,63 @@ export class QuizGameRepository implements IQuizGameRepository {
     try {
       const manager = queryRunner.manager;
 
-      const currentTime = new Date().toISOString()
-      const games: GameWhichNeedComplete[] = await this.dataSource.query(this.findGameWhichNeedComplete(), [Number(settings.gameRules.questionsCount), currentTime])
-      console.log(games)
-      if (!games.length) return
-      console.log('i am find')
-      for (let game of games) {
-        console.log(game)
-        const nextQuestionNumber = game.secondPlayerAnswerProgress
-        const unansweredQuestions: {questionId: string, userId: string}[] = await this.dataSource.query(this.getLastQuestionsIdQuery(), [game.fistAnsweredPlayerId, game.gameId, nextQuestionNumber])
-        const lastQuestionsId = unansweredQuestions[unansweredQuestions.length - 1].questionId
+      const currentTime = new Date().toISOString();
+      const games: GameWhichNeedComplete[] = await this.dataSource.query(
+        this.findGameWhichNeedComplete(),
+        [Number(settings.gameRules.questionsCount), currentTime],
+      );
+      console.log('games:', games);
+      if (!games.length) return;
+      console.log('i am find game');
+      for (const game of games) {
+        console.log(game);
+        const nextQuestionNumber = game.secondPlayerAnswerProgress;
+        const unansweredQuestions: { questionId: string; userId: string }[] =
+          await this.dataSource.query(this.getLastQuestionsIdQuery(), [
+            game.fistAnsweredPlayerId,
+            game.gameId,
+            nextQuestionNumber,
+          ]);
+        const lastQuestionsId =
+          unansweredQuestions[unansweredQuestions.length - 1].questionId;
         const lastQuestionProgress: GameProgressDb[] = await manager.query(
-            this.getLastQuestionsProgressQuery(),
-            [game.gameId, lastQuestionsId],
+          this.getLastQuestionsProgressQuery(),
+          [game.gameId, lastQuestionsId],
         );
         const firstAnsweredPlayer = lastQuestionProgress[0];
 
-        const answers = unansweredQuestions.map(q => new SqlUserAnswer(q.userId, game.gameId, q.questionId, null))
-        console.log(answers)
-        await manager.getRepository(SqlUserAnswer).save(answers)
+        const answers = unansweredQuestions.map(
+          (q) => new SqlUserAnswer(q.userId, game.gameId, q.questionId, null),
+        );
+        console.log(answers);
+        await manager.save(answers);
 
         await manager
-            .createQueryBuilder()
-            .update(SqlGame)
-            .set({
-              status: GameStatus.Finished,
-              finishGameDate: new Date().toISOString(),
-            })
-            .where('id = :gameId', { gameId: game.gameId })
-            .execute();
+          .createQueryBuilder()
+          .update(SqlGame)
+          .set({
+            status: GameStatus.Finished,
+            finishGameDate: new Date().toISOString(),
+          })
+          .where('id = :gameId', { gameId: game.gameId })
+          .execute();
 
         const extraScore = 1;
         if (firstAnsweredPlayer.score !== 0) {
           await manager
-              .createQueryBuilder()
-              .update(SqlGameProgress)
-              .set({ score: () => `score + ${extraScore}` })
-              .where('userId = :userId AND gameId = :gameId', {
-                userId: firstAnsweredPlayer.userId,
-                gameId: game.gameId,
-              })
-              .execute();
+            .createQueryBuilder()
+            .update(SqlGameProgress)
+            .set({ score: () => `score + ${extraScore}` })
+            .where('userId = :userId AND gameId = :gameId', {
+              userId: firstAnsweredPlayer.userId,
+              gameId: game.gameId,
+            })
+            .execute();
         }
       }
 
       await queryRunner.commitTransaction();
-      return
+      return;
     } catch (e) {
       await queryRunner.rollbackTransaction();
     } finally {
@@ -280,7 +290,7 @@ export class QuizGameRepository implements IQuizGameRepository {
            AND gp."userId" != $1
          WHERE gq."gameId" = $2 
         OFFSET $3;
-    `
+    `;
   }
 
   private findGameWhichNeedComplete = (): string => {
@@ -305,6 +315,6 @@ export class QuizGameRepository implements IQuizGameRepository {
        GROUP BY g.id, ua."userId"
       HAVING COUNT(*) = $1
          AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = 5 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '10 seconds');
-    `
-  }
+    `;
+  };
 }

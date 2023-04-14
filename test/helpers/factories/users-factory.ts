@@ -7,7 +7,7 @@ import { ViewUser } from '../../../src/modules/sa/users/api/view/view-user';
 import { UpdateUserBanStatusDto } from '../../../src/modules/sa/users/api/dto/update-user-ban-status.dto';
 import { BanStatus } from '../../../src/modules/sa/users/api/dto/query/ban-status';
 import { Auth } from '../request/auth';
-import {UserWithTokensType} from "../type/auth/user-with-token-type";
+import { UserWithTokensType } from '../type/auth/user-with-token-type';
 
 export class UsersFactory {
   constructor(private users: Users, private auth: Auth) {}

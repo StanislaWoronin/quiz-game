@@ -9,9 +9,9 @@ import { SendAnswerDto } from './dto/send-answer.dto';
 import { CheckAnswerProgressDb } from '../infrastructure/sql/pojo/check-answer-progress.db';
 import { util } from 'prettier';
 import getAlignmentSize = util.getAlignmentSize;
-import {TaskService} from "./task.service";
-import {SchedulerRegistry} from "@nestjs/schedule";
-import {settings} from "../../../../settings";
+import { TaskService } from './task.service';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { settings } from '../../../../settings';
 
 @Injectable()
 export class PairQuizGameService {
@@ -37,7 +37,7 @@ export class PairQuizGameService {
     dto: AnswerDto,
     gameId: string,
   ): Promise<ViewAnswer | null> {
-    const questionsCount = Number(settings.gameRules.questionsCount)
+    const questionsCount = Number(settings.gameRules.questionsCount);
     const currentUserAnswerProgress =
       await this.queryGameRepository.currentGameAnswerProgress(userId, gameId);
     if (currentUserAnswerProgress == questionsCount) {
@@ -63,9 +63,7 @@ export class PairQuizGameService {
 
     return await this.gameRepository.sendAnswer(sendAnswerDto);
   }
-
 }
-
 
 // CREATE OR REPLACE FUNCTION finish_game(game_id INT)
 // RETURNS VOID AS

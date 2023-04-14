@@ -1,6 +1,6 @@
-import {GameStatus} from '../../../shared/game-status';
-import {AnswerStatus} from '../../../shared/answer-status';
-import {ViewGame} from '../../../api/view/view-game';
+import { GameStatus } from '../../../shared/game-status';
+import { AnswerStatus } from '../../../shared/answer-status';
+import { ViewGame } from '../../../api/view/view-game';
 
 export class GameDb {
   id: string;
@@ -35,58 +35,61 @@ export class GameDb {
   }[];
 
   toViewModel(games: GameDb[]): ViewGame[] {
-    return games.map(({
-                        id,
-                        firstUserHost,
-                        firstUser,
-                        secondUser,
-                        firstUserAnswers,
-                        secondUserAnswers,
-                        firstUserScore,
-                        secondUserScore,
-                        questions,
-                        status,
-                        pairCreatedDate,
-                        startGameDate,
-                        finishGameDate
-                      }) => {
-      const firstPlayerProgress = firstUserHost
+    return games.map(
+      ({
+        id,
+        firstUserHost,
+        firstUser,
+        secondUser,
+        firstUserAnswers,
+        secondUserAnswers,
+        firstUserScore,
+        secondUserScore,
+        questions,
+        status,
+        pairCreatedDate,
+        startGameDate,
+        finishGameDate,
+      }) => {
+        const firstPlayerProgress = firstUserHost
           ? {
-            player: firstUser,
-            answers: firstUserAnswers ?? [],
-            score: firstUserScore
-          }
-          : {
-            player: secondUser,
-            answers: secondUserAnswers ?? [],
-            score: secondUserScore
-          };
-
-      let secondPlayerProgress = null;
-      if (secondUser.id) {
-        secondPlayerProgress = firstUserHost
-            ? {
-              player: secondUser,
-              answers: secondUserAnswers ?? [],
-              score: secondUserScore
-            }
-            : {
               player: firstUser,
               answers: firstUserAnswers ?? [],
-              score: firstUserScore
+              score: firstUserScore,
+            }
+          : {
+              player: secondUser,
+              answers: secondUserAnswers ?? [],
+              score: secondUserScore,
             };
-      }
 
-      return {
-        id: id,
-        firstPlayerProgress,
-        secondPlayerProgress,
-        questions: status === GameStatus.PendingSecondPlayer ? null : questions,
-        status: status,
-        pairCreatedDate: pairCreatedDate,
-        startGameDate: startGameDate,
-        finishGameDate: finishGameDate,
-      };
-    })
+        let secondPlayerProgress = null;
+        if (secondUser.id) {
+          secondPlayerProgress = firstUserHost
+            ? {
+                player: secondUser,
+                answers: secondUserAnswers ?? [],
+                score: secondUserScore,
+              }
+            : {
+                player: firstUser,
+                answers: firstUserAnswers ?? [],
+                score: firstUserScore,
+              };
+        }
+
+        return {
+          id: id,
+          firstPlayerProgress,
+          secondPlayerProgress,
+          questions:
+            status === GameStatus.PendingSecondPlayer ? null : questions,
+          status: status,
+          pairCreatedDate: pairCreatedDate,
+          startGameDate: startGameDate,
+          finishGameDate: finishGameDate,
+        };
+      },
+    );
   }
 }

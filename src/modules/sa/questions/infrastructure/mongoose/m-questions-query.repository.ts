@@ -1,11 +1,11 @@
-import {ViewQuestion} from './../../api/view/view-question';
-import {ViewPage} from './../../../../../common/pagination/view-page';
-import {PublishedStatus} from './../../api/dto/query/published-status';
-import {Injectable} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {MongoQuestion, QuestionsDocument} from './schema/question.schema';
-import {Model} from 'mongoose';
-import {QuestionsQueryDto} from '../../api/dto/query/questions-query.dto';
+import { ViewQuestion } from './../../api/view/view-question';
+import { ViewPage } from './../../../../../common/pagination/view-page';
+import { PublishedStatus } from './../../api/dto/query/published-status';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { MongoQuestion, QuestionsDocument } from './schema/question.schema';
+import { Model } from 'mongoose';
+import { QuestionsQueryDto } from '../../api/dto/query/questions-query.dto';
 
 @Injectable()
 export class MQuestionsQueryRepository {

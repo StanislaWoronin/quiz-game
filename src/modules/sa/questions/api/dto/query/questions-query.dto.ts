@@ -2,7 +2,7 @@ import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PublishedStatus } from './published-status';
 import { QueryDto } from '../../../../../../common/pagination/query-parameters/query.dto';
 import { SortByQuestionsField } from './quesions-sort-field';
-import {SortDirection} from "../../../../../../common/pagination/query-parameters/sort-direction";
+import { SortDirection } from '../../../../../../common/pagination/query-parameters/sort-direction';
 
 export class QuestionsQueryDto extends QueryDto {
   @IsString()

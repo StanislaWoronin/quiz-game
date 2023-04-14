@@ -7,7 +7,7 @@ export type TestsPaginationType<T> = Partial<{
   searchEmailTerm: string;
   bodySearchTerm: string;
   sortBy: T;
-  sort: T[] | string[],
+  sort: T[] | string[];
   sortDirection: SortDirection;
   publishedStatus: PublishedStatus;
   banStatus: BanStatus;

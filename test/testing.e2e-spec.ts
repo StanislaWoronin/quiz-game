@@ -8,9 +8,9 @@ import { createApp } from '../src/config/create-app';
 import { Users } from './helpers/request/users';
 import { UsersFactory } from './helpers/factories/users-factory';
 import { Auth } from './helpers/request/auth';
-import {Game} from "./helpers/request/game";
-import {GameFactory} from "./helpers/factories/game-factory";
-import {preparedGameData} from "./helpers/prepeared-data/prepared-game-data";
+import { Game } from './helpers/request/game';
+import { GameFactory } from './helpers/factories/game-factory';
+import { preparedGameData } from './helpers/prepeared-data/prepared-game-data';
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -59,15 +59,21 @@ describe('/sa/quiz/questions (e2e)', () => {
     it('Create data', async () => {
       await questionsFactories.createQuestions(1);
       await usersFactory.crateAndBanUsers(1);
-      const [fistUser, secondUser] = await usersFactory.createAndLoginUsers(2, 2)
-      await questionsFactories.createQuestions(
-          preparedGameData.length,
-          preparedGameData,
+      const [fistUser, secondUser] = await usersFactory.createAndLoginUsers(
+        2,
+        2,
       );
-      await gameFactory.createFinishedGame({first: fistUser, second: secondUser})
+      await questionsFactories.createQuestions(
+        preparedGameData.length,
+        preparedGameData,
+      );
+      await gameFactory.createFinishedGame({
+        first: fistUser,
+        second: secondUser,
+      });
 
       const rowCount = await testing.getAllRowCount();
-      expect(rowCount).not.toBe(0)
+      expect(rowCount).not.toBe(0);
 
       expect.setState({ rowCount });
     });

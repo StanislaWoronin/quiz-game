@@ -1,4 +1,4 @@
-import {ApiProperty} from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ErrorsMessages {
   errorsMessages: {
@@ -18,5 +18,3 @@ export class BadRequestResponse {
   @ApiProperty()
   errorsMessages: Message;
 }
-
-

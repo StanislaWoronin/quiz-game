@@ -26,6 +26,6 @@ export const settings = {
   },
   currentRepository: 'sql',
   gameRules: {
-    questionsCount: '5'
-  }
+    questionsCount: '5',
+  },
 };

@@ -6,9 +6,9 @@ export const getUrlWithQuery = <T>(
 ): string => {
   let url = `${endpoint}?`;
 
-  for (let key in query) {
+  for (const key in query) {
     if (Array.isArray(query[key])) {
-      for (let val of query[key]) {
+      for (const val of query[key]) {
         url += `${key}=${val}&`;
       }
     } else {

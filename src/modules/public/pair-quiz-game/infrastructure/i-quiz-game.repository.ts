@@ -6,7 +6,7 @@ export interface IQuizGameRepository {
   createGame(userId): Promise<ViewGame>;
   joinGame(userId: string, gameId: string): Promise<ViewGame>;
   sendAnswer(dto: SendAnswerDto): Promise<ViewAnswer>;
-  forceGameOver()
+  forceGameOver();
 }
 
 export const IQuizGameRepository = 'IQuizGameRepository';

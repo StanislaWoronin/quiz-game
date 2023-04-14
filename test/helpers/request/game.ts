@@ -9,9 +9,9 @@ import { TestsPaginationType } from '../type/pagination/pagination.type';
 import { SortByGameField } from '../../../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
 import { SortDirection } from '../../../src/common/pagination/query-parameters/sort-direction';
 import { getUrlWithQuery } from '../routing/get-url/url-with-query';
-import {ViewUserStatistic} from "../../../src/modules/public/pair-quiz-game/api/view/view-user-statistic";
-import {ViewTopPlayers} from "../../../src/modules/public/pair-quiz-game/api/view/view-top-players";
-import {TopPlayersSortField} from "../../../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field";
+import { ViewUserStatistic } from '../../../src/modules/public/pair-quiz-game/api/view/view-user-statistic';
+import { ViewTopPlayers } from '../../../src/modules/public/pair-quiz-game/api/view/view-top-players';
+import { TopPlayersSortField } from '../../../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field';
 
 export class Game {
   constructor(private readonly server: any) {}
@@ -82,32 +82,38 @@ export class Game {
     return { body: response.body, status: response.status };
   }
 
-  async getStatistic(token?: string): Promise<TestingRequestDto<ViewUserStatistic>> {
+  async getStatistic(
+    token?: string,
+  ): Promise<TestingRequestDto<ViewUserStatistic>> {
     const response = await request(this.server)
-        .get(endpoints.pairGameQuiz.users.myStatistic)
-        .auth(token, { type: 'bearer' });
+      .get(endpoints.pairGameQuiz.users.myStatistic)
+      .auth(token, { type: 'bearer' });
 
     return { body: response.body, status: response.status };
   }
 
-  async getTopPlayers(
-      {
-        sort = [TopPlayersSortField.AvgScoresDESC, TopPlayersSortField.SumScoreDESC],
-        pageNumber = 1,
-        pageSize = 10,
-      }: TestsPaginationType<TopPlayersSortField>,
-  ): Promise<TestingRequestDto<ViewPage<ViewTopPlayers>>> {
-
+  async getTopPlayers({
+    sort = [
+      TopPlayersSortField.AvgScoresDESC,
+      TopPlayersSortField.SumScoreDESC,
+    ],
+    pageNumber = 1,
+    pageSize = 10,
+  }: TestsPaginationType<TopPlayersSortField>): Promise<
+    TestingRequestDto<ViewPage<ViewTopPlayers>>
+  > {
     const query = {
       sort,
       pageNumber,
-      pageSize
-    }
+      pageSize,
+    };
 
-    const url = getUrlWithQuery<string>(endpoints.pairGameQuiz.users.top, query)
+    const url = getUrlWithQuery<string>(
+      endpoints.pairGameQuiz.users.top,
+      query,
+    );
 
-    const response = await request(this.server)
-        .get(url)
+    const response = await request(this.server).get(url);
 
     return { body: response.body, status: response.status };
   }

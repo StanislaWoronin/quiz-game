@@ -1,8 +1,14 @@
-import {Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,} from 'typeorm';
-import {SqlUsers} from '../../../../../sa/users/infrastructure/sql/entity/users.entity';
-import {SqlQuestions} from '../../../../../sa/questions/infrastructure/sql/entity/questions.entity';
-import {SqlGame} from './sql-game.entity';
-import {AnswerStatus} from '../../../shared/answer-status';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { SqlUsers } from '../../../../../sa/users/infrastructure/sql/entity/users.entity';
+import { SqlQuestions } from '../../../../../sa/questions/infrastructure/sql/entity/questions.entity';
+import { SqlGame } from './sql-game.entity';
+import { AnswerStatus } from '../../../shared/answer-status';
 
 @Entity()
 export class SqlUserAnswer {
@@ -27,7 +33,7 @@ export class SqlUserAnswer {
   gameId: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   userAnswer: string;
 
@@ -35,7 +41,7 @@ export class SqlUserAnswer {
   answerStatus: AnswerStatus;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   addedAt: string;
 

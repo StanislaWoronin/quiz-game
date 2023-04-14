@@ -1,8 +1,5 @@
 import { ViewPage } from '../../../src/common/pagination/view-page';
-import {
-  givePagesCount,
-  giveSkipNumber,
-} from '../../../src/common/helpers';
+import { givePagesCount, giveSkipNumber } from '../../../src/common/helpers';
 
 export const expectPagination = <T>(
   values: T[],

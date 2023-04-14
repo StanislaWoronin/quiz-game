@@ -1,27 +1,31 @@
-import {HttpStatus, INestApplication} from '@nestjs/common';
-import {QuestionsFactory} from './helpers/factories/questions-factory';
-import {Questions} from './helpers/request/questions';
-import {Testing} from './helpers/request/testing';
-import {Test, TestingModule} from '@nestjs/testing';
-import {AppModule} from '../src/app.module';
-import {createApp} from '../src/config/create-app';
-import {Game} from './helpers/request/game';
-import {Users} from './helpers/request/users';
-import {UsersFactory} from './helpers/factories/users-factory';
-import {Auth} from './helpers/request/auth';
-import {expectAnswer, expectPlayerProgress, expectQuestions, expectViewGame,} from './helpers/expect-data/expect-game';
-import {GameStatus} from '../src/modules/public/pair-quiz-game/shared/game-status';
-import {AnswerStatus} from '../src/modules/public/pair-quiz-game/shared/answer-status';
-import {preparedGameData} from './helpers/prepeared-data/prepared-game-data';
-import {GameFactory} from './helpers/factories/game-factory';
-import {randomUUID} from 'crypto';
-import {faker} from '@faker-js/faker';
-import {expectPagination} from './helpers/expect-data/expect-pagination';
-import {SortByGameField} from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
-import {SortDirection} from '../src/common/pagination/query-parameters/sort-direction';
-import {TopPlayersSortField} from "../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field";
-import {sleep} from "./helpers/helpers";
-import {preparedAnswer} from "./helpers/prepeared-data/prepared-answer";
+import { HttpStatus, INestApplication } from '@nestjs/common';
+import { QuestionsFactory } from './helpers/factories/questions-factory';
+import { Questions } from './helpers/request/questions';
+import { Testing } from './helpers/request/testing';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppModule } from '../src/app.module';
+import { createApp } from '../src/config/create-app';
+import { Game } from './helpers/request/game';
+import { Users } from './helpers/request/users';
+import { UsersFactory } from './helpers/factories/users-factory';
+import { Auth } from './helpers/request/auth';
+import {
+  expectAnswer,
+  expectPlayerProgress,
+  expectQuestions,
+  expectViewGame,
+} from './helpers/expect-data/expect-game';
+import { GameStatus } from '../src/modules/public/pair-quiz-game/shared/game-status';
+import { AnswerStatus } from '../src/modules/public/pair-quiz-game/shared/answer-status';
+import { preparedGameData } from './helpers/prepeared-data/prepared-game-data';
+import { GameFactory } from './helpers/factories/game-factory';
+import { randomUUID } from 'crypto';
+import { faker } from '@faker-js/faker';
+import { expectPagination } from './helpers/expect-data/expect-pagination';
+import { SortByGameField } from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
+import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
+import { TopPlayersSortField } from '../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field';
+import { sleep } from './helpers/helpers';
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -226,45 +230,60 @@ describe('/sa/quiz/questions (e2e)', () => {
       // );
 
       it('Game over if the second player hasn`t answered all the questions', async () => {
-        const [fistPlayer, secondPlayer] = await usersFactory.createAndLoginUsers(2, 3)
-        const activeGame = await gameFactory.createGame(fistPlayer, secondPlayer)
+        const [fistPlayer, secondPlayer] =
+          await usersFactory.createAndLoginUsers(2, 3);
+        const activeGame = await gameFactory.createGame(
+          fistPlayer,
+          secondPlayer,
+        );
         const questions = activeGame.body.questions;
-        await gameFactory.sendCorrectAnswer(fistPlayer.accessToken, questions[0])
+        await gameFactory.sendCorrectAnswer(
+          fistPlayer.accessToken,
+          questions[0],
+        );
 
         await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
-            2: AnswerStatus.Incorrect,
-            3: AnswerStatus.Incorrect,
-            4: AnswerStatus.Correct,
-            5: AnswerStatus.Correct
-        })
+          2: AnswerStatus.Incorrect,
+          3: AnswerStatus.Incorrect,
+          4: AnswerStatus.Correct,
+          5: AnswerStatus.Correct,
+        });
         await gameFactory.sendManyAnswer(secondPlayer.accessToken, questions, {
-            1: AnswerStatus.Correct,
-            2: AnswerStatus.Correct
-        })
+          1: AnswerStatus.Correct,
+          2: AnswerStatus.Correct,
+        });
 
         await sleep(11);
 
-        const secondPlayerTryAnswered = await gameFactory.sendCorrectAnswer(secondPlayer.accessToken, activeGame.body.questions[1])
-        expect(secondPlayerTryAnswered.status).toBe(HttpStatus.FORBIDDEN)
+        const secondPlayerTryAnswered = await gameFactory.sendCorrectAnswer(
+          secondPlayer.accessToken,
+          activeGame.body.questions[1],
+        );
+        expect(secondPlayerTryAnswered.status).toBe(HttpStatus.FORBIDDEN);
 
-        const finishedGame = await game.getGameById(activeGame.body.id, fistPlayer.accessToken)
-        expect(finishedGame.status).toBe(HttpStatus.OK)
-        expect(finishedGame.body.status).toBe(GameStatus.Finished)
-        expect(finishedGame.body.secondPlayerProgress)
-        expect(finishedGame.body.secondPlayerProgress.score).toBe(2)
+        const finishedGame = await game.getGameById(
+          activeGame.body.id,
+          fistPlayer.accessToken,
+        );
+        expect(finishedGame.status).toBe(HttpStatus.OK);
+        expect(finishedGame.body.status).toBe(GameStatus.Finished);
+        expect(finishedGame.body.secondPlayerProgress);
+        expect(finishedGame.body.secondPlayerProgress.score).toBe(2);
 
-
-          console.log(finishedGame.body.secondPlayerProgress.answers.map(v => v.questionId))
-
+        console.log(
+          finishedGame.body.secondPlayerProgress.answers.map(
+            (v) => v.questionId,
+          ),
+        );
 
         expect(finishedGame.body.secondPlayerProgress.answers).toEqual([
-            expectAnswer(AnswerStatus.Correct),
-            expectAnswer(AnswerStatus.Correct),
-            expectAnswer(AnswerStatus.Incorrect, false),
-            expectAnswer(AnswerStatus.Incorrect, false),
-            expectAnswer(AnswerStatus.Incorrect, false),
-        ])
-      })
+          expectAnswer(AnswerStatus.Correct),
+          expectAnswer(AnswerStatus.Correct),
+          expectAnswer(AnswerStatus.Incorrect, false),
+          expectAnswer(AnswerStatus.Incorrect, false),
+          expectAnswer(AnswerStatus.Incorrect, false),
+        ]);
+      });
     },
   );
 
@@ -347,77 +366,77 @@ describe('/sa/quiz/questions (e2e)', () => {
       );
     });
 
-    // it('Should return "PendingSecondPlayer" game', async () => {
-    //   const { thirdUser } = expect.getState();
-    //
-    //   const createdGame = await game.joinGame(thirdUser.accessToken);
-    //   const response = await game.getGameById(
-    //     createdGame.body.id,
-    //     thirdUser.accessToken,
-    //   );
-    //   expect(response.status).toBe(HttpStatus.OK);
-    //   expect(response.body).toStrictEqual(
-    //     expectViewGame(
-    //       {
-    //         first: expectPlayerProgress(thirdUser.user, {}),
-    //       },
-    //       GameStatus.PendingSecondPlayer,
-    //     ),
-    //   );
-    // });
-    //
-    // it('Should return "Finished" game', async () => {
-    //   const { firstUser, secondUser, gameId, questions } = expect.getState();
-    //
-    //   await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
-    //     1: AnswerStatus.Incorrect,
-    //     2: AnswerStatus.Correct,
-    //     3: AnswerStatus.Incorrect,
-    //     4: AnswerStatus.Incorrect,
-    //     5: AnswerStatus.Incorrect,
-    //   });
-    //
-    //   await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
-    //     1: AnswerStatus.Incorrect,
-    //     2: AnswerStatus.Incorrect,
-    //     3: AnswerStatus.Incorrect,
-    //     4: AnswerStatus.Correct,
-    //     5: AnswerStatus.Incorrect,
-    //   });
-    //
-    //   const response = await game.getGameById(gameId, firstUser.accessToken);
-    //   expect(response.status).toBe(HttpStatus.OK);
-    //   expect(response.body).toStrictEqual(
-    //     expectViewGame(
-    //       {
-    //         first: expectPlayerProgress(
-    //           firstUser.user,
-    //           {
-    //             1: AnswerStatus.Incorrect,
-    //             2: AnswerStatus.Correct,
-    //             3: AnswerStatus.Incorrect,
-    //             4: AnswerStatus.Incorrect,
-    //             5: AnswerStatus.Incorrect,
-    //           },
-    //           2,
-    //         ),
-    //         second: expectPlayerProgress(
-    //           secondUser.user,
-    //           {
-    //             1: AnswerStatus.Incorrect,
-    //             2: AnswerStatus.Incorrect,
-    //             3: AnswerStatus.Incorrect,
-    //             4: AnswerStatus.Correct,
-    //             5: AnswerStatus.Incorrect,
-    //           },
-    //           1,
-    //         ),
-    //       },
-    //       GameStatus.Finished,
-    //       expectQuestions(questions),
-    //     ),
-    //   );
-    // });
+    it('Should return "PendingSecondPlayer" game', async () => {
+      const { thirdUser } = expect.getState();
+
+      const createdGame = await game.joinGame(thirdUser.accessToken);
+      const response = await game.getGameById(
+        createdGame.body.id,
+        thirdUser.accessToken,
+      );
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toStrictEqual(
+        expectViewGame(
+          {
+            first: expectPlayerProgress(thirdUser.user, {}),
+          },
+          GameStatus.PendingSecondPlayer,
+        ),
+      );
+    });
+
+    it('Should return "Finished" game', async () => {
+      const { firstUser, secondUser, gameId, questions } = expect.getState();
+
+      await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
+        1: AnswerStatus.Incorrect,
+        2: AnswerStatus.Correct,
+        3: AnswerStatus.Incorrect,
+        4: AnswerStatus.Incorrect,
+        5: AnswerStatus.Incorrect,
+      });
+
+      await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
+        1: AnswerStatus.Incorrect,
+        2: AnswerStatus.Incorrect,
+        3: AnswerStatus.Incorrect,
+        4: AnswerStatus.Correct,
+        5: AnswerStatus.Incorrect,
+      });
+
+      const response = await game.getGameById(gameId, firstUser.accessToken);
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toStrictEqual(
+        expectViewGame(
+          {
+            first: expectPlayerProgress(
+              firstUser.user,
+              {
+                1: AnswerStatus.Incorrect,
+                2: AnswerStatus.Correct,
+                3: AnswerStatus.Incorrect,
+                4: AnswerStatus.Incorrect,
+                5: AnswerStatus.Incorrect,
+              },
+              2,
+            ),
+            second: expectPlayerProgress(
+              secondUser.user,
+              {
+                1: AnswerStatus.Incorrect,
+                2: AnswerStatus.Incorrect,
+                3: AnswerStatus.Incorrect,
+                4: AnswerStatus.Correct,
+                5: AnswerStatus.Incorrect,
+              },
+              1,
+            ),
+          },
+          GameStatus.Finished,
+          expectQuestions(questions),
+        ),
+      );
+    });
   });
 
   describe(
@@ -1899,10 +1918,10 @@ describe('/sa/quiz/questions (e2e)', () => {
           'all game without pagination',
         async () => {
           const { firstPlayer, endedFistGame } = expect.getState();
-          const finishedGames = await gameFactory.createFinishedGames(
-            12,
-              {first: firstPlayer, startFrom: 4},
-          );
+          const finishedGames = await gameFactory.createFinishedGames(12, {
+            first: firstPlayer,
+            startFrom: 4,
+          });
 
           const expectGames = finishedGames.expectGames.reverse();
 
@@ -1974,10 +1993,12 @@ describe('/sa/quiz/questions (e2e)', () => {
     },
   );
 
-  describe('GET -> "pair-game-quiz/users/my-statistic"' +
-      'Return current user statistic.', () => {
+  describe(
+    'GET -> "pair-game-quiz/users/my-statistic"' +
+      'Return current user statistic.',
+    () => {
       it('Clear data base', async () => {
-          await testing.clearDb();
+        await testing.clearDb();
       });
 
       // it('Shouldn`t return statistic if user unauthorized', async () => {
@@ -1986,151 +2007,126 @@ describe('/sa/quiz/questions (e2e)', () => {
       // })
 
       it('Create and return statistic', async () => {
-          await questionsFactories.createQuestions(
-              preparedGameData.length,
-              preparedGameData,
-          );
+        await questionsFactories.createQuestions(
+          preparedGameData.length,
+          preparedGameData,
+        );
 
-          const expectStats = await gameFactory.createFinishedGames(11, {})
+        const expectStats = await gameFactory.createFinishedGames(11, {});
 
-          const response = await game.getStatistic(expectStats.accessToken)
-          expect(response.status).toBe(HttpStatus.OK)
-          expect(response.body).toStrictEqual(expectStats.playerStats)
-      })
-  })
+        const response = await game.getStatistic(expectStats.accessToken);
+        expect(response.status).toBe(HttpStatus.OK);
+        expect(response.body).toStrictEqual(expectStats.playerStats);
+      });
+    },
+  );
 
   describe('GET -> Top players', () => {
-      it('Clear data base', async () => {
-          await testing.clearDb();
+    it('Clear data base', async () => {
+      await testing.clearDb();
+    });
+
+    it('Create data', async () => {
+      await questionsFactories.createQuestions(
+        preparedGameData.length,
+        preparedGameData,
+      );
+
+      const gamesStat = await gameFactory.createPlayersTop(5, 5);
+      expect.setState({ gamesStat });
+    });
+
+    it('Return statistic without pagination', async () => {
+      const { gamesStat } = expect.getState();
+
+      const expectStats = gameFactory.sortStats(gamesStat, [
+        TopPlayersSortField.AvgScoresDESC,
+        TopPlayersSortField.SumScoreDESC,
+      ]);
+
+      const response = await game.getTopPlayers({});
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expectPagination(expectStats, { totalCount: 5 }),
+      );
+    });
+
+    it('Return statistic with pagination', async () => {
+      const { gamesStat } = expect.getState();
+
+      const expectStats = gameFactory.sortStats(gamesStat, [
+        TopPlayersSortField.LossesCountASC,
+        TopPlayersSortField.GamesCountDESC,
+      ]);
+
+      const response = await game.getTopPlayers({
+        sort: [
+          TopPlayersSortField.LossesCountASC,
+          TopPlayersSortField.GamesCountDESC,
+        ],
+        pageNumber: 2,
+        pageSize: 3,
       });
 
-      it('Create data', async () => {
-          await questionsFactories.createQuestions(
-              preparedGameData.length,
-              preparedGameData,
-          );
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expectPagination([expectStats[3], expectStats[4]], {
+          page: 2,
+          pageSize: 3,
+          totalCount: 5,
+        }),
+      );
+    });
 
-          const gamesStat = await gameFactory.createPlayersTop(5, 5)
-          expect.setState({gamesStat})
-      })
+    it('Return statistic with one sort parametr', async () => {
+      const { gamesStat } = expect.getState();
 
-      it('Return statistic without pagination', async () => {
-          const { gamesStat } = expect.getState()
+      const expectStats = gameFactory.sortStats(gamesStat, [
+        TopPlayersSortField.AvgScoresDESC,
+      ]);
 
-          const expectStats = gameFactory.sortStats(
-              gamesStat,
-              [
-                  TopPlayersSortField.AvgScoresDESC,
-                  TopPlayersSortField.SumScoreDESC
-              ]
-          )
+      const response = await game.getTopPlayers({
+        sort: [TopPlayersSortField.AvgScoresDESC],
+      });
 
-          const response = await game.getTopPlayers({})
-          expect(response.status).toBe(HttpStatus.OK)
-          expect(response.body).toEqual(
-              expectPagination(
-                  expectStats,
-                  {totalCount: 5}
-              )
-          )
-      })
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expectPagination(expectStats, { totalCount: 5 }),
+      );
+    });
 
-      it('Return statistic with pagination', async () => {
-          const { gamesStat } = expect.getState()
+    it('Return statistic with pagination', async () => {
+      const { gamesStat } = expect.getState();
 
-          const expectStats = gameFactory.sortStats(
-              gamesStat,
-              [
-                  TopPlayersSortField.LossesCountASC,
-                  TopPlayersSortField.GamesCountDESC
-              ]
-          )
+      const expectStats = gameFactory.sortStats(gamesStat, [
+        TopPlayersSortField.LossesCountASC,
+        TopPlayersSortField.GamesCountDESC,
+      ]);
 
-          const response = await game.getTopPlayers({
-              sort: [
-                  TopPlayersSortField.LossesCountASC,
-                  TopPlayersSortField.GamesCountDESC
-              ],
-              pageNumber: 2,
-              pageSize: 3
-          })
+      const response = await game.getTopPlayers({
+        sort: [
+          TopPlayersSortField.LossesCountASC,
+          TopPlayersSortField.GamesCountDESC,
+        ],
+        pageNumber: 2,
+        pageSize: 3,
+      });
 
-          expect(response.status).toBe(HttpStatus.OK)
-          expect(response.body).toEqual(
-              expectPagination(
-                  [
-                      expectStats[3],
-                      expectStats[4],
-                  ],
-                  {page: 2, pageSize: 3,totalCount: 5}
-              )
-          )
-      })
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expectPagination([expectStats[3], expectStats[4]], {
+          page: 2,
+          pageSize: 3,
+          totalCount: 5,
+        }),
+      );
+    });
 
-      it('Return statistic with one sort parametr', async () => {
-          const { gamesStat } = expect.getState()
-
-          const expectStats = gameFactory.sortStats(
-              gamesStat,
-              [
-                  TopPlayersSortField.AvgScoresDESC
-              ]
-          )
-
-          const response = await game.getTopPlayers({
-              sort: [
-                  TopPlayersSortField.AvgScoresDESC
-              ]
-          })
-
-          expect(response.status).toBe(HttpStatus.OK)
-          expect(response.body).toEqual(
-              expectPagination(
-                  expectStats,
-                  {totalCount: 5}
-              )
-          )
-      })
-
-      it('Return statistic with pagination', async () => {
-          const { gamesStat } = expect.getState()
-
-          const expectStats = gameFactory.sortStats(
-              gamesStat,
-              [
-                  TopPlayersSortField.LossesCountASC,
-                  TopPlayersSortField.GamesCountDESC
-              ]
-          )
-
-          const response = await game.getTopPlayers({
-              sort: [
-                  TopPlayersSortField.LossesCountASC,
-                  TopPlayersSortField.GamesCountDESC
-              ],
-              pageNumber: 2,
-              pageSize: 3
-          })
-
-          expect(response.status).toBe(HttpStatus.OK)
-          expect(response.body).toEqual(
-              expectPagination(
-                  [
-                      expectStats[3],
-                      expectStats[4],
-                  ],
-                  {page: 2, pageSize: 3,totalCount: 5}
-              )
-          )
-      })
-
-      it('Test validation query parametrs', async () => {
-          const response = await game.getTopPlayers({
-              sort: [
-                  'avgScoresAsc', 'gamesCountAsc'
-              ]
-          })
-          expect(response.status).toBe(HttpStatus.BAD_REQUEST)
-      })
-  })
+    it('Test validation query parametrs', async () => {
+      const response = await game.getTopPlayers({
+        sort: ['avgScoresAsc', 'gamesCountAsc'],
+      });
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+    });
+  });
 });

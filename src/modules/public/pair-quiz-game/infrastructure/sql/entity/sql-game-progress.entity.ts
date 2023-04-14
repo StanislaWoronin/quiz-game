@@ -1,6 +1,12 @@
-import {Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,} from 'typeorm';
-import {SqlUsers} from '../../../../../sa/users/infrastructure/sql/entity/users.entity';
-import {SqlGame} from './sql-game.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { SqlUsers } from '../../../../../sa/users/infrastructure/sql/entity/users.entity';
+import { SqlGame } from './sql-game.entity';
 
 @Entity()
 export class SqlGameProgress {

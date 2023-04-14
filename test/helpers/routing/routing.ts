@@ -28,8 +28,8 @@ export const endpoints = {
     },
     users: {
       myStatistic: `${pairGameQuiz}/users/my-statistic`,
-      top: `${pairGameQuiz}/users/top`
-    }
+      top: `${pairGameQuiz}/users/top`,
+    },
   },
   sa: {
     quiz: {

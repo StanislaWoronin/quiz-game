@@ -1,19 +1,19 @@
-import {IQuizGameQueryRepository} from '../i-quiz-game-query.repository';
-import {GameStatus} from '../../shared/game-status';
-import {InjectDataSource} from '@nestjs/typeorm';
-import {DataSource} from 'typeorm';
-import {ViewGame} from '../../api/view/view-game';
-import {PlayerIdDb} from './pojo/player-id.db';
-import {GetCorrectAnswerDb} from './pojo/get-correct-answer.db';
-import {ViewPage} from '../../../../../common/pagination/view-page';
-import {GameDb} from './pojo/game.db';
-import {GameQueryDto} from '../../api/dto/query/game-query.dto';
-import {ViewUserStatistic} from "../../api/view/view-user-statistic";
-import {ViewTopPlayers} from "../../api/view/view-top-players";
-import {TopPlayersQueryDto} from "../../api/dto/query/top-players-query.dto";
-import {GameWhichNeedComplete} from "./pojo/game-which-need-complete";
-import {settings} from "../../../../../settings";
-import {gameQueryOptions} from "../helpers/game-query-options.type";
+import { IQuizGameQueryRepository } from '../i-quiz-game-query.repository';
+import { GameStatus } from '../../shared/game-status';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { ViewGame } from '../../api/view/view-game';
+import { PlayerIdDb } from './pojo/player-id.db';
+import { GetCorrectAnswerDb } from './pojo/get-correct-answer.db';
+import { ViewPage } from '../../../../../common/pagination/view-page';
+import { GameDb } from './pojo/game.db';
+import { GameQueryDto } from '../../api/dto/query/game-query.dto';
+import { ViewUserStatistic } from '../../api/view/view-user-statistic';
+import { ViewTopPlayers } from '../../api/view/view-top-players';
+import { TopPlayersQueryDto } from '../../api/dto/query/top-players-query.dto';
+import { GameWhichNeedComplete } from './pojo/game-which-need-complete';
+import { settings } from '../../../../../settings';
+import { gameQueryOptions } from '../helpers/game-query-options.type';
 
 export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -25,7 +25,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     const query = this.getGameQuery({
       gameStatus: [GameStatus.Active, GameStatus.Finished],
       dto: queryDto,
-    })
+    });
     const result: GameDb[] = await this.dataSource.query(query, [userId]);
     const games = new GameDb().toViewModel(result);
 
@@ -45,25 +45,27 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   }
 
   async getMyCurrentGame(userId: string): Promise<ViewGame | null> {
-    const query = this.getGameQuery({gameStatus: [GameStatus.PendingSecondPlayer, GameStatus.Active]})
-    const result = await this.dataSource.query(query, [userId])
+    const query = this.getGameQuery({
+      gameStatus: [GameStatus.PendingSecondPlayer, GameStatus.Active],
+    });
+    const result = await this.dataSource.query(query, [userId]);
     if (!result) {
-      return null
+      return null;
     }
 
-    const game = new GameDb().toViewModel(result)[0]
-    return game
+    const game = new GameDb().toViewModel(result)[0];
+    return game;
   }
 
   async getGameById(userId: string, gameId: string): Promise<ViewGame | null> {
-    const query = this.getGameQuery({_gameIdFilter: true})
-    const result = await this.dataSource.query(query, [userId, gameId])
+    const query = this.getGameQuery({ _gameIdFilter: true });
+    const result = await this.dataSource.query(query, [userId, gameId]);
     if (!result[0]) {
-      return null
+      return null;
     }
 
-    const game = new GameDb().toViewModel(result)[0]
-    return game
+    const game = new GameDb().toViewModel(result)[0];
+    return game;
   }
 
   async getPlayerByGameId(gameId: string): Promise<PlayerIdDb[]> {
@@ -112,14 +114,18 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
         JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
         JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1;
     `;
-    const result: ViewUserStatistic[] = await this.dataSource.query(query, [userId])
-    result[0].avgScores = Number(result[0].avgScores) // TODO FIXIT
+    const result: ViewUserStatistic[] = await this.dataSource.query(query, [
+      userId,
+    ]);
+    result[0].avgScores = Number(result[0].avgScores); // TODO FIXIT
 
-    return result[0]
+    return result[0];
   }
 
-  async getTopPlayers(queryDto: TopPlayersQueryDto): Promise<ViewPage<ViewTopPlayers>> {
-    const sortBy = this.getSortBy(queryDto.sort)
+  async getTopPlayers(
+    queryDto: TopPlayersQueryDto,
+  ): Promise<ViewPage<ViewTopPlayers>> {
+    const sortBy = this.getSortBy(queryDto.sort);
 
     const query = `
       SELECT JSON_BUILD_OBJECT('id', fp."userId", 'login', u.login) AS player,
@@ -140,27 +146,34 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
        ${sortBy}
       OFFSET $1 LIMIT $2;
     `;
-    const result: ViewTopPlayers[] = await this.dataSource.query(query, [queryDto.skip, queryDto.pageSize])
-    const res = result.map(r => {return {
-      player: r.player,
-      gamesCount: r.gamesCount,
-      sumScore: r.sumScore,
-      avgScores: Number(r.avgScores),
-      winsCount: r.winsCount,
-      lossesCount: r.lossesCount,
-      drawsCount: r.drawsCount,
-    }}) // TODO FIXIT
+    const result: ViewTopPlayers[] = await this.dataSource.query(query, [
+      queryDto.skip,
+      queryDto.pageSize,
+    ]);
+    const res = result.map((r) => {
+      return {
+        player: r.player,
+        gamesCount: r.gamesCount,
+        sumScore: r.sumScore,
+        avgScores: Number(r.avgScores),
+        winsCount: r.winsCount,
+        lossesCount: r.lossesCount,
+        drawsCount: r.drawsCount,
+      };
+    }); // TODO FIXIT
 
     const totalCountQuery = `
       SELECT CAST(COUNT(*) AS INTEGER)
         FROM sql_users
        WHERE EXISTS(SELECT FROM sql_game_progress);   
     `;
-    const totalCount = await this.dataSource.query(totalCountQuery)
+    const totalCount = await this.dataSource.query(totalCountQuery);
 
     return new ViewPage<ViewTopPlayers>({
-      items: res, query: queryDto, totalCount: totalCount[0].count
-    })
+      items: res,
+      query: queryDto,
+      totalCount: totalCount[0].count,
+    });
   }
 
   async checkUserCurrentGame(
@@ -243,24 +256,31 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   //   return await this.dataSource.query(query, [Number(settings.gameRules.questionsCount), currentTime])
   // }
 
-  private getGameQuery({_gameIdFilter, gameStatus, dto}: gameQueryOptions): string {
-    let gameIdFilter = ''
+  private getGameQuery({
+    _gameIdFilter,
+    gameStatus,
+    dto,
+  }: gameQueryOptions): string {
+    let gameIdFilter = '';
     if (_gameIdFilter) {
-      gameIdFilter = `WHERE g.id = $2`
+      gameIdFilter = `WHERE g.id = $2`;
     }
 
-    let gameStatusFilter = ''
-    if (Array.isArray(gameStatus)) { // if !gameStatus then return false
-      gameStatusFilter = `WHERE g.status IN (${gameStatus.map(status => `'${status}'`).join(',')})`;
+    let gameStatusFilter = '';
+    if (Array.isArray(gameStatus)) {
+      // if !gameStatus then return false
+      gameStatusFilter = `WHERE g.status IN (${gameStatus
+        .map((status) => `'${status}'`)
+        .join(',')})`;
     }
 
-    let gamesPaginationFilter = ''
+    let gamesPaginationFilter = '';
     if (dto) {
       gamesPaginationFilter = `
         ORDER BY g."${dto.sortBy}" ${dto.sortDirection},
                  g."pairCreatedDate" DESC
         LIMIT ${dto.pageSize} OFFSET ${dto.skip};
-      `
+      `;
     }
 
     return `
@@ -323,20 +343,19 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
 
   private getSortBy(sortBy: string | string[]) {
     if (!sortBy) {
-      return ''
+      return '';
     }
 
-    let parametrs = []
+    let parametrs = [];
     if (typeof sortBy === 'string') {
-      parametrs.push(sortBy)
-
+      parametrs.push(sortBy);
     } else {
-      parametrs = sortBy
+      parametrs = sortBy;
     }
 
-    let result = 'ORDER BY '
-    for (let parametr of parametrs) {
-      const [field, direction] = parametr.split(' ')
+    let result = 'ORDER BY ';
+    for (const parametr of parametrs) {
+      const [field, direction] = parametr.split(' ');
       result += `"${field}" ${direction},`;
     }
 

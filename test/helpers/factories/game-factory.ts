@@ -14,15 +14,19 @@ import {
 } from '../expect-data/expect-game';
 import { GameStatus } from '../../../src/modules/public/pair-quiz-game/shared/game-status';
 import { ViewAnswer } from '../../../src/modules/public/pair-quiz-game/api/view/view-answer';
-import {ViewUserStatistic} from "../../../src/modules/public/pair-quiz-game/api/view/view-user-statistic";
-import {getAvgScore} from "../../../src/common/helpers";
-import {FinishedGamesType, FinishedGameType, GameStats} from "../type/finished-game.type";
-import {GameStatsType} from "../type/game-stats.type";
-import {CreateFinishedGameType} from "../type/create-finished-game.type";
-import {ViewTopPlayers} from "../../../src/modules/public/pair-quiz-game/api/view/view-top-players";
-import {ViewPlayer} from "../../../src/modules/public/pair-quiz-game/api/view/view-player";
-import {TestsPaginationType} from "../type/pagination/pagination.type";
-import {TopPlayersSortField} from "../../../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field";
+import { ViewUserStatistic } from '../../../src/modules/public/pair-quiz-game/api/view/view-user-statistic';
+import { getAvgScore } from '../../../src/common/helpers';
+import {
+  FinishedGamesType,
+  FinishedGameType,
+  GameStats,
+} from '../type/finished-game.type';
+import { GameStatsType } from '../type/game-stats.type';
+import { CreateFinishedGameType } from '../type/create-finished-game.type';
+import { ViewTopPlayers } from '../../../src/modules/public/pair-quiz-game/api/view/view-top-players';
+import { ViewPlayer } from '../../../src/modules/public/pair-quiz-game/api/view/view-player';
+import { TestsPaginationType } from '../type/pagination/pagination.type';
+import { TopPlayersSortField } from '../../../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field';
 
 export class GameFactory {
   constructor(private game: Game, private usersFactory: UsersFactory) {}
@@ -71,26 +75,24 @@ export class GameFactory {
     return await this.game.joinGame(secondPlayer.accessToken);
   }
 
-  async createFinishedGame(
-      {
-        first,
-        second,
-        startFrom = 1
-      }: CreateFinishedGameType,
-  ): Promise<FinishedGameType> {
+  async createFinishedGame({
+    first,
+    second,
+    startFrom = 1,
+  }: CreateFinishedGameType): Promise<FinishedGameType> {
     let firstUser = first;
     if (!firstUser) {
       const [first] = await this.usersFactory.createAndLoginUsers(1);
       firstUser = first;
     }
 
-    let secondUser = second
+    let secondUser = second;
     if (!second) {
       const [second] = await this.usersFactory.createAndLoginUsers(
-          1,
-          startFrom,
+        1,
+        startFrom,
       );
-      secondUser = second
+      secondUser = second;
     }
 
     const draw = this.eagleAndTails();
@@ -130,18 +132,18 @@ export class GameFactory {
       game.body.questions,
     );
 
-    const fistUserStat = this.checkStat(viewGame, firstUser.user.login)
+    const fistUserStat = this.checkStat(viewGame, firstUser.user.login);
 
-    return { accessToken: firstUser.accessToken, expectGame: viewGame, fistUserStat };
+    return {
+      accessToken: firstUser.accessToken,
+      expectGame: viewGame,
+      fistUserStat,
+    };
   }
 
   async createFinishedGames(
     gamesCount: number,
-    {
-      first,
-      second,
-      startFrom = 1
-    }: CreateFinishedGameType,
+    { first, second, startFrom = 1 }: CreateFinishedGameType,
   ): Promise<FinishedGamesType> {
     const expectGames = [];
     const playerStats: ViewUserStatistic = {
@@ -150,8 +152,8 @@ export class GameFactory {
       gamesCount: 0,
       winsCount: 0,
       lossesCount: 0,
-      drawsCount: 0
-    }
+      drawsCount: 0,
+    };
 
     let firstUser = first;
     if (!first) {
@@ -166,63 +168,76 @@ export class GameFactory {
     }
 
     for (let i = 0; i < gamesCount; i++) {
-      const viewGame = await this.createFinishedGame({first: firstUser, second: secondUser});
+      const viewGame = await this.createFinishedGame({
+        first: firstUser,
+        second: secondUser,
+      });
       expectGames.push(viewGame.expectGame);
 
-      playerStats.sumScore += viewGame.fistUserStat.score
-      playerStats.gamesCount++
+      playerStats.sumScore += viewGame.fistUserStat.score;
+      playerStats.gamesCount++;
       switch (viewGame.fistUserStat.gameStats) {
         case GameStats.Win:
-          playerStats.winsCount++
+          playerStats.winsCount++;
           break;
         case GameStats.Lose:
-          playerStats.lossesCount++
+          playerStats.lossesCount++;
           break;
         case GameStats.Draw:
-          playerStats.drawsCount++
+          playerStats.drawsCount++;
       }
     }
-    playerStats.avgScores = getAvgScore(playerStats.sumScore, playerStats.gamesCount)
+    playerStats.avgScores = getAvgScore(
+      playerStats.sumScore,
+      playerStats.gamesCount,
+    );
 
-    return { accessToken: firstUser.accessToken, expectGames: expectGames, playerStats };
+    return {
+      accessToken: firstUser.accessToken,
+      expectGames: expectGames,
+      playerStats,
+    };
   }
 
-  async createPlayersTop(playersCount: number, gameRound: number): Promise<ViewTopPlayers[]> {
-    const players = await this.usersFactory.createAndLoginUsers(playersCount)
+  async createPlayersTop(
+    playersCount: number,
+    gameRound: number,
+  ): Promise<ViewTopPlayers[]> {
+    const players = await this.usersFactory.createAndLoginUsers(playersCount);
 
-    let gamesStats = []
+    const gamesStats = [];
     for (let i = 0; i < gameRound; i++) {
-      let secondPlayerNumber = this.eagleAndTails(playersCount)
+      let secondPlayerNumber = this.eagleAndTails(playersCount);
       while (secondPlayerNumber === i) {
-        secondPlayerNumber = this.eagleAndTails(playersCount)
+        secondPlayerNumber = this.eagleAndTails(playersCount);
       }
 
       await this.createFinishedGames(gameRound, {
         first: players[i],
-        second: players[secondPlayerNumber]
-      })
+        second: players[secondPlayerNumber],
+      });
     }
 
-    for (let player of players) {
-      const stat = await this.game.getStatistic(player.accessToken)
-      let userStats = {
+    for (const player of players) {
+      const stat = await this.game.getStatistic(player.accessToken);
+      const userStats = {
         player: new ViewPlayer(player.user.id, player.user.login),
         gamesCount: stat.body.gamesCount,
         avgScores: stat.body.avgScores,
         sumScore: stat.body.sumScore,
         lossesCount: stat.body.lossesCount,
         winsCount: stat.body.winsCount,
-        drawsCount: stat.body.drawsCount
-      }
-      gamesStats.push(userStats)
+        drawsCount: stat.body.drawsCount,
+      };
+      gamesStats.push(userStats);
     }
 
-    return gamesStats
+    return gamesStats;
   }
 
   sortStats(
     gamesStat: ViewTopPlayers[],
-    sort: TopPlayersSortField[]
+    sort: TopPlayersSortField[],
   ): ViewTopPlayers[] {
     return gamesStat.sort((a, b) => {
       let result = 0;
@@ -230,7 +245,8 @@ export class GameFactory {
         const [field, direction] = sort[i].split(' ');
         const aValue = a[field];
         const bValue = b[field];
-        result = direction.toLowerCase() === 'asc' ? aValue - bValue : bValue - aValue;
+        result =
+          direction.toLowerCase() === 'asc' ? aValue - bValue : bValue - aValue;
         if (result !== 0) break;
       }
 
@@ -248,7 +264,7 @@ export class GameFactory {
     };
   }
 
-  private eagleAndTails(randomRange: number = 2): number {
+  private eagleAndTails(randomRange = 2): number {
     return Math.round(Math.random() * (randomRange - 1));
   }
 
@@ -271,25 +287,25 @@ export class GameFactory {
   }
 
   private checkStat(game: ViewGame, userLogin: string): GameStatsType {
-    let firstUserScore
-    let secondUserScore
+    let firstUserScore;
+    let secondUserScore;
     if (game.firstPlayerProgress.player.login === userLogin) {
-      firstUserScore = game.firstPlayerProgress.score
-      secondUserScore = game.secondPlayerProgress.score
+      firstUserScore = game.firstPlayerProgress.score;
+      secondUserScore = game.secondPlayerProgress.score;
     } else {
-      firstUserScore = game.secondPlayerProgress.score
-      secondUserScore = game.firstPlayerProgress.score
+      firstUserScore = game.secondPlayerProgress.score;
+      secondUserScore = game.firstPlayerProgress.score;
     }
 
-    let firstUserGameStats
+    let firstUserGameStats;
     if (firstUserScore > secondUserScore) {
-      firstUserGameStats = GameStats.Win
+      firstUserGameStats = GameStats.Win;
     } else if (firstUserScore < secondUserScore) {
-      firstUserGameStats = GameStats.Lose
+      firstUserGameStats = GameStats.Lose;
     } else {
-      firstUserGameStats = GameStats.Draw
+      firstUserGameStats = GameStats.Draw;
     }
 
-    return {score: firstUserScore, gameStats: firstUserGameStats}
+    return { score: firstUserScore, gameStats: firstUserGameStats };
   }
 }
