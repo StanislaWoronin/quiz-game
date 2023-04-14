@@ -26,7 +26,7 @@ export interface IQuizGameQueryRepository {
   ): Promise<string | null>;
   checkOpenGame(): Promise<string | null>;
   currentGameAnswerProgress(userId: string, gameId: string): Promise<number>;
-  findGamesWhichNeedComplete(currentTime: string): Promise<GameWhichNeedComplete[]>
+  //findGamesWhichNeedComplete(currentTime: string): Promise<GameWhichNeedComplete[]>
 }
 
 export const IQuizGameQueryRepository = 'IQuizGameQueryRepository';

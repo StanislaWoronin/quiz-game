@@ -20,7 +20,8 @@ import {expectPagination} from './helpers/expect-data/expect-pagination';
 import {SortByGameField} from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
 import {SortDirection} from '../src/common/pagination/query-parameters/sort-direction';
 import {TopPlayersSortField} from "../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field";
-import {logger, sleep} from "./helpers/helpers";
+import {sleep} from "./helpers/helpers";
+import {preparedAnswer} from "./helpers/prepeared-data/prepared-answer";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -92,7 +93,6 @@ describe('/sa/quiz/questions (e2e)', () => {
         const { firstUser } = expect.getState();
 
         const createdGame = await game.joinGame(firstUser.accessToken);
-          logger(createdGame, 'createdGame')
         expect(createdGame.status).toBe(HttpStatus.OK);
         expect(createdGame.body).toStrictEqual(
           expectViewGame(
@@ -101,8 +101,7 @@ describe('/sa/quiz/questions (e2e)', () => {
           ),
         );
 
-        const getGame = await game.getMyCurrentGame(firstUser.accessToken); // TODO нужно переделать запрос, когда джойним юзера, которого нет, запрос возвращает {}
-          logger(getGame, 'getGame')
+        const getGame = await game.getMyCurrentGame(firstUser.accessToken);
         const getGameById = await game.getGameById(
           createdGame.body.id,
           firstUser.accessToken,
@@ -111,43 +110,43 @@ describe('/sa/quiz/questions (e2e)', () => {
         expect(createdGame.body).toStrictEqual(getGameById.body);
       });
 
-      // it('1 - Shouldn`t join into the game, if user already has active game', async () => {
-      //   const { firstUser } = expect.getState();
-      //
-      //   const response = await game.joinGame(firstUser.accessToken);
-      //   expect(response.status).toBe(HttpStatus.FORBIDDEN);
-      // });
-      //
-      // it('User join into active game', async () => {
-      //   const { firstUser, secondUser, questions } = expect.getState();
-      //
-      //   const response = await game.joinGame(secondUser.accessToken);
-      //   expect(response.status).toBe(HttpStatus.OK);
-      //   expect(response.body).toStrictEqual(
-      //     expectViewGame(
-      //       {
-      //         first: expectPlayerProgress(firstUser.user, {}),
-      //         second: expectPlayerProgress(secondUser.user, {}),
-      //       },
-      //       GameStatus.Active,
-      //       expectQuestions(questions),
-      //     ),
-      //   );
-      // });
-      //
-      // it('2 - Shouldn`t join into the game, if user already has active game', async () => {
-      //   const { firstUser } = expect.getState();
-      //
-      //   const response = await game.joinGame(firstUser.accessToken);
-      //   expect(response.status).toBe(HttpStatus.FORBIDDEN);
-      // });
-      //
-      // it('3 - Shouldn`t join into the game, if user already has active game', async () => {
-      //   const { secondUser } = expect.getState();
-      //
-      //   const response = await game.joinGame(secondUser.accessToken);
-      //   expect(response.status).toBe(HttpStatus.FORBIDDEN);
-      // });
+      it('1 - Shouldn`t join into the game, if user already has active game', async () => {
+        const { firstUser } = expect.getState();
+
+        const response = await game.joinGame(firstUser.accessToken);
+        expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      });
+
+      it('User join into active game', async () => {
+        const { firstUser, secondUser, questions } = expect.getState();
+
+        const response = await game.joinGame(secondUser.accessToken);
+        expect(response.status).toBe(HttpStatus.OK);
+        expect(response.body).toStrictEqual(
+          expectViewGame(
+            {
+              first: expectPlayerProgress(firstUser.user, {}),
+              second: expectPlayerProgress(secondUser.user, {}),
+            },
+            GameStatus.Active,
+            expectQuestions(questions),
+          ),
+        );
+      });
+
+      it('2 - Shouldn`t join into the game, if user already has active game', async () => {
+        const { firstUser } = expect.getState();
+
+        const response = await game.joinGame(firstUser.accessToken);
+        expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      });
+
+      it('3 - Shouldn`t join into the game, if user already has active game', async () => {
+        const { secondUser } = expect.getState();
+
+        const response = await game.joinGame(secondUser.accessToken);
+        expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      });
     },
   );
 
@@ -232,8 +231,6 @@ describe('/sa/quiz/questions (e2e)', () => {
         const questions = activeGame.body.questions;
         await gameFactory.sendCorrectAnswer(fistPlayer.accessToken, questions[0])
 
-        // await sleep(10)
-        //   console.log('fist timer end')
         await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
             2: AnswerStatus.Incorrect,
             3: AnswerStatus.Incorrect,
@@ -246,17 +243,21 @@ describe('/sa/quiz/questions (e2e)', () => {
         })
 
         await sleep(11);
-        console.log('second timer end')
+
         const secondPlayerTryAnswered = await gameFactory.sendCorrectAnswer(secondPlayer.accessToken, activeGame.body.questions[1])
         expect(secondPlayerTryAnswered.status).toBe(HttpStatus.FORBIDDEN)
 
         const finishedGame = await game.getGameById(activeGame.body.id, fistPlayer.accessToken)
-          logger(finishedGame.body)
         expect(finishedGame.status).toBe(HttpStatus.OK)
         expect(finishedGame.body.status).toBe(GameStatus.Finished)
         expect(finishedGame.body.secondPlayerProgress)
         expect(finishedGame.body.secondPlayerProgress.score).toBe(2)
-        expect(finishedGame.body.secondPlayerProgress.answers).toStrictEqual([
+
+
+          console.log(finishedGame.body.secondPlayerProgress.answers.map(v => v.questionId))
+
+
+        expect(finishedGame.body.secondPlayerProgress.answers).toEqual([
             expectAnswer(AnswerStatus.Correct),
             expectAnswer(AnswerStatus.Correct),
             expectAnswer(AnswerStatus.Incorrect, false),
@@ -333,7 +334,6 @@ describe('/sa/quiz/questions (e2e)', () => {
       const { firstUser, secondUser, gameId, questions } = expect.getState();
 
       const response = await game.getGameById(gameId, firstUser.accessToken);
-        logger(response.body)
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toStrictEqual(
         expectViewGame(
@@ -421,7 +421,7 @@ describe('/sa/quiz/questions (e2e)', () => {
   });
 
   describe(
-    'GET -> "pair-game-quiz/pair/my-current"' +
+    'GET -> "pair-game-quiz/pair/my-current". ' +
       'Return current unfinished user game',
     () => {
       it('Clear data base', async () => {
@@ -1360,7 +1360,7 @@ describe('/sa/quiz/questions (e2e)', () => {
   });
 
   describe(
-    'GET -> "pair-game-quiz/pair/my"' +
+    'GET -> "pair-game-quiz/pair/my". ' +
       'Return all games current user in status "Current" and "Finished"',
     () => {
       it('Clear data base', async () => {

@@ -4,3 +4,4 @@ export class GameWhichNeedComplete {
     fistPlayerAnsweredTime: string
     secondPlayerAnswerProgress: number
 }
+

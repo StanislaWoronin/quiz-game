@@ -22,9 +22,11 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     userId: string,
     queryDto: GameQueryDto,
   ): Promise<ViewPage<ViewGame>> {
-    const query = this.getGameQuery({dto: queryDto})
+    const query = this.getGameQuery({
+      gameStatus: [GameStatus.Active, GameStatus.Finished],
+      dto: queryDto,
+    })
     const result: GameDb[] = await this.dataSource.query(query, [userId]);
-
     const games = new GameDb().toViewModel(result);
 
     const totalCountQuery = `
@@ -32,7 +34,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
         FROM sql_game g
         JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
         JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1;
-    `;
+      `;
     const totalCount = await this.dataSource.query(totalCountQuery, [userId]);
 
     return new ViewPage<ViewGame>({
@@ -43,15 +45,13 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   }
 
   async getMyCurrentGame(userId: string): Promise<ViewGame | null> {
-    const query = this.getGameQuery({_gameStatusFilter: true})
+    const query = this.getGameQuery({gameStatus: [GameStatus.PendingSecondPlayer, GameStatus.Active]})
     const result = await this.dataSource.query(query, [userId])
     if (!result) {
       return null
     }
-    console.log(query)
-    console.log(result)
+
     const game = new GameDb().toViewModel(result)[0]
-    console.log(game)
     return game
   }
 
@@ -217,45 +217,41 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     return result[0].count;
   }
 
-  async findGamesWhichNeedComplete(currentTime: string): Promise<GameWhichNeedComplete[]> {
-    try {
-      const query = `
-      SELECT g.id AS "gameId", ua."userId" AS "fistAnsweredPlayerId", MAX(ua."addedAt") AS "fistPlayerAnsweredTime",
-             (SELECT COUNT(*)
-                FROM sql_user_answer 
-               WHERE "gameId" = g.id 
-                 AND "userId" != ua."userId") AS "secondPlayerAnswerProgress"
-        FROM sql_game g
-        JOIN (
-          SELECT *, ROW_NUMBER() OVER (PARTITION BY "gameId", "userId" ORDER BY "addedAt") AS rn
-          FROM sql_user_answer
-        ) ua ON ua."gameId" = g.id 
-       WHERE ua."userId" IN (
-             SELECT "userId"
-             FROM sql_user_answer
-             WHERE "gameId" = g.id
-             GROUP BY "userId"
-             HAVING COUNT(*) = $1
-       )
-       GROUP BY g.id, ua."userId"
-      HAVING COUNT(*) = $1
-         AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = 5 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '10 seconds');
-    `
-      return await this.dataSource.query(query, [Number(settings.gameRules.questionsCount), currentTime])
-    } catch (e) {
-      console.log(e)
-    }
-  }
+  // async findGamesWhichNeedComplete(currentTime: string): Promise<GameWhichNeedComplete[]> {
+  //   const query = `
+  //     SELECT g.id AS "gameId", ua."userId" AS "fistAnsweredPlayerId", MAX(ua."addedAt") AS "fistPlayerAnsweredTime",
+  //            (SELECT COUNT(*)
+  //               FROM sql_user_answer
+  //              WHERE "gameId" = g.id
+  //                AND "userId" != ua."userId") AS "secondPlayerAnswerProgress"
+  //       FROM sql_game g
+  //       JOIN (
+  //         SELECT *, ROW_NUMBER() OVER (PARTITION BY "gameId", "userId" ORDER BY "addedAt") AS rn
+  //         FROM sql_user_answer
+  //       ) ua ON ua."gameId" = g.id
+  //      WHERE ua."userId" IN (
+  //            SELECT "userId"
+  //            FROM sql_user_answer
+  //            WHERE "gameId" = g.id
+  //            GROUP BY "userId"
+  //            HAVING COUNT(*) = $1
+  //      )
+  //      GROUP BY g.id, ua."userId"
+  //     HAVING COUNT(*) = $1
+  //        AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = 5 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '10 seconds');
+  //   `
+  //   return await this.dataSource.query(query, [Number(settings.gameRules.questionsCount), currentTime])
+  // }
 
-  private getGameQuery({_gameIdFilter, _gameStatusFilter, dto}: gameQueryOptions): string {
+  private getGameQuery({_gameIdFilter, gameStatus, dto}: gameQueryOptions): string {
     let gameIdFilter = ''
     if (_gameIdFilter) {
       gameIdFilter = `WHERE g.id = $2`
     }
 
     let gameStatusFilter = ''
-    if (_gameStatusFilter) {
-      gameStatusFilter = `WHERE g.status = '${GameStatus.PendingSecondPlayer}' OR g.status = '${GameStatus.Active}'`
+    if (Array.isArray(gameStatus)) { // if !gameStatus then return false
+      gameStatusFilter = `WHERE g.status IN (${gameStatus.map(status => `'${status}'`).join(',')})`;
     }
 
     let gamesPaginationFilter = ''
@@ -270,8 +266,8 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     return `
       SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
                COALESCE(fp."gameHost", 'false') AS "firstUserHost",
-               fp.score AS "firstPlayerScore",
-               sp.score AS "secondPlayerScore",
+               fp.score AS "firstUserScore",
+               sp.score AS "secondUserScore",
                (SELECT JSON_AGG(
                        JSON_BUILD_OBJECT(
                             'id', gq."questionId",
@@ -311,9 +307,9 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                ) AS "secondUserAnswers"
               FROM sql_game g
               JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
-              JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1
+              LEFT JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1
               JOIN sql_users fu ON fp."userId" = fu.id
-              JOIN sql_users su ON sp."userId" = su.id
+              LEFT JOIN sql_users su ON sp."userId" = su.id
              ${gameIdFilter} 
              ${gameStatusFilter}
              GROUP BY g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",

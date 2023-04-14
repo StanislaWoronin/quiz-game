@@ -34,7 +34,10 @@ import { IEmailConfirmationRepository } from '../../../sa/users/infrastructure/i
 import { IUsersQueryRepository } from '../../../sa/users/infrastructure/i-users-query.repository';
 import { ViewAboutMe } from './view/view-about-me';
 import { AccessToken } from '../../security/api/view/access-token';
+import {ApiBody, ApiOperation, ApiResponse, ApiTags} from "@nestjs/swagger";
+import {BadRequestResponse} from "../../../../common/dto/errors-messages";
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   isDev: boolean;
@@ -54,6 +57,21 @@ export class AuthController {
     this.isDev = config.get<boolean>('environment');
   }
 
+  @ApiOperation({summary: 'A new user is registered in the system'})
+  @ApiBody({type: RegistrationDto})
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Input data is accepted. Email with confirmation code will be send to passed email address',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'If the inputModel has incorrect values (in particular if the user with the given email or password already exists)',
+    type: [BadRequestResponse]
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'More than 5 attempts from one IP-address during 10 seconds',
+  })
   // @Throttle(5, 10)
   // @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -62,10 +80,29 @@ export class AuthController {
     return await this.createUserUseCase.execute(dto);
   }
 
+  @ApiOperation({summary: 'New user login after registration'})
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returns JWT accessToken (expired after 10 seconds) in body and JWT refreshToken in cookie (http-only, secure) (expired after 20 seconds)',
+    type: AccessToken,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'If the inputModel has incorrect values',
+    type: [BadRequestResponse]
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'If the password or login is wrong',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'More than 5 attempts from one IP-address during 10 seconds',
+  })
   //@Throttle(5, 10)
   @UseGuards(/*ThrottlerGuard, */ CheckCredentialGuard)
   @Post('login')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async createUser(
     @Body() dto: AuthDto,
     @Ip() ipAddress: string,
@@ -88,6 +125,21 @@ export class AuthController {
       .send({ accessToken: tokens.accessToken });
   }
 
+  @ApiOperation({summary: 'Re-sends registration confirmation code'})
+  @ApiBody({type: ResendingDto})
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Input data is accepted.Email with confirmation code will be send to passed email address.Confirmation code should be inside link as query param, for example: https://some-front.com/confirm-registration?code=youtcodehere',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'If the inputModel has incorrect values',
+    type: [BadRequestResponse]
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'More than 5 attempts from one IP-address during 10 seconds',
+  })
   // @Throttle(5, 10)
   // @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -106,6 +158,21 @@ export class AuthController {
     );
   }
 
+  @ApiOperation({summary: 'Confirmation of registration via confirmation code'})
+  @ApiBody({type: RegistrationConfirmationDto})
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Email was verified. Account was activated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'If the confirmation code is incorrect, expired or already been applied',
+    type: [BadRequestResponse]
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'More than 5 attempts from one IP-address during 10 seconds',
+  })
   // @Throttle(5, 10)
   // @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -116,6 +183,8 @@ export class AuthController {
     );
   }
 
+  @ApiOperation({summary: 'Password recovery request'})
+  @ApiResponse({status: HttpStatus.NO_CONTENT})
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('password-recovery')
   async passwordRecovery(@Body() dto: PasswordRecoveryDto) {
@@ -130,6 +199,8 @@ export class AuthController {
     return;
   }
 
+  @ApiOperation({summary: 'Sending a new password'})
+  @ApiResponse({status: HttpStatus.NO_CONTENT})
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('new-password')
   async createNewPassword(
@@ -147,6 +218,8 @@ export class AuthController {
     return;
   }
 
+  @ApiOperation({summary: 'Update authorization tokens'})
+  @ApiResponse({status: HttpStatus.OK, type: AccessToken})
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenValidationGuard)
   @Post('refresh-token')
@@ -164,6 +237,8 @@ export class AuthController {
       .send({ accessToken: tokens.accessToken });
   }
 
+  @ApiOperation({summary: 'User logout'})
+  @ApiResponse({status: HttpStatus.NO_CONTENT})
   @UseGuards(RefreshTokenValidationGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('logout')
@@ -175,6 +250,8 @@ export class AuthController {
     return;
   }
 
+  @ApiOperation({summary: 'An authorized user requests information about their account'})
+  @ApiResponse({status: HttpStatus.OK})
   @UseGuards(AuthBearerGuard)
   @Get('me')
   async aboutMe(@UserId() userId: string): Promise<ViewAboutMe> {
