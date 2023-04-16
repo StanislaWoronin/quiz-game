@@ -1,4 +1,5 @@
 import {
+  applyDecorators,
   Body,
   Controller,
   Get,
@@ -13,29 +14,56 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
-import { RegistrationDto } from './dto/registration.dto';
-import { CreateUserUseCase } from '../../../sa/users/use-cases/create-user.use-case';
-import { AuthDto } from './dto/auth.dto';
-import { UserId } from '../../../../common/decorators/user.decorator';
-import { ConfigService } from '@nestjs/config';
-import { CheckCredentialGuard } from '../guards/check-credential.guard';
-import { SecurityService } from '../../security/application/security.service';
-import { PasswordRecoveryDto } from './dto/password-recovery.dto';
-import { NewPasswordDto } from './dto/new-password.dto';
-import { AuthService } from '../applications/auth.service';
-import { UsersService } from '../../../sa/users/applications/users.service';
-import { RefreshTokenValidationGuard } from '../guards/refresh-token-validation.guard';
-import { AuthBearerGuard } from '../guards/auth-bearer.guard';
-import { ResendingDto } from './dto/resending.dto';
-import { RegistrationConfirmationDto } from './dto/registration-confirmation.dto';
-import { EmailManager } from '../email-transfer/email.manager';
-import { IEmailConfirmationRepository } from '../../../sa/users/infrastructure/i-email-confirmation.repository';
-import { IUsersQueryRepository } from '../../../sa/users/infrastructure/i-users-query.repository';
-import { ViewAboutMe } from './view/view-about-me';
-import { AccessToken } from '../../security/api/view/access-token';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { BadRequestResponse } from '../../../../common/dto/errors-messages';
+import {Request, Response} from 'express';
+import {RegistrationDto} from './dto/registration.dto';
+import {CreateUserUseCase} from '../../../sa/users/use-cases/create-user.use-case';
+import {AuthDto} from './dto/auth.dto';
+import {UserId} from '../../../../common/decorators/user.decorator';
+import {ConfigService} from '@nestjs/config';
+import {CheckCredentialGuard} from '../guards/check-credential.guard';
+import {SecurityService} from '../../security/application/security.service';
+import {PasswordRecoveryDto} from './dto/password-recovery.dto';
+import {NewPasswordDto} from './dto/new-password.dto';
+import {AuthService} from '../applications/auth.service';
+import {UsersService} from '../../../sa/users/applications/users.service';
+import {RefreshTokenValidationGuard} from '../guards/refresh-token-validation.guard';
+import {AuthBearerGuard} from '../guards/auth-bearer.guard';
+import {ResendingDto} from './dto/resending.dto';
+import {RegistrationConfirmationDto} from './dto/registration-confirmation.dto';
+import {EmailManager} from '../email-transfer/email.manager';
+import {IEmailConfirmationRepository} from '../../../sa/users/infrastructure/i-email-confirmation.repository';
+import {IUsersQueryRepository} from '../../../sa/users/infrastructure/i-users-query.repository';
+import {ViewAboutMe} from './view/view-about-me';
+import {AccessToken} from '../../security/api/view/access-token';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiNoContentResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags
+} from '@nestjs/swagger';
+import {BadRequestResponse} from '../../../../common/dto/errors-messages';
+
+export function ApiRegistration() {
+  return applyDecorators(
+    ApiOperation({summary: 'A new user is registered in the system'}),
+    ApiBody({type: RegistrationDto}),
+    ApiNoContentResponse({
+      description:
+        'Input data is accepted. Email with confirmation code will be send to passed email address',
+    }),
+    ApiBadRequestResponse({
+      description:
+        'If the inputModel has incorrect values (in particular if the user with the given email or password already exists)',
+      type: [BadRequestResponse],
+    }),
+    ApiResponse({
+      status: HttpStatus.FORBIDDEN,
+      description: 'More than 5 attempts from one IP-address during 10 seconds',
+    })
+  );
+}
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -57,23 +85,7 @@ export class AuthController {
     this.isDev = config.get<boolean>('environment');
   }
 
-  @ApiOperation({ summary: 'A new user is registered in the system' })
-  @ApiBody({ type: RegistrationDto })
-  @ApiResponse({
-    status: HttpStatus.NO_CONTENT,
-    description:
-      'Input data is accepted. Email with confirmation code will be send to passed email address',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description:
-      'If the inputModel has incorrect values (in particular if the user with the given email or password already exists)',
-    type: [BadRequestResponse],
-  })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: 'More than 5 attempts from one IP-address during 10 seconds',
-  })
+  @ApiRegistration()
   // @Throttle(5, 10)
   // @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -82,7 +94,7 @@ export class AuthController {
     return await this.createUserUseCase.execute(dto);
   }
 
-  @ApiOperation({ summary: 'New user login after registration' })
+  @ApiOperation({summary: 'New user login after registration'})
   @ApiResponse({
     status: HttpStatus.OK,
     description:
@@ -125,11 +137,11 @@ export class AuthController {
         secure: !this.isDev,
         maxAge: 24 * 60 * 60 * 1000,
       })
-      .send({ accessToken: tokens.accessToken });
+      .send({accessToken: tokens.accessToken});
   }
 
-  @ApiOperation({ summary: 'Re-sends registration confirmation code' })
-  @ApiBody({ type: ResendingDto })
+  @ApiOperation({summary: 'Re-sends registration confirmation code'})
+  @ApiBody({type: ResendingDto})
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
     description:
@@ -165,7 +177,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Confirmation of registration via confirmation code',
   })
-  @ApiBody({ type: RegistrationConfirmationDto })
+  @ApiBody({type: RegistrationConfirmationDto})
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
     description: 'Email was verified. Account was activated',
@@ -190,8 +202,8 @@ export class AuthController {
     );
   }
 
-  @ApiOperation({ summary: 'Password recovery request' })
-  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiOperation({summary: 'Password recovery request'})
+  @ApiResponse({status: HttpStatus.NO_CONTENT})
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('password-recovery')
   async passwordRecovery(@Body() dto: PasswordRecoveryDto) {
@@ -206,8 +218,8 @@ export class AuthController {
     return;
   }
 
-  @ApiOperation({ summary: 'Sending a new password' })
-  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiOperation({summary: 'Sending a new password'})
+  @ApiResponse({status: HttpStatus.NO_CONTENT})
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('new-password')
   async createNewPassword(
@@ -225,8 +237,8 @@ export class AuthController {
     return;
   }
 
-  @ApiOperation({ summary: 'Update authorization tokens' })
-  @ApiResponse({ status: HttpStatus.OK, type: AccessToken })
+  @ApiOperation({summary: 'Update authorization tokens'})
+  @ApiResponse({status: HttpStatus.OK, type: AccessToken})
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenValidationGuard)
   @Post('refresh-token')
@@ -241,11 +253,11 @@ export class AuthController {
         secure: !this.isDev,
         maxAge: 24 * 60 * 60 * 1000,
       })
-      .send({ accessToken: tokens.accessToken });
+      .send({accessToken: tokens.accessToken});
   }
 
-  @ApiOperation({ summary: 'User logout' })
-  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiOperation({summary: 'User logout'})
+  @ApiResponse({status: HttpStatus.NO_CONTENT})
   @UseGuards(RefreshTokenValidationGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('logout')
@@ -260,7 +272,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'An authorized user requests information about their account',
   })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({status: HttpStatus.OK})
   @UseGuards(AuthBearerGuard)
   @Get('me')
   async aboutMe(@UserId() userId: string): Promise<ViewAboutMe> {

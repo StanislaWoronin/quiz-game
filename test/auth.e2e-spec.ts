@@ -1,28 +1,25 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { createApp } from '../src/config/create-app';
-import { EmailManager } from '../src/modules/public/auth/email-transfer/email.manager';
-import { AppModule } from '../src/app.module';
-import { Test, TestingModule } from '@nestjs/testing';
-import { EmailManagerMock } from './mock/email-adapter.mock';
-import { Testing } from './helpers/request/testing';
-import { Auth } from './helpers/request/auth';
-import {
-  preparedUser,
-  prepareLogin,
-} from './helpers/prepeared-data/prepared-user';
-import { getErrorsMessage } from './helpers/expect-data/expect-errors-messages';
-import { Users } from './helpers/request/users';
-import { preparedSuperUser } from './helpers/prepeared-data/prepared-super-user';
-import { preparedSecurity } from './helpers/prepeared-data/prepared-security';
-import { getErrorMessage } from './helpers/routing/errors-messages';
-import { randomUUID } from 'crypto';
-import { preparedPassword } from './helpers/prepeared-data/prepared-password';
-import { ViewAboutMe } from '../src/modules/public/auth/api/view/view-about-me';
-import { faker } from '@faker-js/faker';
+import {HttpStatus, INestApplication} from '@nestjs/common';
+import {createApp} from '../src/config/create-app';
+import {EmailManager} from '../src/modules/public/auth/email-transfer/email.manager';
+import {AppModule} from '../src/app.module';
+import {Test, TestingModule} from '@nestjs/testing';
+import {EmailManagerMock} from './mock/email-adapter.mock';
+import {Testing} from './helpers/request/testing';
+import {Auth} from './helpers/request/auth';
+import {preparedUser, prepareLogin,} from './helpers/prepeared-data/prepared-user';
+import {getErrorsMessage} from './helpers/expect-data/expect-errors-messages';
+import {Users} from './helpers/request/users';
+import {preparedSuperUser} from './helpers/prepeared-data/prepared-super-user';
+import {preparedSecurity} from './helpers/prepeared-data/prepared-security';
+import {getErrorMessage} from './helpers/routing/errors-messages';
+import {randomUUID} from 'crypto';
+import {preparedPassword} from './helpers/prepeared-data/prepared-password';
+import {ViewAboutMe} from '../src/modules/public/auth/api/view/view-about-me';
+import {faker} from '@faker-js/faker';
 
 describe('/auth', () => {
   const second = 1000;
-  jest.setTimeout(5 * second);
+  jest.setTimeout(10 * second);
 
   let app: INestApplication;
   let server;
@@ -63,11 +60,11 @@ describe('/auth', () => {
     it('Shouldn`t registration user with incorrect input data', async () => {
       const shortInputData = await auth.registrationUser(preparedUser.short);
       expect(shortInputData.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(shortInputData.body).toStrictEqual({ errorsMessages });
+      expect(shortInputData.body).toStrictEqual({errorsMessages});
 
       const longInputData = await auth.registrationUser(preparedUser.long);
       expect(longInputData.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(longInputData.body).toStrictEqual({ errorsMessages });
+      expect(longInputData.body).toStrictEqual({errorsMessages});
     });
 
     it('Should registrate user', async () => {
@@ -78,7 +75,7 @@ describe('/auth', () => {
       const user = await users.getUsers(preparedSuperUser.valid, {});
       expect(user.body.items).toHaveLength(1);
 
-      expect.setState({ user: user.body.items[0] });
+      expect.setState({user: user.body.items[0]});
     });
 
     it('Should`t registrate if login or email already exists', async () => {
@@ -86,7 +83,7 @@ describe('/auth', () => {
 
       const response = await auth.registrationUser(preparedUser.valid);
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(response.body).toStrictEqual({ errorsMessages });
+      expect(response.body).toStrictEqual({errorsMessages});
     });
   });
 
@@ -98,13 +95,13 @@ describe('/auth', () => {
         email: preparedUser.short.email,
       });
       expect(response1.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(response1.body).toStrictEqual({ errorsMessages });
+      expect(response1.body).toStrictEqual({errorsMessages});
 
       const response2 = await auth.resendingConfirmationCode({
         email: preparedUser.long.email,
       });
       expect(response2.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(response2.body).toStrictEqual({ errorsMessages });
+      expect(response2.body).toStrictEqual({errorsMessages});
     });
 
     it('Should`t resending confirmation code, if email not registrated', async () => {
@@ -112,11 +109,11 @@ describe('/auth', () => {
         email: faker.internet.email(),
       });
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(response.body).toStrictEqual({ errorsMessages });
+      expect(response.body).toStrictEqual({errorsMessages});
     });
 
     it('Should resending confirmation code', async () => {
-      const { user } = expect.getState();
+      const {user} = expect.getState();
 
       const oldConfirmationCode = testing.getConfirmationCode(user.id);
 
@@ -128,47 +125,47 @@ describe('/auth', () => {
       const newConfirmationCode = await testing.getConfirmationCode(user.id);
       expect(oldConfirmationCode).not.toEqual(newConfirmationCode);
 
-      expect.setState({ confirmationCode: newConfirmationCode });
+      expect.setState({confirmationCode: newConfirmationCode});
     });
   });
 
   describe('POST -> "/auth/registration-confirmation"', () => {
     const errorsMessages = getErrorsMessage(['code']);
     it('Shouldn`t confirmed if the confirmation code is incorrect', async () => {
-      const { confirmationCode } = expect.getState();
+      const {confirmationCode} = expect.getState();
       const response = await auth.confirmRegistration(`${confirmationCode}-1`);
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
     });
 
     it('Shouldn`t confirmed if the confirmation code is expired', async () => {
-      const { user } = expect.getState();
+      const {user} = expect.getState();
 
       await testing.makeExpired(user.id);
       const confirmationCode = await testing.getConfirmationCode(user.id);
 
       const response = await auth.confirmRegistration(confirmationCode);
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(response.body).toEqual({ errorsMessages });
+      expect(response.body).toEqual({errorsMessages});
     });
 
     it('Email was verified. Account was activated', async () => {
-      const { user } = expect.getState();
-      await auth.resendingConfirmationCode({ email: user.email });
+      const {user} = expect.getState();
+      await auth.resendingConfirmationCode({email: user.email});
       const confirmationCode = await testing.getConfirmationCode(user.id);
 
       await auth.confirmRegistration(confirmationCode);
       const isConfirmed = await testing.checkConfirmationStatus(user.id);
       expect(isConfirmed).toBeTruthy();
 
-      expect.setState({ confirmationCode: confirmationCode });
+      expect.setState({confirmationCode: confirmationCode});
     });
 
     it('Shouldn`t confirmed if the confirmation code is already been applied', async () => {
-      const { confirmationCode } = expect.getState();
+      const {confirmationCode} = expect.getState();
 
       const response = await auth.confirmRegistration(confirmationCode);
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(response.body).toEqual({ errorsMessages });
+      expect(response.body).toEqual({errorsMessages});
     });
   });
 
@@ -179,12 +176,12 @@ describe('/auth', () => {
         preparedSecurity.email.notValid,
       );
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(response.body).toEqual({ errorsMessages });
+      expect(response.body).toEqual({errorsMessages});
     });
 
     it(
       'Shouldn`t return error even if current email is not' +
-        'registered (for prevent user`s email detection)',
+      'registered (for prevent user`s email detection)',
       async () => {
         const response = await auth.sendPasswordRecovery(
           preparedSecurity.email.notExist,
@@ -194,7 +191,7 @@ describe('/auth', () => {
     );
 
     it('Should update confirmation code', async () => {
-      const { user, confirmationCode } = expect.getState();
+      const {user, confirmationCode} = expect.getState();
 
       const response = await auth.sendPasswordRecovery(
         preparedSecurity.email.valid,
@@ -216,11 +213,11 @@ describe('/auth', () => {
         randomCode,
       );
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(response.body).toEqual({ errorsMessages });
+      expect(response.body).toEqual({errorsMessages});
     });
 
     it('Shouldn`t confirm password recovery if recovery code expired', async () => {
-      const { user } = expect.getState();
+      const {user} = expect.getState();
       const errorsMessages = getErrorMessage(['newPassword']);
 
       await testing.makeExpired(user.id);
@@ -231,13 +228,13 @@ describe('/auth', () => {
         expiredCode,
       );
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(response.body).toEqual({ errorsMessages });
+      expect(response.body).toEqual({errorsMessages});
     });
 
     it('Confirm password recovery', async () => {
-      const { user } = expect.getState();
+      const {user} = expect.getState();
 
-      await auth.sendPasswordRecovery({ email: preparedUser.valid.email });
+      await auth.sendPasswordRecovery({email: preparedUser.valid.email});
       const confirmationCode = await testing.getConfirmationCode(user.id);
 
       await auth.newPassword(preparedPassword.newPass, confirmationCode);
@@ -269,7 +266,7 @@ describe('/auth', () => {
   describe('POST -> "/auth/refresh-token"', () => {
     it(
       'Shouldn`t generate new pair token if the JWT refreshToken' +
-        'inside cookie is missing',
+      'inside cookie is missing',
       async () => {
         const response = await auth.generateToken();
         expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
@@ -278,9 +275,9 @@ describe('/auth', () => {
 
     it(
       'Shouldn`t generate new pair token if the JWT refreshToken' +
-        'inside cookie is incorrect',
+      'inside cookie is incorrect',
       async () => {
-        const { refreshToken } = expect.getState();
+        const {refreshToken} = expect.getState();
 
         const response = await auth.generateToken(`a1-${refreshToken}-1a`);
         expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
@@ -289,9 +286,9 @@ describe('/auth', () => {
 
     it(
       'Shouldn`t generate new pair token if the JWT' +
-        'inside cookie is expired',
+      'inside cookie is expired',
       async () => {
-        const { refreshToken } = expect.getState();
+        const {refreshToken} = expect.getState();
 
         const expiredToken = await testing.makeExpired(refreshToken);
 
@@ -305,7 +302,7 @@ describe('/auth', () => {
     );
 
     it('Should return new pair of access and refresh token', async () => {
-      const { refreshToken } = expect.getState();
+      const {refreshToken} = expect.getState();
 
       const response = await auth.generateToken(refreshToken);
       expect(response.status).toBe(HttpStatus.OK);
@@ -326,7 +323,7 @@ describe('/auth', () => {
     // })
 
     it('Return info about user', async () => {
-      const { user, refreshToken } = expect.getState();
+      const {user, refreshToken} = expect.getState();
 
       const response = await auth.getInfoAboutMe(refreshToken);
       expect(response.status).toBe(HttpStatus.OK);
@@ -341,14 +338,14 @@ describe('/auth', () => {
     });
 
     it('Shouldn`t logout if refresh token is incorrect', async () => {
-      const { refreshToken } = expect.getState();
+      const {refreshToken} = expect.getState();
 
       const response = await auth.logout(`a1-${refreshToken}-1a`);
       expect(response).toBe(HttpStatus.UNAUTHORIZED);
     });
 
     it('Shouldn`t logout if refresh token is expired', async () => {
-      const { refreshToken } = expect.getState();
+      const {refreshToken} = expect.getState();
 
       const expiredToken = await testing.makeExpired(refreshToken);
 

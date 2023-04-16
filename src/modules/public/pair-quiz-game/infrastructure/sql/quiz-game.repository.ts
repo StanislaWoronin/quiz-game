@@ -1,25 +1,26 @@
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { GameStatus } from '../../shared/game-status';
-import { SqlGameProgress } from './entity/sql-game-progress.entity';
-import { ViewGame } from '../../api/view/view-game';
-import { SqlGame } from './entity/sql-game.entity';
-import { SqlUsers } from '../../../../sa/users/infrastructure/sql/entity/users.entity';
-import { IQuizGameRepository } from '../i-quiz-game.repository';
-import { ViewAnswer } from '../../api/view/view-answer';
-import { AnswerStatus } from '../../shared/answer-status';
-import { SqlUserAnswer } from './entity/sql-user-answer.entity';
-import { ViewGameProgress } from '../../api/view/view-game-progress';
-import { SqlGameQuestions } from './entity/sql-game-questions.entity';
-import { SimpleGameDb } from './pojo/simple-game.db';
-import { toViewJoinGame } from '../../../../../common/data-mapper/to-view-join-game';
-import { SendAnswerDto } from '../../applications/dto/send-answer.dto';
-import { GameProgressDb } from './pojo/game-progress.db';
-import { settings } from '../../../../../settings';
-import { GameWhichNeedComplete } from './pojo/game-which-need-complete';
+import {InjectDataSource} from '@nestjs/typeorm';
+import {DataSource} from 'typeorm';
+import {GameStatus} from '../../shared/game-status';
+import {SqlGameProgress} from './entity/sql-game-progress.entity';
+import {ViewGame} from '../../api/view/view-game';
+import {SqlGame} from './entity/sql-game.entity';
+import {SqlUsers} from '../../../../sa/users/infrastructure/sql/entity/users.entity';
+import {IQuizGameRepository} from '../i-quiz-game.repository';
+import {ViewAnswer} from '../../api/view/view-answer';
+import {AnswerStatus} from '../../shared/answer-status';
+import {SqlUserAnswer} from './entity/sql-user-answer.entity';
+import {ViewGameProgress} from '../../api/view/view-game-progress';
+import {SqlGameQuestions} from './entity/sql-game-questions.entity';
+import {SimpleGameDb} from './pojo/simple-game.db';
+import {toViewJoinGame} from '../../../../../common/data-mapper/to-view-join-game';
+import {SendAnswerDto} from '../../applications/dto/send-answer.dto';
+import {GameProgressDb} from './pojo/game-progress.db';
+import {settings} from '../../../../../settings';
+import {GameWhichNeedComplete} from './pojo/game-which-need-complete';
 
 export class QuizGameRepository implements IQuizGameRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {
+  }
 
   async createGame(userId: string): Promise<ViewGame> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -45,7 +46,7 @@ export class QuizGameRepository implements IQuizGameRepository {
       const userLogin = await manager
         .createQueryBuilder(SqlUsers, 'u')
         .select('u.login', 'login')
-        .where('u.id = :id', { id: userId })
+        .where('u.id = :id', {id: userId})
         .getRawOne();
 
       await queryRunner.commitTransaction();
@@ -75,7 +76,7 @@ export class QuizGameRepository implements IQuizGameRepository {
           status: GameStatus.Active,
           startGameDate: new Date().toISOString(),
         })
-        .where('id = :gameId', { gameId })
+        .where('id = :gameId', {gameId})
         .execute();
 
       const gameQuery = `
@@ -129,7 +130,7 @@ export class QuizGameRepository implements IQuizGameRepository {
         await manager
           .createQueryBuilder()
           .update(SqlGameProgress)
-          .set({ score: () => `score + ${score}` })
+          .set({score: () => `score + ${score}`})
           .where('userId = :userId AND gameId = :gameId', {
             userId: dto.userId,
             gameId: dto.gameId,
@@ -155,14 +156,14 @@ export class QuizGameRepository implements IQuizGameRepository {
               status: GameStatus.Finished,
               finishGameDate: new Date().toISOString(),
             })
-            .where('id = :gameId', { gameId: dto.gameId })
+            .where('id = :gameId', {gameId: dto.gameId})
             .execute();
 
           if (firstAnsweredPlayer.score !== 0) {
             await manager
               .createQueryBuilder()
               .update(SqlGameProgress)
-              .set({ score: () => `score + ${extraScore}` })
+              .set({score: () => `score + ${extraScore}`})
               .where('userId = :userId AND gameId = :gameId', {
                 userId: firstAnsweredPlayer.userId,
                 gameId: dto.gameId,
@@ -201,11 +202,9 @@ export class QuizGameRepository implements IQuizGameRepository {
         this.findGameWhichNeedComplete(),
         [Number(settings.gameRules.questionsCount), currentTime],
       );
-      console.log('games:', games);
+
       if (!games.length) return;
-      console.log('i am find game');
       for (const game of games) {
-        console.log(game);
         const nextQuestionNumber = game.secondPlayerAnswerProgress;
         const unansweredQuestions: { questionId: string; userId: string }[] =
           await this.dataSource.query(this.getLastQuestionsIdQuery(), [
@@ -224,7 +223,7 @@ export class QuizGameRepository implements IQuizGameRepository {
         const answers = unansweredQuestions.map(
           (q) => new SqlUserAnswer(q.userId, game.gameId, q.questionId, null),
         );
-        console.log(answers);
+
         await manager.save(answers);
 
         await manager
@@ -234,7 +233,7 @@ export class QuizGameRepository implements IQuizGameRepository {
             status: GameStatus.Finished,
             finishGameDate: new Date().toISOString(),
           })
-          .where('id = :gameId', { gameId: game.gameId })
+          .where('id = :gameId', {gameId: game.gameId})
           .execute();
 
         const extraScore = 1;
@@ -242,7 +241,7 @@ export class QuizGameRepository implements IQuizGameRepository {
           await manager
             .createQueryBuilder()
             .update(SqlGameProgress)
-            .set({ score: () => `score + ${extraScore}` })
+            .set({score: () => `score + ${extraScore}`})
             .where('userId = :userId AND gameId = :gameId', {
               userId: firstAnsweredPlayer.userId,
               gameId: game.gameId,
