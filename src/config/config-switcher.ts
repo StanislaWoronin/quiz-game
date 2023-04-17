@@ -1,9 +1,9 @@
-import {MongooseModule} from '@nestjs/mongoose';
-import {MongooseConfig} from './mongoose.config';
-import {entity, mongooseModels} from '../app.module';
-import {TypeOrmModule} from '@nestjs/typeorm';
-import {settings} from '../settings';
-import {typeOrmConfig} from "./migrations/postgresql.config";
+import { MongooseModule } from '@nestjs/mongoose';
+import { MongooseConfig } from './mongoose.config';
+import { entity, mongooseModels } from '../app.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { settings } from '../settings';
+import { typeOrmConfig } from './migrations/postgresql.config';
 
 export const configSwitcher = (repositoryType: string) => {
   if (repositoryType === settings.repositoryType.mongoose) {

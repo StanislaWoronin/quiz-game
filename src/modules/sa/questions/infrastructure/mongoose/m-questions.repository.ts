@@ -1,11 +1,11 @@
-import {Injectable} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {MongoQuestion, QuestionsDocument} from './schema/question.schema';
-import {Model} from 'mongoose';
-import {CreatedQuestions} from '../../api/view/created-questions';
-import {UpdateQuestionDto} from '../../api/dto/update-question.dto';
-import {CreateQuestionDto} from '../../api/dto/create-question.dto';
-import {MongoAnswers} from './schema/answerSchema';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { MongoQuestion, QuestionsDocument } from './schema/question.schema';
+import { Model } from 'mongoose';
+import { CreatedQuestions } from '../../api/view/created-questions';
+import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
+import { CreateQuestionDto } from '../../api/dto/create-question.dto';
+import { MongoAnswers } from './schema/answerSchema';
 
 @Injectable()
 export class MQuestionsRepository {
@@ -13,7 +13,7 @@ export class MQuestionsRepository {
     @InjectModel(MongoQuestion.name)
     private questionsRepository: Model<QuestionsDocument>,
   ) {
-    console.log('repo')
+    console.log('repo');
   }
 
   async createQuestion(
@@ -31,7 +31,7 @@ export class MQuestionsRepository {
     dto: UpdateQuestionDto,
   ): Promise<boolean> {
     const result = await this.questionsRepository.updateOne(
-      {id: questionId},
+      { id: questionId },
       {
         $set: {
           body: dto.body,
@@ -49,15 +49,15 @@ export class MQuestionsRepository {
     published: boolean,
   ): Promise<boolean> {
     const result = await this.questionsRepository.updateOne(
-      {id: questionId, correctAnswers: {$exists: true}},
-      {published, updatedAt: new Date().toISOString()},
+      { id: questionId, correctAnswers: { $exists: true } },
+      { published, updatedAt: new Date().toISOString() },
     );
 
     return result.matchedCount === 1;
   }
 
   async deleteQuestion(questionId: string): Promise<boolean> {
-    const result = await this.questionsRepository.deleteOne({id: questionId});
+    const result = await this.questionsRepository.deleteOne({ id: questionId });
 
     return result.deletedCount === 1;
   }

@@ -1,23 +1,22 @@
-import {IQuizGameQueryRepository} from '../i-quiz-game-query.repository';
-import {GameStatus} from '../../shared/game-status';
-import {InjectDataSource} from '@nestjs/typeorm';
-import {DataSource} from 'typeorm';
-import {ViewGame} from '../../api/view/view-game';
-import {PlayerIdDb} from './pojo/player-id.db';
-import {GetCorrectAnswerDb} from './pojo/get-correct-answer.db';
-import {ViewPage} from '../../../../../common/pagination/view-page';
-import {GameDb} from './pojo/game.db';
-import {GameQueryDto} from '../../api/dto/query/game-query.dto';
-import {ViewUserStatistic} from '../../api/view/view-user-statistic';
-import {ViewTopPlayers} from '../../api/view/view-top-players';
-import {TopPlayersQueryDto} from '../../api/dto/query/top-players-query.dto';
-import {GameWhichNeedComplete} from './pojo/game-which-need-complete';
-import {settings} from '../../../../../settings';
-import {gameQueryOptions} from '../helpers/game-query-options.type';
+import { IQuizGameQueryRepository } from '../i-quiz-game-query.repository';
+import { GameStatus } from '../../shared/game-status';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { ViewGame } from '../../api/view/view-game';
+import { PlayerIdDb } from './pojo/player-id.db';
+import { GetCorrectAnswerDb } from './pojo/get-correct-answer.db';
+import { ViewPage } from '../../../../../common/pagination/view-page';
+import { GameDb } from './pojo/game.db';
+import { GameQueryDto } from '../../api/dto/query/game-query.dto';
+import { ViewUserStatistic } from '../../api/view/view-user-statistic';
+import { ViewTopPlayers } from '../../api/view/view-top-players';
+import { TopPlayersQueryDto } from '../../api/dto/query/top-players-query.dto';
+import { GameWhichNeedComplete } from './pojo/game-which-need-complete';
+import { settings } from '../../../../../settings';
+import { gameQueryOptions } from '../helpers/game-query-options.type';
 
 export class QuizGameQueryRepository implements IQuizGameQueryRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {
-  }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getMyGames(
     userId: string,
@@ -59,7 +58,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   }
 
   async getGameById(userId: string, gameId: string): Promise<ViewGame | null> {
-    const query = this.getGameQuery({_gameIdFilter: true});
+    const query = this.getGameQuery({ _gameIdFilter: true });
     const result = await this.dataSource.query(query, [userId, gameId]);
     if (!result[0]) {
       return null;
@@ -119,12 +118,12 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
       const result: ViewUserStatistic[] = await this.dataSource.query(query, [
         userId,
       ]);
-      console.log(result)
+      console.log(result);
       result[0].avgScores = Number(result[0].avgScores); // TODO FIXIT
 
       return result[0];
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
 
@@ -236,7 +235,9 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     return result[0].count;
   }
 
-  async findGamesWhichNeedComplete(currentTime: string): Promise<GameWhichNeedComplete[]> {
+  async findGamesWhichNeedComplete(
+    currentTime: string,
+  ): Promise<GameWhichNeedComplete[]> {
     const query = `
       SELECT g.id AS "gameId", ua."userId" AS "fistAnsweredPlayerId", MAX(ua."addedAt") AS "fistPlayerAnsweredTime",
              (SELECT COUNT(*)
@@ -258,15 +259,18 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
        GROUP BY g.id, ua."userId"
       HAVING COUNT(*) = $1
          AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = 5 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '10 seconds');
-    `
-    return await this.dataSource.query(query, [Number(settings.gameRules.questionsCount), currentTime])
+    `;
+    return await this.dataSource.query(query, [
+      Number(settings.gameRules.questionsCount),
+      currentTime,
+    ]);
   }
 
   private getGameQuery({
-                         _gameIdFilter,
-                         gameStatus,
-                         dto,
-                       }: gameQueryOptions): string {
+    _gameIdFilter,
+    gameStatus,
+    dto,
+  }: gameQueryOptions): string {
     let gameIdFilter = '';
     if (_gameIdFilter) {
       gameIdFilter = `WHERE g.id = $2`;

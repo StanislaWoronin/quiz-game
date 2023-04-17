@@ -1,6 +1,6 @@
-import {PostgresConnectionOptions} from "typeorm/driver/postgres/PostgresConnectionOptions";
-import {entity} from "../../app.module";
-import {DataSource} from "typeorm";
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+import { entity } from '../../app.module';
+import { DataSource } from 'typeorm';
 
 // export const typeOrmConfig: PostgresConnectionOptions = {
 //   type: 'postgres',
@@ -9,7 +9,6 @@ import {DataSource} from "typeorm";
 //   migrations: [__dirname + '/migrations-files/**/*{.ts,.js}'],
 //   entities: entity
 // }
-
 
 export const typeOrmConfig: PostgresConnectionOptions = {
   type: 'postgres',
@@ -20,8 +19,7 @@ export const typeOrmConfig: PostgresConnectionOptions = {
   database: 'quiz_game',
   synchronize: false,
   migrations: [__dirname + '/migrations-files/**/*{.ts,.js}'],
-  entities: entity
-}
+  entities: entity,
+};
 
-
-export default new DataSource(typeOrmConfig)
+export default new DataSource(typeOrmConfig);

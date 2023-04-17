@@ -1,15 +1,18 @@
-import {Inject, Injectable} from '@nestjs/common';
-import {ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface,} from 'class-validator';
-import {IEmailConfirmationRepository} from '../../../sa/users/infrastructure/i-email-confirmation.repository';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+import { IEmailConfirmationRepository } from '../../../sa/users/infrastructure/i-email-confirmation.repository';
 
-@ValidatorConstraint({name: 'ConfirmationCodeValidator', async: true})
+@ValidatorConstraint({ name: 'ConfirmationCodeValidator', async: true })
 @Injectable()
 export class PasswordRecoveryValidator implements ValidatorConstraintInterface {
   constructor(
     @Inject(IEmailConfirmationRepository)
     protected emailConfirmationRepository: IEmailConfirmationRepository,
-  ) {
-  }
+  ) {}
 
   async validate(code: string) {
     const emailConfirmation =

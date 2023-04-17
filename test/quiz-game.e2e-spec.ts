@@ -1,27 +1,32 @@
-import {HttpStatus, INestApplication} from '@nestjs/common';
-import {QuestionsFactory} from './helpers/factories/questions-factory';
-import {Questions} from './helpers/request/questions';
-import {Testing} from './helpers/request/testing';
-import {Test, TestingModule} from '@nestjs/testing';
-import {AppModule} from '../src/app.module';
-import {createApp} from '../src/config/create-app';
-import {Game} from './helpers/request/game';
-import {Users} from './helpers/request/users';
-import {UsersFactory} from './helpers/factories/users-factory';
-import {Auth} from './helpers/request/auth';
-import {expectAnswer, expectPlayerProgress, expectQuestions, expectViewGame,} from './helpers/expect-data/expect-game';
-import {GameStatus} from '../src/modules/public/pair-quiz-game/shared/game-status';
-import {AnswerStatus} from '../src/modules/public/pair-quiz-game/shared/answer-status';
-import {preparedGameData} from './helpers/prepeared-data/prepared-game-data';
-import {GameFactory} from './helpers/factories/game-factory';
-import {randomUUID} from 'crypto';
-import {faker} from '@faker-js/faker';
-import {expectPagination} from './helpers/expect-data/expect-pagination';
-import {SortByGameField} from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
-import {SortDirection} from '../src/common/pagination/query-parameters/sort-direction';
-import {TopPlayersSortField} from '../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field';
-import {sleep} from './helpers/helpers';
-import {preparedAnswer} from "./helpers/prepeared-data/prepared-answer";
+import { HttpStatus, INestApplication } from '@nestjs/common';
+import { QuestionsFactory } from './helpers/factories/questions-factory';
+import { Questions } from './helpers/request/questions';
+import { Testing } from './helpers/request/testing';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppModule } from '../src/app.module';
+import { createApp } from '../src/config/create-app';
+import { Game } from './helpers/request/game';
+import { Users } from './helpers/request/users';
+import { UsersFactory } from './helpers/factories/users-factory';
+import { Auth } from './helpers/request/auth';
+import {
+  expectAnswer,
+  expectPlayerProgress,
+  expectQuestions,
+  expectViewGame,
+} from './helpers/expect-data/expect-game';
+import { GameStatus } from '../src/modules/public/pair-quiz-game/shared/game-status';
+import { AnswerStatus } from '../src/modules/public/pair-quiz-game/shared/answer-status';
+import { preparedGameData } from './helpers/prepeared-data/prepared-game-data';
+import { GameFactory } from './helpers/factories/game-factory';
+import { randomUUID } from 'crypto';
+import { faker } from '@faker-js/faker';
+import { expectPagination } from './helpers/expect-data/expect-pagination';
+import { SortByGameField } from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
+import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
+import { TopPlayersSortField } from '../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field';
+import { sleep } from './helpers/helpers';
+import { preparedAnswer } from './helpers/prepeared-data/prepared-answer';
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -64,8 +69,8 @@ describe('/sa/quiz/questions (e2e)', () => {
 
   describe(
     'POST -> "pair-game-quiz/pair/connection".' +
-    'Connect current user to existing random pending pair or create' +
-    'new pair which will be waiting second player',
+      'Connect current user to existing random pending pair or create' +
+      'new pair which will be waiting second player',
     () => {
       it('Clear data base', async () => {
         await testing.clearDb();
@@ -90,13 +95,13 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('User create new pair quiz-game', async () => {
-        const {firstUser} = expect.getState();
+        const { firstUser } = expect.getState();
 
         const createdGame = await game.joinGame(firstUser.accessToken);
         expect(createdGame.status).toBe(HttpStatus.OK);
         expect(createdGame.body).toStrictEqual(
           expectViewGame(
-            {first: expectPlayerProgress(firstUser.user, {})},
+            { first: expectPlayerProgress(firstUser.user, {}) },
             GameStatus.PendingSecondPlayer,
           ),
         );
@@ -111,14 +116,14 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('1 - Shouldn`t join into the game, if user already has active game', async () => {
-        const {firstUser} = expect.getState();
+        const { firstUser } = expect.getState();
 
         const response = await game.joinGame(firstUser.accessToken);
         expect(response.status).toBe(HttpStatus.FORBIDDEN);
       });
 
       it('User join into active game', async () => {
-        const {firstUser, secondUser, questions} = expect.getState();
+        const { firstUser, secondUser, questions } = expect.getState();
 
         const response = await game.joinGame(secondUser.accessToken);
         expect(response.status).toBe(HttpStatus.OK);
@@ -135,14 +140,14 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('2 - Shouldn`t join into the game, if user already has active game', async () => {
-        const {firstUser} = expect.getState();
+        const { firstUser } = expect.getState();
 
         const response = await game.joinGame(firstUser.accessToken);
         expect(response.status).toBe(HttpStatus.FORBIDDEN);
       });
 
       it('3 - Shouldn`t join into the game, if user already has active game', async () => {
-        const {secondUser} = expect.getState();
+        const { secondUser } = expect.getState();
 
         const response = await game.joinGame(secondUser.accessToken);
         expect(response.status).toBe(HttpStatus.FORBIDDEN);
@@ -152,7 +157,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
   describe(
     'POST -> "pair-game-quiz/pair/my-current/answers"' +
-    'Send answer for next not answered questions in active pair',
+      'Send answer for next not answered questions in active pair',
     () => {
       it('Clear data base', async () => {
         await testing.clearDb();
@@ -182,7 +187,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('Should send answer', async () => {
-        const {firstUser} = expect.getState();
+        const { firstUser } = expect.getState();
 
         const response = await game.sendAnswer(
           preparedAnswer.random,
@@ -195,7 +200,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('The user can`t send a response if he is not in an active pair', async () => {
-        const {thirdUser} = expect.getState();
+        const { thirdUser } = expect.getState();
 
         const thirdUserAnswered = await game.sendAnswer(
           preparedAnswer.random,
@@ -206,9 +211,9 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       it(
         'The user can`t send a response if he has already answered on' +
-        ' all questions',
+          ' all questions',
         async () => {
-          const {secondUser, questions} = expect.getState();
+          const { secondUser, questions } = expect.getState();
 
           await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
             1: AnswerStatus.Incorrect,
@@ -309,7 +314,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Shouldn`t return game if specifical id not found', async () => {
-      const {firstUser} = expect.getState();
+      const { firstUser } = expect.getState();
       const randomId = randomUUID();
 
       const response = await game.getGameById(randomId, firstUser.accessToken);
@@ -318,9 +323,9 @@ describe('/sa/quiz/questions (e2e)', () => {
 
     it(
       'Shouldn`t return game if user tries to get pair in which user ' +
-      'is not participant',
+        'is not participant',
       async () => {
-        const {thirdUser, gameId} = expect.getState();
+        const { thirdUser, gameId } = expect.getState();
 
         const response = await game.getGameById(gameId, thirdUser.accessToken);
         expect(response.status).toBe(HttpStatus.FORBIDDEN);
@@ -328,14 +333,14 @@ describe('/sa/quiz/questions (e2e)', () => {
     );
 
     it('Shouldn`t return game, if he is unauthorized', async () => {
-      const {gameId} = expect.getState();
+      const { gameId } = expect.getState();
 
       const response = await game.getGameById(gameId);
       expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
     });
 
     it('Shouldn`t return game, if id has invalid format', async () => {
-      const {firstUser} = expect.getState();
+      const { firstUser } = expect.getState();
       const invalidId = Date.now();
 
       const response = await game.getGameById(
@@ -346,7 +351,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Should return "Active" game', async () => {
-      const {firstUser, secondUser, gameId, questions} = expect.getState();
+      const { firstUser, secondUser, gameId, questions } = expect.getState();
 
       const response = await game.getGameById(gameId, firstUser.accessToken);
       expect(response.status).toBe(HttpStatus.OK);
@@ -363,7 +368,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Should return "PendingSecondPlayer" game', async () => {
-      const {thirdUser} = expect.getState();
+      const { thirdUser } = expect.getState();
 
       const createdGame = await game.joinGame(thirdUser.accessToken);
       const response = await game.getGameById(
@@ -382,7 +387,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Should return "Finished" game', async () => {
-      const {firstUser, secondUser, gameId, questions} = expect.getState();
+      const { firstUser, secondUser, gameId, questions } = expect.getState();
 
       await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
         1: AnswerStatus.Incorrect,
@@ -437,7 +442,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
   describe(
     'GET -> "pair-game-quiz/pair/my-current". ' +
-    'Return current unfinished user game',
+      'Return current unfinished user game',
     () => {
       it('Clear data base', async () => {
         await testing.clearDb();
@@ -463,7 +468,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('Shouldn`t return game if user don`t has active pair', async () => {
-        const {thirdUser} = expect.getState();
+        const { thirdUser } = expect.getState();
 
         const response = await game.getMyCurrentGame(thirdUser.accessToken);
         expect(response.status).toBe(HttpStatus.NOT_FOUND);
@@ -475,7 +480,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('Should return game', async () => {
-        const {firstUser, secondUser, questions} = expect.getState();
+        const { firstUser, secondUser, questions } = expect.getState();
 
         const response = await game.getMyCurrentGame(firstUser.accessToken);
         expect(response.status).toBe(HttpStatus.OK);
@@ -492,7 +497,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('Shouldn`t return the game if the game has been completed', async () => {
-        const {firstUser, secondUser, questions} = expect.getState();
+        const { firstUser, secondUser, questions } = expect.getState();
 
         await gameFactory.sendManyAnswer(firstUser.accessToken, questions, {
           1: AnswerStatus.Incorrect,
@@ -519,7 +524,7 @@ describe('/sa/quiz/questions (e2e)', () => {
   describe('Scoring test', () => {
     describe(
       'First and second players take turns answering questions. Both players score' +
-      'the same number of points, but the first one wins because he was the first',
+        'the same number of points, but the first one wins because he was the first',
       () => {
         it('Clear data base', async () => {
           await testing.clearDb();
@@ -544,7 +549,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
 
         it('1 - First player send incorrect answer for first questions', async () => {
-          const {firstUser, secondUser, questions} = expect.getState();
+          const { firstUser, secondUser, questions } = expect.getState();
 
           await game.sendAnswer(faker.random.alpha(5), firstUser.accessToken);
           const response = await game.getMyCurrentGame(firstUser.accessToken);
@@ -563,7 +568,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
 
         it('2 - Second player send correct answer for first questions', async () => {
-          const {firstUser, secondUser, gameId, questions} =
+          const { firstUser, secondUser, gameId, questions } =
             expect.getState();
 
           await gameFactory.sendCorrectAnswer(
@@ -595,7 +600,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
 
         it('3 - First player send correct answer for second questions', async () => {
-          const {firstUser, secondUser, questions} = expect.getState();
+          const { firstUser, secondUser, questions } = expect.getState();
 
           await gameFactory.sendCorrectAnswer(
             firstUser.accessToken,
@@ -628,7 +633,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
 
         it('4 - Second player send incorrect answer for second questions', async () => {
-          const {firstUser, secondUser, questions} = expect.getState();
+          const { firstUser, secondUser, questions } = expect.getState();
 
           await game.sendAnswer(faker.random.alpha(5), secondUser.accessToken);
           const response = await game.getMyCurrentGame(secondUser.accessToken);
@@ -659,7 +664,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
 
         it('5 - First player send correct th for third questions', async () => {
-          const {firstUser, secondUser, gameId, questions} =
+          const { firstUser, secondUser, gameId, questions } =
             expect.getState();
 
           await gameFactory.sendCorrectAnswer(
@@ -698,7 +703,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
 
         it('6 - Second player send correct answer for third questions', async () => {
-          const {firstUser, secondUser, questions} = expect.getState();
+          const { firstUser, secondUser, questions } = expect.getState();
 
           await gameFactory.sendCorrectAnswer(
             secondUser.accessToken,
@@ -734,7 +739,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
 
         it('7 - First player send correct answer for fourth questions', async () => {
-          const {firstUser, secondUser, questions} = expect.getState();
+          const { firstUser, secondUser, questions } = expect.getState();
 
           await gameFactory.sendCorrectAnswer(
             firstUser.accessToken,
@@ -771,7 +776,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
 
         it('8 - Second player send correct answer for fourth questions', async () => {
-          const {firstUser, secondUser, questions} = expect.getState();
+          const { firstUser, secondUser, questions } = expect.getState();
 
           await gameFactory.sendCorrectAnswer(
             secondUser.accessToken,
@@ -809,7 +814,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
 
         it('9 - First player send incorrect th for fifth questions', async () => {
-          const {firstUser, secondUser, questions} = expect.getState();
+          const { firstUser, secondUser, questions } = expect.getState();
 
           await game.sendAnswer(faker.random.alpha(5), firstUser.accessToken);
           const response = await game.getMyCurrentGame(secondUser.accessToken);
@@ -845,7 +850,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
 
         it('10 - Second player send incorrect answer for fifth questions', async () => {
-          const {firstUser, secondUser, gameId, questions} =
+          const { firstUser, secondUser, gameId, questions } =
             expect.getState();
 
           await game.sendAnswer(faker.random.alpha(5), secondUser.accessToken);
@@ -889,7 +894,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
     describe(
       'The first player went faster, but gave zero correct answers. The second' +
-      'player gave one correct answer. Second player wins',
+        'player gave one correct answer. Second player wins',
       () => {
         it('Clear data base', async () => {
           await testing.clearDb();
@@ -937,7 +942,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
 
         it('Return game by id', async () => {
-          const {firstUser, secondUser, gameId, questions} =
+          const { firstUser, secondUser, gameId, questions } =
             expect.getState();
 
           const response = await game.getGameById(
@@ -1011,7 +1016,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Send answer for fist game', async () => {
-      const {firstUser, secondUser, firstGame, questions} = expect.getState();
+      const { firstUser, secondUser, firstGame, questions } = expect.getState();
 
       await gameFactory.sendCorrectAnswer(firstUser.accessToken, questions[0]);
       const answer1 = await game.getMyCurrentGame(firstUser.accessToken);
@@ -1076,7 +1081,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Create third game by secondUser, connect to the game by firstUser', async () => {
-      const {firstUser, secondUser} = expect.getState();
+      const { firstUser, secondUser } = expect.getState();
 
       const createdGame = await gameFactory.createGame(secondUser, firstUser);
       expect(createdGame.status).toBe(HttpStatus.OK);
@@ -1205,7 +1210,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Create fourth game by secondUser, connect to the game by firstUser', async () => {
-      const {firstUser, secondUser} = expect.getState();
+      const { firstUser, secondUser } = expect.getState();
 
       const createdGame = await gameFactory.createGame(secondUser, firstUser);
       expect(createdGame.status).toBe(HttpStatus.OK);
@@ -1272,7 +1277,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Create fifth game by secondUser, connect to the game by firstUser', async () => {
-      const {firstUser, secondUser} = expect.getState();
+      const { firstUser, secondUser } = expect.getState();
 
       const createdGame = await gameFactory.createGame(secondUser, firstUser);
       expect(createdGame.status).toBe(HttpStatus.OK);
@@ -1376,7 +1381,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
   describe(
     'GET -> "pair-game-quiz/pair/my". ' +
-    'Return all games current user in status "Current" and "Finished"',
+      'Return all games current user in status "Current" and "Finished"',
     () => {
       it('Clear data base', async () => {
         await testing.clearDb();
@@ -1398,7 +1403,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         const response = await game.getMyGames({}, firstPlayer.accessToken);
         expect(response.status).toBe(HttpStatus.OK);
         expect(response.body).toStrictEqual(
-          expectPagination([], {totalCount: 0}),
+          expectPagination([], { totalCount: 0 }),
         );
 
         expect.setState({
@@ -1408,7 +1413,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('Second player join into the game', async () => {
-        const {firstPlayer} = expect.getState();
+        const { firstPlayer } = expect.getState();
 
         const [secondPlayer] = await usersFactory.createAndLoginUsers(1, 1);
         const activeGame = await game.joinGame(secondPlayer.accessToken);
@@ -1416,7 +1421,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         const response = await game.getMyGames({}, firstPlayer.accessToken);
         expect(response.status).toBe(HttpStatus.OK);
         expect(response.body).toStrictEqual(
-          expectPagination([activeGame.body], {totalCount: 1}),
+          expectPagination([activeGame.body], { totalCount: 1 }),
         );
 
         expect.setState({
@@ -1427,7 +1432,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('Send answer, and return my games', async () => {
-        const {firstPlayer, secondPlayer, firstGame, firstGameQuestions} =
+        const { firstPlayer, secondPlayer, firstGame, firstGameQuestions } =
           expect.getState();
 
         await gameFactory.sendCorrectAnswer(
@@ -1458,7 +1463,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 firstGame.body.questions,
               ),
             ],
-            {totalCount: 1},
+            { totalCount: 1 },
           ),
         );
 
@@ -1501,7 +1506,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 firstGame.body.questions,
               ),
             ],
-            {totalCount: 1},
+            { totalCount: 1 },
           ),
         );
 
@@ -1546,7 +1551,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 firstGame.body.questions,
               ),
             ],
-            {totalCount: 1},
+            { totalCount: 1 },
           ),
         );
 
@@ -1593,7 +1598,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 firstGame.body.questions,
               ),
             ],
-            {totalCount: 1},
+            { totalCount: 1 },
           ),
         );
       });
@@ -1608,7 +1613,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         const response = await game.getMyGames({}, thirdUser.accessToken);
         expect(response.status).toBe(HttpStatus.OK);
         expect(response.body).toStrictEqual(
-          expectPagination([secondGame.body], {totalCount: 1}),
+          expectPagination([secondGame.body], { totalCount: 1 }),
         );
 
         expect.setState({
@@ -1619,7 +1624,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
 
       it('Send answer for second game, and return all user games', async () => {
-        const {thirdPlayer, fourthPlayer, secondGameQuestions} =
+        const { thirdPlayer, fourthPlayer, secondGameQuestions } =
           expect.getState();
 
         await gameFactory.sendManyAnswer(
@@ -1657,7 +1662,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 secondGameQuestions,
               ),
             ],
-            {totalCount: 1},
+            { totalCount: 1 },
           ),
         );
 
@@ -1702,7 +1707,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 secondGameQuestions,
               ),
             ],
-            {totalCount: 1},
+            { totalCount: 1 },
           ),
         );
 
@@ -1749,7 +1754,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 secondGameQuestions,
               ),
             ],
-            {totalCount: 1},
+            { totalCount: 1 },
           ),
         );
 
@@ -1800,13 +1805,13 @@ describe('/sa/quiz/questions (e2e)', () => {
                 secondGameQuestions,
               ),
             ],
-            {totalCount: 1},
+            { totalCount: 1 },
           ),
         );
       });
 
       it('End fist game', async () => {
-        const {firstPlayer, secondPlayer, firstGameQuestions} =
+        const { firstPlayer, secondPlayer, firstGameQuestions } =
           expect.getState();
 
         await gameFactory.sendManyAnswer(
@@ -1854,7 +1859,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 firstGameQuestions,
               ),
             ],
-            {totalCount: 1},
+            { totalCount: 1 },
           ),
         );
 
@@ -1900,7 +1905,7 @@ describe('/sa/quiz/questions (e2e)', () => {
                 firstGameQuestions,
               ),
             ],
-            {totalCount: 1},
+            { totalCount: 1 },
           ),
         );
 
@@ -1911,9 +1916,9 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       it(
         'Testing pagination. Create some game by fist user, and return' +
-        'all game without pagination',
+          'all game without pagination',
         async () => {
-          const {firstPlayer, endedFistGame} = expect.getState();
+          const { firstPlayer, endedFistGame } = expect.getState();
           const finishedGames = await gameFactory.createFinishedGames(12, {
             first: firstPlayer,
             startFrom: 4,
@@ -1964,7 +1969,7 @@ describe('/sa/quiz/questions (e2e)', () => {
               expectGames[2],
               expectGames[3],
             ],
-            {pageSize: 5, totalCount: totalCount + 1},
+            { pageSize: 5, totalCount: totalCount + 1 },
           ),
         );
 
@@ -1991,7 +1996,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
   describe(
     'GET -> "pair-game-quiz/users/my-statistic"' +
-    'Return current user statistic.',
+      'Return current user statistic.',
     () => {
       it('Clear data base', async () => {
         await testing.clearDb();
@@ -2029,11 +2034,11 @@ describe('/sa/quiz/questions (e2e)', () => {
       );
 
       const gamesStat = await gameFactory.createPlayersTop(5, 5);
-      expect.setState({gamesStat});
+      expect.setState({ gamesStat });
     });
 
     it('Return statistic without pagination', async () => {
-      const {gamesStat} = expect.getState();
+      const { gamesStat } = expect.getState();
 
       const expectStats = gameFactory.sortStats(gamesStat, [
         TopPlayersSortField.AvgScoresDESC,
@@ -2043,12 +2048,12 @@ describe('/sa/quiz/questions (e2e)', () => {
       const response = await game.getTopPlayers({});
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toEqual(
-        expectPagination(expectStats, {totalCount: 5}),
+        expectPagination(expectStats, { totalCount: 5 }),
       );
     });
 
     it('Return statistic with pagination', async () => {
-      const {gamesStat} = expect.getState();
+      const { gamesStat } = expect.getState();
 
       const expectStats = gameFactory.sortStats(gamesStat, [
         TopPlayersSortField.LossesCountASC,
@@ -2075,7 +2080,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Return statistic with one sort parametr', async () => {
-      const {gamesStat} = expect.getState();
+      const { gamesStat } = expect.getState();
 
       const expectStats = gameFactory.sortStats(gamesStat, [
         TopPlayersSortField.AvgScoresDESC,
@@ -2087,12 +2092,12 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toEqual(
-        expectPagination(expectStats, {totalCount: 5}),
+        expectPagination(expectStats, { totalCount: 5 }),
       );
     });
 
     it('Return statistic with pagination', async () => {
-      const {gamesStat} = expect.getState();
+      const { gamesStat } = expect.getState();
 
       const expectStats = gameFactory.sortStats(gamesStat, [
         TopPlayersSortField.LossesCountASC,

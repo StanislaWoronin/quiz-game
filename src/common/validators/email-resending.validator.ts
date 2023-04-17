@@ -1,9 +1,13 @@
-import {Inject, Injectable} from '@nestjs/common';
-import {ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface,} from 'class-validator';
-import {IEmailConfirmationRepository} from '../../modules/sa/users/infrastructure/i-email-confirmation.repository';
-import {IUsersQueryRepository} from '../../modules/sa/users/infrastructure/i-users-query.repository';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+import { IEmailConfirmationRepository } from '../../modules/sa/users/infrastructure/i-email-confirmation.repository';
+import { IUsersQueryRepository } from '../../modules/sa/users/infrastructure/i-users-query.repository';
 
-@ValidatorConstraint({name: 'EmailResendingValidator', async: true})
+@ValidatorConstraint({ name: 'EmailResendingValidator', async: true })
 @Injectable()
 export class EmailResendingValidator implements ValidatorConstraintInterface {
   constructor(
@@ -11,8 +15,7 @@ export class EmailResendingValidator implements ValidatorConstraintInterface {
     protected emailConfirmationRepository: IEmailConfirmationRepository,
     @Inject(IUsersQueryRepository)
     protected usersQueryRepository: IUsersQueryRepository,
-  ) {
-  }
+  ) {}
 
   async validate(email) {
     const user = await this.usersQueryRepository.getUserByLoginOrEmail(email);
