@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
+import {Injectable} from '@nestjs/common';
+import {TypeOrmModuleOptions, TypeOrmOptionsFactory} from '@nestjs/typeorm';
+import {ConfigService} from '@nestjs/config';
 
 @Injectable()
 export class TypeOrmConfig implements TypeOrmOptionsFactory {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+  }
 
   private getUrl(): string {
     const env = this.configService.get('ENV_TYPE');
@@ -35,7 +36,7 @@ export class TypeOrmConfig implements TypeOrmOptionsFactory {
       type: 'postgres',
       url: this.getUrl(),
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
       ssl: this.getSsl(),
     };
   }

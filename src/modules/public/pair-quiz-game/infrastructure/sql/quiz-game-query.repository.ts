@@ -99,7 +99,8 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
   }
 
   async getUserStatistic(userId: string): Promise<ViewUserStatistic> {
-    const query = `
+    try {
+      const query = `
       SELECT COUNT(g.id) AS "gamesCount",
              CAST(COUNT(DISTINCT fp."gameId") AS INTEGER) AS "gamesCount",
              CAST(SUM(fp.score) AS INTEGER) AS "sumScore",
@@ -110,17 +111,21 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
                 WHEN AVG(fp.score) % 1 = 0 
                 THEN CAST(AVG(fp.score) AS INTEGER)
                 ELSE CAST(ROUND(AVG(fp.score), 2) AS NUMERIC(10,2))
-             END AS NUMERIC) AS "avgScores"
+             END AS DOUBLE PRECISION) AS "avgScores"
         FROM sql_game g
         JOIN sql_game_progress fp ON g.id = fp."gameId" AND fp."userId" = $1
         JOIN sql_game_progress sp ON g.id = sp."gameId" AND sp."userId" != $1;
     `;
-    const result: ViewUserStatistic[] = await this.dataSource.query(query, [
-      userId,
-    ]);
-    result[0].avgScores = Number(result[0].avgScores); // TODO FIXIT
+      const result: ViewUserStatistic[] = await this.dataSource.query(query, [
+        userId,
+      ]);
+      console.log(result)
+      result[0].avgScores = Number(result[0].avgScores); // TODO FIXIT
 
-    return result[0];
+      return result[0];
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   async getTopPlayers(

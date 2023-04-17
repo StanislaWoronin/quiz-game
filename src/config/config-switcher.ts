@@ -2,8 +2,8 @@ import {MongooseModule} from '@nestjs/mongoose';
 import {MongooseConfig} from './mongoose.config';
 import {entity, mongooseModels} from '../app.module';
 import {TypeOrmModule} from '@nestjs/typeorm';
-import {TypeOrmConfig} from './type-orm.config';
 import {settings} from '../settings';
+import {typeOrmConfig} from "./migrations/postgresql.config";
 
 export const configSwitcher = (repositoryType: string) => {
   if (repositoryType === settings.repositoryType.mongoose) {
@@ -16,9 +16,7 @@ export const configSwitcher = (repositoryType: string) => {
   }
 
   return [
-    TypeOrmModule.forRootAsync({
-      useClass: TypeOrmConfig,
-    }),
+    TypeOrmModule.forRoot(typeOrmConfig),
     TypeOrmModule.forFeature([...entity]),
   ];
 };
