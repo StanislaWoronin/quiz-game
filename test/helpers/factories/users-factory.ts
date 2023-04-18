@@ -25,7 +25,7 @@ export class UsersFactory {
         preparedSuperUser.valid,
         inputData,
       );
-      console.log(response.body)
+
       result.push(response.body);
     }
 

@@ -1,4 +1,4 @@
-import {SqlUsers} from "../../infrastructure/sql/entity/users.entity";
+import { SqlUsers } from '../../infrastructure/sql/entity/users.entity';
 
 export class CreatedUser {
   readonly id: string;

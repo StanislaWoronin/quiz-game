@@ -1,11 +1,11 @@
-import {Inject, Injectable} from '@nestjs/common';
-import {IUsersRepository} from '../infrastructure/i-users.repository';
-import {CreatedUser} from '../api/view/created-user';
-import {CreateUserDto} from '../api/dto/create-user.dto';
+import { Inject, Injectable } from '@nestjs/common';
+import { IUsersRepository } from '../infrastructure/i-users.repository';
+import { CreatedUser } from '../api/view/created-user';
+import { CreateUserDto } from '../api/dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
-import {settings} from '../../../../settings';
-import {UpdateUserBanStatusDto} from '../api/dto/update-user-ban-status.dto';
-import {EmailConfirmationDto} from "./dto/email-confirmation.dto";
+import { settings } from '../../../../settings';
+import { UpdateUserBanStatusDto } from '../api/dto/update-user-ban-status.dto';
+import { EmailConfirmationDto } from './dto/email-confirmation.dto';
 
 @Injectable()
 export class UsersService {

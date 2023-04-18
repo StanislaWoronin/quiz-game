@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { SqlUsers } from './users.entity';
 
-@Entity({name: 'sql_user_ban_info'})
+@Entity({ name: 'sql_user_ban_info' })
 export class SqlUserBanInfo {
   @Column({
     type: 'character varying',

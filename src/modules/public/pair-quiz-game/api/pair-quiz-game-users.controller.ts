@@ -6,8 +6,11 @@ import { ViewPage } from '../../../../common/pagination/view-page';
 import { ViewUserStatistic } from './view/view-user-statistic';
 import { TopPlayersQueryDto } from './dto/query/top-players-query.dto';
 import { ViewTopPlayers } from './view/view-top-players';
-import {ApiTags} from "@nestjs/swagger";
-import {ApiGetTopPlayers, ApiGetUserStatistic} from "../../../documentations/quiz-game.documentation";
+import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiGetTopPlayers,
+  ApiGetUserStatistic,
+} from '../../../documentations/quiz-game.documentation';
 
 @ApiTags('PairQuizGame')
 @Controller('pair-game-quiz')

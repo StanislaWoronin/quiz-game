@@ -30,7 +30,7 @@ import { preparedAnswer } from './helpers/prepeared-data/prepared-answer';
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
-  jest.setTimeout(100 * second);
+  jest.setTimeout(40 * second);
 
   let app: INestApplication;
   let server;
@@ -270,12 +270,6 @@ describe('/sa/quiz/questions (e2e)', () => {
         expect(finishedGame.body.status).toBe(GameStatus.Finished);
         expect(finishedGame.body.secondPlayerProgress);
         expect(finishedGame.body.secondPlayerProgress.score).toBe(2);
-
-        console.log(
-          finishedGame.body.secondPlayerProgress.answers.map(
-            (v) => v.questionId,
-          ),
-        );
 
         expect(finishedGame.body.secondPlayerProgress.answers).toEqual([
           expectAnswer(AnswerStatus.Correct),
@@ -2052,7 +2046,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       );
     });
 
-    it('Return statistic with pagination', async () => {
+    it('Return statistic with pagination 1', async () => {
       const { gamesStat } = expect.getState();
 
       const expectStats = gameFactory.sortStats(gamesStat, [
@@ -2079,7 +2073,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       );
     });
 
-    it('Return statistic with one sort parametr', async () => {
+    it('Return statistic with one sort parametr 2', async () => {
       const { gamesStat } = expect.getState();
 
       const expectStats = gameFactory.sortStats(gamesStat, [
@@ -2096,7 +2090,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       );
     });
 
-    it('Return statistic with pagination', async () => {
+    it('Return statistic with pagination 3', async () => {
       const { gamesStat } = expect.getState();
 
       const expectStats = gameFactory.sortStats(gamesStat, [

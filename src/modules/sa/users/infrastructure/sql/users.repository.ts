@@ -8,7 +8,7 @@ import { SqlUserBanInfo } from './entity/ban-info.entity';
 import { UpdateUserBanStatusDto } from '../../api/dto/update-user-ban-status.dto';
 import { SqlEmailConfirmation } from './entity/sql-email-confirmation.entity';
 import { IUsersRepository } from '../i-users.repository';
-import {CreateUserDto} from "../../api/dto/create-user.dto";
+import { CreateUserDto } from '../../api/dto/create-user.dto';
 
 @Injectable()
 export class UsersRepository implements IUsersRepository {
@@ -26,25 +26,25 @@ export class UsersRepository implements IUsersRepository {
     try {
       const manager = queryRunner.manager;
 
-      const newUser = new SqlUsers(dto.login, dto.email)
+      const newUser = new SqlUsers(dto.login, dto.email);
       const createdUser = await manager.save(newUser);
 
-      const credential = new SqlCredentials(createdUser.id, hash)
+      const credential = new SqlCredentials(createdUser.id, hash);
       await manager.save(credential);
 
       const emailConfirmation = new SqlEmailConfirmation(
-          createdUser.id,
-          emailConfirmationDto.isConfirmed,
-          emailConfirmationDto.confirmationCode,
-          emailConfirmationDto.expirationDate,
-      )
+        createdUser.id,
+        emailConfirmationDto.isConfirmed,
+        emailConfirmationDto.confirmationCode,
+        emailConfirmationDto.expirationDate,
+      );
       await manager.save(emailConfirmation);
 
       await queryRunner.commitTransaction();
       return new CreatedUser(createdUser);
     } catch (e) {
       await queryRunner.rollbackTransaction();
-
+      console.log(e);
       return null;
     } finally {
       await queryRunner.release();
@@ -97,24 +97,19 @@ export class UsersRepository implements IUsersRepository {
 
     try {
       const manager = queryRunner.manager;
-      await manager.query(this.getQuery('sql_credentials', 'userId'), [
+      await manager.query(this.getQuery('sql_credentials', 'userId'), [userId]);
+
+      await manager.query(this.getQuery('sql_user_ban_info', 'userId'), [
         userId,
       ]);
 
-      await manager.query(
-        this.getQuery('sql_user_ban_info', 'userId'),
-        [userId],
-      );
+      await manager.query(this.getQuery('sql_email_confirmation', 'userId'), [
+        userId,
+      ]);
 
-      await manager.query(
-        this.getQuery('sql_email_confirmation', 'userId'),
-        [userId],
-      );
-
-      const result = await manager.query(
-        this.getQuery('sql_users', 'id'),
-        [userId],
-      );
+      const result = await manager.query(this.getQuery('sql_users', 'id'), [
+        userId,
+      ]);
 
       if (result[1] !== 1) {
         return false;

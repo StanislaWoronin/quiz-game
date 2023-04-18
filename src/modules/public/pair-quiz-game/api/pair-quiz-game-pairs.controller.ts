@@ -23,14 +23,14 @@ import { ParamsId } from '../../../../common/dto/params-id';
 import { GameStatus } from '../shared/game-status';
 import { ViewPage } from '../../../../common/pagination/view-page';
 import { GameQueryDto } from './dto/query/game-query.dto';
-import {ApiTags} from "@nestjs/swagger";
+import { ApiTags } from '@nestjs/swagger';
 import {
   ApiGetGameById,
   ApiGetUserCurrentGame,
   ApiGetUserGames,
   ApiJoinGame,
-  ApiSendAnswer
-} from "../../../documentations/quiz-game.documentation";
+  ApiSendAnswer,
+} from '../../../documentations/quiz-game.documentation';
 
 @ApiTags('PairQuizGame')
 @UseGuards(AuthBearerGuard)

@@ -1,12 +1,15 @@
-import {Injectable} from '@nestjs/common';
-import {InjectConnection, InjectModel} from '@nestjs/mongoose';
-import {MongoUsers, UsersDocument} from './schema/userSchema';
-import {ClientSession, Connection, Model} from 'mongoose';
-import {CreatedUser} from '../../api/view/created-user';
-import {randomUUID} from 'crypto';
-import {UpdateUserBanStatusDto} from '../../api/dto/update-user-ban-status.dto';
-import {CredentialsDocument, MongoCredentials,} from './schema/credential.schema';
-import {CreateUserDto} from "../../api/dto/create-user.dto";
+import { Injectable } from '@nestjs/common';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { MongoUsers, UsersDocument } from './schema/userSchema';
+import { ClientSession, Connection, Model } from 'mongoose';
+import { CreatedUser } from '../../api/view/created-user';
+import { randomUUID } from 'crypto';
+import { UpdateUserBanStatusDto } from '../../api/dto/update-user-ban-status.dto';
+import {
+  CredentialsDocument,
+  MongoCredentials,
+} from './schema/credential.schema';
+import { CreateUserDto } from '../../api/dto/create-user.dto';
 
 @Injectable()
 export class MUsersRepository {
@@ -34,14 +37,12 @@ export class MUsersRepository {
         console.log(r, 'mongo repo');
 
         // @ts-ignore
-        return r as CreatedUser
+        return r as CreatedUser;
       });
     } finally {
       await session.endSession();
-      return null
+      return null;
     }
-
-
   }
 
   async updateBanStatus(

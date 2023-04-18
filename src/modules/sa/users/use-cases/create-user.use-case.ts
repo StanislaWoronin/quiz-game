@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto';
 import { add } from 'date-fns';
 import { settings } from '../../../../settings';
 import { SqlEmailConfirmation } from '../infrastructure/sql/entity/sql-email-confirmation.entity';
-import {EmailConfirmationDto} from "../applications/dto/email-confirmation.dto";
+import { EmailConfirmationDto } from '../applications/dto/email-confirmation.dto';
 
 @Injectable()
 export class CreateUserUseCase {

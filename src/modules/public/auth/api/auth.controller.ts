@@ -13,27 +13,27 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import {Request, Response} from 'express';
-import {RegistrationDto} from './dto/registration.dto';
-import {CreateUserUseCase} from '../../../sa/users/use-cases/create-user.use-case';
-import {AuthDto} from './dto/auth.dto';
-import {UserId} from '../../../../common/decorators/user.decorator';
-import {ConfigService} from '@nestjs/config';
-import {CheckCredentialGuard} from '../guards/check-credential.guard';
-import {SecurityService} from '../../security/application/security.service';
-import {PasswordRecoveryDto} from './dto/password-recovery.dto';
-import {NewPasswordDto} from './dto/new-password.dto';
-import {AuthService} from '../applications/auth.service';
-import {UsersService} from '../../../sa/users/applications/users.service';
-import {RefreshTokenValidationGuard} from '../guards/refresh-token-validation.guard';
-import {AuthBearerGuard} from '../guards/auth-bearer.guard';
-import {ResendingDto} from './dto/resending.dto';
-import {RegistrationConfirmationDto} from './dto/registration-confirmation.dto';
-import {EmailManager} from '../email-transfer/email.manager';
-import {IEmailConfirmationRepository} from '../../../sa/users/infrastructure/i-email-confirmation.repository';
-import {IUsersQueryRepository} from '../../../sa/users/infrastructure/i-users-query.repository';
-import {ViewAboutMe} from './view/view-about-me';
-import {ApiTags,} from '@nestjs/swagger';
+import { Request, Response } from 'express';
+import { RegistrationDto } from './dto/registration.dto';
+import { CreateUserUseCase } from '../../../sa/users/use-cases/create-user.use-case';
+import { AuthDto } from './dto/auth.dto';
+import { UserId } from '../../../../common/decorators/user.decorator';
+import { ConfigService } from '@nestjs/config';
+import { CheckCredentialGuard } from '../guards/check-credential.guard';
+import { SecurityService } from '../../security/application/security.service';
+import { PasswordRecoveryDto } from './dto/password-recovery.dto';
+import { NewPasswordDto } from './dto/new-password.dto';
+import { AuthService } from '../applications/auth.service';
+import { UsersService } from '../../../sa/users/applications/users.service';
+import { RefreshTokenValidationGuard } from '../guards/refresh-token-validation.guard';
+import { AuthBearerGuard } from '../guards/auth-bearer.guard';
+import { ResendingDto } from './dto/resending.dto';
+import { RegistrationConfirmationDto } from './dto/registration-confirmation.dto';
+import { EmailManager } from '../email-transfer/email.manager';
+import { IEmailConfirmationRepository } from '../../../sa/users/infrastructure/i-email-confirmation.repository';
+import { IUsersQueryRepository } from '../../../sa/users/infrastructure/i-users-query.repository';
+import { ViewAboutMe } from './view/view-about-me';
+import { ApiTags } from '@nestjs/swagger';
 import {
   ApiAboutMe,
   ApiLogin,
@@ -43,8 +43,8 @@ import {
   ApiRefreshToken,
   ApiRegistration,
   ApiRegistrationConfirmation,
-  ApiRegistrationEmailResending
-} from "../../../documentations/auth.documentation";
+  ApiRegistrationEmailResending,
+} from '../../../documentations/auth.documentation';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -164,7 +164,6 @@ export class AuthController {
 
     return;
   }
-
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenValidationGuard)

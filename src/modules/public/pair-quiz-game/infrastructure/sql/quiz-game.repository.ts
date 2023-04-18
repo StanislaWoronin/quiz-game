@@ -211,6 +211,7 @@ export class QuizGameRepository implements IQuizGameRepository {
             game.gameId,
             nextQuestionNumber,
           ]);
+
         const lastQuestionsId =
           unansweredQuestions[unansweredQuestions.length - 1].questionId;
         const lastQuestionProgress: GameProgressDb[] = await manager.query(
@@ -252,6 +253,7 @@ export class QuizGameRepository implements IQuizGameRepository {
       await queryRunner.commitTransaction();
       return;
     } catch (e) {
+      console.log(e);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
