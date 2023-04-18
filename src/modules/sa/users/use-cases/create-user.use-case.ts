@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import { add } from 'date-fns';
 import { settings } from '../../../../settings';
 import { SqlEmailConfirmation } from '../infrastructure/sql/entity/sql-email-confirmation.entity';
+import {EmailConfirmationDto} from "../applications/dto/email-confirmation.dto";
 
 @Injectable()
 export class CreateUserUseCase {
@@ -15,14 +16,7 @@ export class CreateUserUseCase {
   ) {}
 
   async execute(dto: RegistrationDto): Promise<boolean> {
-    const emailConfirmation = new SqlEmailConfirmation(
-      randomUUID(),
-      false,
-      randomUUID(),
-      add(new Date(), {
-        hours: Number(settings.timeLife.CONFIRMATION_CODE),
-      }).toISOString(),
-    );
+    const emailConfirmation = new EmailConfirmationDto(false);
 
     await this.emailManager.sendConfirmationEmail(
       dto.email,

@@ -1,4 +1,4 @@
-import { NewUserDto } from '../../applications/dto/new-user.dto';
+import {SqlUsers} from "../../infrastructure/sql/entity/users.entity";
 
 export class CreatedUser {
   readonly id: string;
@@ -11,8 +11,8 @@ export class CreatedUser {
     readonly banReason: string;
   };
 
-  constructor(id: string, createdUser: NewUserDto) {
-    this.id = id;
+  constructor(createdUser: SqlUsers) {
+    this.id = createdUser.id;
     this.login = createdUser.login;
     this.email = createdUser.email;
     this.createdAt = createdUser.createdAt;

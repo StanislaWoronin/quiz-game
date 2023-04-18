@@ -20,11 +20,12 @@ export class UsersFactory {
         password: `password${i + startWith}`,
         email: `${i + startWith}${faker.internet.email()}`,
       };
+
       const response = await this.users.createUser(
         preparedSuperUser.valid,
         inputData,
       );
-
+      console.log(response.body)
       result.push(response.body);
     }
 

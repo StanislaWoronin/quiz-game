@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { SqlUsers } from './users.entity';
 
-@Entity()
+@Entity({name: 'sql_email_confirmation'})
 export class SqlEmailConfirmation {
   @Column({ default: null }) confirmationCode: string | null;
 

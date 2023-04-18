@@ -1,52 +1,47 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { NewUserDto } from '../../applications/dto/new-user.dto';
 import { CreatedUser } from '../../api/view/created-user';
 import { SqlUsers } from './entity/users.entity';
 import { SqlCredentials } from './entity/credentials.entity';
-import { CreatedUserDb } from './pojo/created-user.db';
 import { SqlUserBanInfo } from './entity/ban-info.entity';
 import { UpdateUserBanStatusDto } from '../../api/dto/update-user-ban-status.dto';
 import { SqlEmailConfirmation } from './entity/sql-email-confirmation.entity';
 import { IUsersRepository } from '../i-users.repository';
+import {CreateUserDto} from "../../api/dto/create-user.dto";
 
 @Injectable()
 export class UsersRepository implements IUsersRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createUser(
-    newUser: NewUserDto,
+    dto: CreateUserDto,
     hash: string,
-    emailConfirmation: SqlEmailConfirmation,
+    emailConfirmationDto: SqlEmailConfirmation,
   ): Promise<CreatedUser | null> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const manager = queryRunner.manager;
     try {
-      const createdUser: CreatedUserDb = await manager
-        .getRepository(SqlUsers)
-        .save(newUser);
+      const manager = queryRunner.manager;
 
-      await manager
-        .getRepository(SqlCredentials)
-        .save(new SqlCredentials(createdUser.id, hash));
+      const newUser = new SqlUsers(dto.login, dto.email)
+      const createdUser = await manager.save(newUser);
 
-      await manager
-        .getRepository(SqlEmailConfirmation)
-        .save(
-          new SqlEmailConfirmation(
-            createdUser.id,
-            emailConfirmation.isConfirmed,
-            emailConfirmation.confirmationCode,
-            emailConfirmation.expirationDate,
-          ),
-        );
+      const credential = new SqlCredentials(createdUser.id, hash)
+      await manager.save(credential);
+
+      const emailConfirmation = new SqlEmailConfirmation(
+          createdUser.id,
+          emailConfirmationDto.isConfirmed,
+          emailConfirmationDto.confirmationCode,
+          emailConfirmationDto.expirationDate,
+      )
+      await manager.save(emailConfirmation);
 
       await queryRunner.commitTransaction();
-      return new CreatedUser(createdUser.id, createdUser);
+      return new CreatedUser(createdUser);
     } catch (e) {
       await queryRunner.rollbackTransaction();
 
@@ -100,23 +95,23 @@ export class UsersRepository implements IUsersRepository {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const manager = queryRunner.manager;
     try {
-      await this.dataSource.query(this.getQuery('sql_credentials', 'userId'), [
+      const manager = queryRunner.manager;
+      await manager.query(this.getQuery('sql_credentials', 'userId'), [
         userId,
       ]);
 
-      await this.dataSource.query(
+      await manager.query(
         this.getQuery('sql_user_ban_info', 'userId'),
         [userId],
       );
 
-      await this.dataSource.query(
+      await manager.query(
         this.getQuery('sql_email_confirmation', 'userId'),
         [userId],
       );
 
-      const result = await this.dataSource.query(
+      const result = await manager.query(
         this.getQuery('sql_users', 'id'),
         [userId],
       );

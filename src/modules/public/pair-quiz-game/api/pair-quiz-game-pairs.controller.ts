@@ -23,7 +23,16 @@ import { ParamsId } from '../../../../common/dto/params-id';
 import { GameStatus } from '../shared/game-status';
 import { ViewPage } from '../../../../common/pagination/view-page';
 import { GameQueryDto } from './dto/query/game-query.dto';
+import {ApiTags} from "@nestjs/swagger";
+import {
+  ApiGetGameById,
+  ApiGetUserCurrentGame,
+  ApiGetUserGames,
+  ApiJoinGame,
+  ApiSendAnswer
+} from "../../../documentations/quiz-game.documentation";
 
+@ApiTags('PairQuizGame')
 @UseGuards(AuthBearerGuard)
 @Controller('pair-game-quiz/pairs')
 export class PairQuizGamePairsController {
@@ -33,8 +42,9 @@ export class PairQuizGamePairsController {
     protected gameQueryRepository: IQuizGameQueryRepository,
   ) {}
 
-  @HttpCode(HttpStatus.OK)
   @Post('connection')
+  @HttpCode(HttpStatus.OK)
+  @ApiJoinGame()
   async joinGame(@UserId() userId: string): Promise<ViewGame> {
     const currentGame = await this.gameQueryRepository.checkUserCurrentGame(
       userId,
@@ -47,8 +57,9 @@ export class PairQuizGamePairsController {
     return await this.gameService.joinGame(userId);
   }
 
-  @HttpCode(HttpStatus.OK)
   @Post('my-current/answers')
+  @HttpCode(HttpStatus.OK)
+  @ApiSendAnswer()
   async sendAnswer(
     @Body() dto: AnswerDto,
     @UserId() userId: string,
@@ -70,6 +81,7 @@ export class PairQuizGamePairsController {
   }
 
   @Get('my')
+  @ApiGetUserGames()
   async getMyGames(
     @Query() dto: GameQueryDto,
     @UserId() userId: string,
@@ -78,6 +90,7 @@ export class PairQuizGamePairsController {
   }
 
   @Get('my-current') // return game witch has status "Active"
+  @ApiGetUserCurrentGame()
   async getMyCurrentGame(@UserId() userId: string): Promise<ViewGame> {
     const hasCurrentGame = await this.gameQueryRepository.checkUserCurrentGame(
       userId,
@@ -90,6 +103,7 @@ export class PairQuizGamePairsController {
   }
 
   @Get(':id') // return the game with any status
+  @ApiGetGameById()
   async getGameById(
     @Param() gameId: ParamsId,
     @UserId() userId: string,

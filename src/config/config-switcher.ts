@@ -17,6 +17,6 @@ export const configSwitcher = (repositoryType: string) => {
 
   return [
     TypeOrmModule.forRoot(typeOrmConfig),
-    TypeOrmModule.forFeature([...entity]),
+    //TypeOrmModule.forFeature([...entity]),
   ];
 };

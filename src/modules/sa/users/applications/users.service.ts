@@ -1,12 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { IUsersRepository } from '../infrastructure/i-users.repository';
-import { CreatedUser } from '../api/view/created-user';
-import { CreateUserDto } from '../api/dto/create-user.dto';
-import { NewUserDto } from './dto/new-user.dto';
+import {Inject, Injectable} from '@nestjs/common';
+import {IUsersRepository} from '../infrastructure/i-users.repository';
+import {CreatedUser} from '../api/view/created-user';
+import {CreateUserDto} from '../api/dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
-import { settings } from '../../../../settings';
-import { UpdateUserBanStatusDto } from '../api/dto/update-user-ban-status.dto';
-import { SqlEmailConfirmation } from '../infrastructure/sql/entity/sql-email-confirmation.entity';
+import {settings} from '../../../../settings';
+import {UpdateUserBanStatusDto} from '../api/dto/update-user-ban-status.dto';
+import {EmailConfirmationDto} from "./dto/email-confirmation.dto";
 
 @Injectable()
 export class UsersService {
@@ -17,18 +16,16 @@ export class UsersService {
 
   async createUser(
     dto: CreateUserDto,
-    emailConfirmation: SqlEmailConfirmation,
+    emailConfirmationDto: EmailConfirmationDto,
   ): Promise<CreatedUser> {
-    const newUser = new NewUserDto(dto);
-
     try {
       const salt = await bcrypt.genSalt(Number(settings.SALT_GENERATE_ROUND));
       const hash = await bcrypt.hash(dto.password, salt);
 
       return await this.usersRepository.createUser(
-        newUser,
+        dto,
         hash,
-        emailConfirmation,
+        emailConfirmationDto,
       );
     } catch (e) {
       // Error try again

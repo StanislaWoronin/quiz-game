@@ -1,15 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { MongoUsers, UsersDocument } from './schema/userSchema';
-import { ClientSession, connection, Connection, Model } from 'mongoose';
-import { NewUserDto } from '../../applications/dto/new-user.dto';
-import { CreatedUser } from '../../api/view/created-user';
-import { randomUUID } from 'crypto';
-import { UpdateUserBanStatusDto } from '../../api/dto/update-user-ban-status.dto';
-import {
-  CredentialsDocument,
-  MongoCredentials,
-} from './schema/credential.schema';
+import {Injectable} from '@nestjs/common';
+import {InjectConnection, InjectModel} from '@nestjs/mongoose';
+import {MongoUsers, UsersDocument} from './schema/userSchema';
+import {ClientSession, Connection, Model} from 'mongoose';
+import {CreatedUser} from '../../api/view/created-user';
+import {randomUUID} from 'crypto';
+import {UpdateUserBanStatusDto} from '../../api/dto/update-user-ban-status.dto';
+import {CredentialsDocument, MongoCredentials,} from './schema/credential.schema';
+import {CreateUserDto} from "../../api/dto/create-user.dto";
 
 @Injectable()
 export class MUsersRepository {
@@ -21,28 +18,30 @@ export class MUsersRepository {
   ) {}
 
   async createUser(
-    newUser: NewUserDto,
+    dto: CreateUserDto,
     hash: string,
   ): Promise<CreatedUser | null> {
     const session: ClientSession = await this.connection.startSession();
 
-    let createdUser;
     try {
       await session.withTransaction(async () => {
-        const user = { id: randomUUID(), ...newUser };
+        const user = { id: randomUUID(), ...dto };
         const r = await this.usersRepository.create([{ ...user }], { session });
         const res = await this.credentialsRepository.create(
           [{ userId: user.id, credential: hash }],
           { session },
         );
         console.log(r, 'mongo repo');
-        createdUser = res[0];
+
+        // @ts-ignore
+        return r as CreatedUser
       });
     } finally {
       await session.endSession();
+      return null
     }
 
-    return new CreatedUser(createdUser.userId, newUser);
+
   }
 
   async updateBanStatus(

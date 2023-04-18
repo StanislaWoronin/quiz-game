@@ -12,7 +12,7 @@ import { SqlUserAnswer } from '../../../../../public/pair-quiz-game/infrastructu
 import { SqlSecurity } from '../../../../../public/security/infrastructure/sql/entity/security';
 import { SqlEmailConfirmation } from './sql-email-confirmation.entity';
 
-@Entity()
+@Entity({name: 'sql_users'})
 export class SqlUsers {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -56,4 +56,10 @@ export class SqlUsers {
 
   @OneToMany(() => SqlSecurity, (s) => s.user)
   security: SqlSecurity[];
+
+  constructor(login: string, email: string) {
+    this.login = login
+    this.email = email
+    this.createdAt = new Date().toISOString()
+  }
 }

@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { SqlUsers } from './users.entity';
 
-@Entity()
+@Entity({name: 'sql_credentials'})
 export class SqlCredentials {
   @Column({
     type: 'character varying',

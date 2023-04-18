@@ -1,6 +1,6 @@
-export class CreatedUserDb {
-  id: string;
-  login: string;
-  email: string;
-  createdAt: string;
-}
+// export class CreatedUserDb {
+//   id: string;
+//   login: string;
+//   email: string;
+//   createdAt: string;
+// } TODO delete
