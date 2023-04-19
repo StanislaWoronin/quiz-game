@@ -59,4 +59,6 @@ export class SqlUserAnswer {
     this.answerStatus = answerStatus;
     this.addedAt = !answer ? null : new Date().toISOString();
   }
+
+  // @AfterInsert() TODO
 }

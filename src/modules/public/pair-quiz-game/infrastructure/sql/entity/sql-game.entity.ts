@@ -54,6 +54,5 @@ export class SqlGame {
     this.status = GameStatus.PendingSecondPlayer;
     this.pairCreatedDate = new Date().toISOString();
     this.startGameDate = null;
-    this.finishGameDate = null;
   }
 }

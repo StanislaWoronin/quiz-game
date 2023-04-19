@@ -69,13 +69,12 @@ import { SqlEmailConfirmation } from './modules/sa/users/infrastructure/sql/enti
 import { SqlGameQuestions } from './modules/public/pair-quiz-game/infrastructure/sql/entity/sql-game-questions.entity';
 import { PairQuizGameUsersController } from './modules/public/pair-quiz-game/api/pair-quiz-game-users.controller';
 import { PairQuizGamePairsController } from './modules/public/pair-quiz-game/api/pair-quiz-game-pairs.controller';
-import { ScheduleModule } from '@nestjs/schedule';
 import { TaskService } from './modules/public/pair-quiz-game/applications/task.service';
 import { Connection } from 'mongoose';
-import {CqrsModule, EventBus} from "@nestjs/cqrs";
-import {
-  DelayedForceGameOverHandler
-} from "./modules/public/pair-quiz-game/applications/delayed-force-game-over.handler";
+import { CqrsModule } from '@nestjs/cqrs';
+import { DelayedForceGameOverHandler } from './modules/public/pair-quiz-game/applications/delayed-force-game-over.handler';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SqlGameSubscriber } from './modules/public/pair-quiz-game/infrastructure/helpers/fisih-game.subscriber';
 
 const controllers = [
   AuthController,
@@ -230,7 +229,7 @@ export const mongooseModels = [
     CqrsModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ...configSwitcher(settings.currentRepository),
-    //ScheduleModule.forRoot(),
+    ScheduleModule.forRoot(),
   ],
   controllers: [...controllers],
   providers: [
@@ -240,6 +239,7 @@ export const mongooseModels = [
     ...services,
     ...validators,
     ...useCases,
+    SqlGameSubscriber,
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: LoggingInterceptor
