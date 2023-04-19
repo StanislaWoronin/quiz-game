@@ -1,21 +1,19 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ViewGame } from '../api/view/view-game';
-import { IQuizGameRepository } from '../infrastructure/i-quiz-game.repository';
-import { AnswerDto } from '../api/dto/answer.dto';
-import { ViewAnswer } from '../api/view/view-answer';
-import { IQuizGameQueryRepository } from '../infrastructure/i-quiz-game-query.repository';
-import { IQuestionsQueryRepository } from '../../../sa/questions/infrastructure/i-questions-query.repository';
-import { SendAnswerDto } from './dto/send-answer.dto';
-import { CheckAnswerProgressDb } from '../infrastructure/sql/pojo/check-answer-progress.db';
-import { util } from 'prettier';
-import getAlignmentSize = util.getAlignmentSize;
-import { TaskService } from './task.service';
-import { SchedulerRegistry } from '@nestjs/schedule';
-import { settings } from '../../../../settings';
+import {Inject, Injectable} from '@nestjs/common';
+import {ViewGame} from '../api/view/view-game';
+import {IQuizGameRepository} from '../infrastructure/i-quiz-game.repository';
+import {AnswerDto} from '../api/dto/answer.dto';
+import {ViewAnswer} from '../api/view/view-answer';
+import {IQuizGameQueryRepository} from '../infrastructure/i-quiz-game-query.repository';
+import {IQuestionsQueryRepository} from '../../../sa/questions/infrastructure/i-questions-query.repository';
+import {SendAnswerDto} from './dto/send-answer.dto';
+import {settings} from '../../../../settings';
+import {EventBus} from "@nestjs/cqrs";
+import {DelayedForceGameOverEvent} from "./dto/delayed-force-game-over.event";
 
 @Injectable()
 export class PairQuizGameService {
   constructor(
+    protected eventBus: EventBus,
     @Inject(IQuizGameRepository)
     protected gameRepository: IQuizGameRepository,
     @Inject(IQuizGameQueryRepository)
@@ -60,6 +58,11 @@ export class PairQuizGameService {
       isCorrectAnswer,
       isLastQuestions,
     );
+    console.log(gameId)
+    console.log(userId)
+    if (isLastQuestions) {
+      this.eventBus.publish(new DelayedForceGameOverEvent(userId, gameId))
+    }
 
     return await this.gameRepository.sendAnswer(sendAnswerDto);
   }

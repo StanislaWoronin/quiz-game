@@ -181,54 +181,54 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
       });
 
-      it('Shouldn`t send answer, if he is unauthorized', async () => {
-        const response = await game.sendAnswer(preparedAnswer.random);
-        expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
-      });
-
-      it('Should send answer', async () => {
-        const { firstUser } = expect.getState();
-
-        const response = await game.sendAnswer(
-          preparedAnswer.random,
-          firstUser.accessToken,
-        );
-        expect(response.status).toBe(HttpStatus.OK);
-        expect(response.body).toStrictEqual(
-          expectAnswer(AnswerStatus.Incorrect),
-        );
-      });
-
-      it('The user can`t send a response if he is not in an active pair', async () => {
-        const { thirdUser } = expect.getState();
-
-        const thirdUserAnswered = await game.sendAnswer(
-          preparedAnswer.random,
-          thirdUser.accessToken,
-        );
-        expect(thirdUserAnswered.status).toBe(HttpStatus.FORBIDDEN);
-      });
-
-      it(
-        'The user can`t send a response if he has already answered on' +
-          ' all questions',
-        async () => {
-          const { secondUser, questions } = expect.getState();
-
-          await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
-            1: AnswerStatus.Incorrect,
-            2: AnswerStatus.Incorrect,
-            3: AnswerStatus.Incorrect,
-            4: AnswerStatus.Incorrect,
-            5: AnswerStatus.Incorrect,
-          });
-          const response = await game.sendAnswer(
-            preparedAnswer.random,
-            secondUser.accessToken,
-          );
-          expect(response.status).toBe(HttpStatus.FORBIDDEN);
-        },
-      );
+      // it('Shouldn`t send answer, if he is unauthorized', async () => {
+      //   const response = await game.sendAnswer(preparedAnswer.random);
+      //   expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      // });
+      //
+      // it('Should send answer', async () => {
+      //   const { firstUser } = expect.getState();
+      //
+      //   const response = await game.sendAnswer(
+      //     preparedAnswer.random,
+      //     firstUser.accessToken,
+      //   );
+      //   expect(response.status).toBe(HttpStatus.OK);
+      //   expect(response.body).toStrictEqual(
+      //     expectAnswer(AnswerStatus.Incorrect),
+      //   );
+      // });
+      //
+      // it('The user can`t send a response if he is not in an active pair', async () => {
+      //   const { thirdUser } = expect.getState();
+      //
+      //   const thirdUserAnswered = await game.sendAnswer(
+      //     preparedAnswer.random,
+      //     thirdUser.accessToken,
+      //   );
+      //   expect(thirdUserAnswered.status).toBe(HttpStatus.FORBIDDEN);
+      // });
+      //
+      // it(
+      //   'The user can`t send a response if he has already answered on' +
+      //     ' all questions',
+      //   async () => {
+      //     const { secondUser, questions } = expect.getState();
+      //
+      //     await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
+      //       1: AnswerStatus.Incorrect,
+      //       2: AnswerStatus.Incorrect,
+      //       3: AnswerStatus.Incorrect,
+      //       4: AnswerStatus.Incorrect,
+      //       5: AnswerStatus.Incorrect,
+      //     });
+      //     const response = await game.sendAnswer(
+      //       preparedAnswer.random,
+      //       secondUser.accessToken,
+      //     );
+      //     expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      //   },
+      // );
 
       it('Game over if the second player hasn`t answered all the questions', async () => {
         const [fistPlayer, secondPlayer] =

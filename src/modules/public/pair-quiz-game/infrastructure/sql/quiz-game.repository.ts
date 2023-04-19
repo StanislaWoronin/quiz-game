@@ -1,22 +1,21 @@
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { GameStatus } from '../../shared/game-status';
-import { SqlGameProgress } from './entity/sql-game-progress.entity';
-import { ViewGame } from '../../api/view/view-game';
-import { SqlGame } from './entity/sql-game.entity';
-import { SqlUsers } from '../../../../sa/users/infrastructure/sql/entity/users.entity';
-import { IQuizGameRepository } from '../i-quiz-game.repository';
-import { ViewAnswer } from '../../api/view/view-answer';
-import { AnswerStatus } from '../../shared/answer-status';
-import { SqlUserAnswer } from './entity/sql-user-answer.entity';
-import { ViewGameProgress } from '../../api/view/view-game-progress';
-import { SqlGameQuestions } from './entity/sql-game-questions.entity';
-import { SimpleGameDb } from './pojo/simple-game.db';
-import { toViewJoinGame } from '../../../../../common/data-mapper/to-view-join-game';
-import { SendAnswerDto } from '../../applications/dto/send-answer.dto';
-import { GameProgressDb } from './pojo/game-progress.db';
-import { settings } from '../../../../../settings';
-import { GameWhichNeedComplete } from './pojo/game-which-need-complete';
+import {InjectDataSource} from '@nestjs/typeorm';
+import {DataSource} from 'typeorm';
+import {GameStatus} from '../../shared/game-status';
+import {SqlGameProgress} from './entity/sql-game-progress.entity';
+import {ViewGame} from '../../api/view/view-game';
+import {SqlGame} from './entity/sql-game.entity';
+import {SqlUsers} from '../../../../sa/users/infrastructure/sql/entity/users.entity';
+import {IQuizGameRepository} from '../i-quiz-game.repository';
+import {ViewAnswer} from '../../api/view/view-answer';
+import {AnswerStatus} from '../../shared/answer-status';
+import {SqlUserAnswer} from './entity/sql-user-answer.entity';
+import {ViewGameProgress} from '../../api/view/view-game-progress';
+import {SqlGameQuestions} from './entity/sql-game-questions.entity';
+import {SimpleGameDb} from './pojo/simple-game.db';
+import {toViewJoinGame} from '../../../../../common/data-mapper/to-view-join-game';
+import {SendAnswerDto} from '../../applications/dto/send-answer.dto';
+import {GameProgressDb} from './pojo/game-progress.db';
+import {DelayedForceGameOverEvent} from "../../applications/dto/delayed-force-game-over.event";
 
 export class QuizGameRepository implements IQuizGameRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -188,7 +187,79 @@ export class QuizGameRepository implements IQuizGameRepository {
     }
   }
 
-  async forceGameOver() {
+  // async forceGameOver() {
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
+  //
+  //   try {
+  //     const manager = queryRunner.manager;
+  //
+  //     const currentTime = new Date().toISOString();
+  //     const games: GameWhichNeedComplete[] = await this.dataSource.query(
+  //       this.findGameWhichNeedComplete(),
+  //       [Number(settings.gameRules.questionsCount), currentTime],
+  //     );
+  //
+  //     if (!games.length) return;
+  //     for (const game of games) {
+  //       const nextQuestionNumber = game.secondPlayerAnswerProgress;
+  //       const unansweredQuestions: { questionId: string; userId: string }[] =
+  //         await this.dataSource.query(this.getLastQuestionsIdQuery(), [
+  //           game.fistAnsweredPlayerId,
+  //           game.gameId,
+  //           nextQuestionNumber,
+  //         ]);
+  //
+  //       const lastQuestionsId =
+  //         unansweredQuestions[unansweredQuestions.length - 1].questionId;
+  //       const lastQuestionProgress: GameProgressDb[] = await manager.query(
+  //         this.getLastQuestionsProgressQuery(),
+  //         [game.gameId, lastQuestionsId],
+  //       );
+  //       const firstAnsweredPlayer = lastQuestionProgress[0];
+  //
+  //       const answers = unansweredQuestions.map(
+  //         (q) => new SqlUserAnswer(q.userId, game.gameId, q.questionId, null),
+  //       );
+  //
+  //       await manager.save(answers);
+  //
+  //       await manager
+  //         .createQueryBuilder()
+  //         .update(SqlGame)
+  //         .set({
+  //           status: GameStatus.Finished,
+  //           finishGameDate: new Date().toISOString(),
+  //         })
+  //         .where('id = :gameId', { gameId: game.gameId })
+  //         .execute();
+  //
+  //       const extraScore = 1;
+  //       if (firstAnsweredPlayer.score !== 0) {
+  //         await manager
+  //           .createQueryBuilder()
+  //           .update(SqlGameProgress)
+  //           .set({ score: () => `score + ${extraScore}` })
+  //           .where('userId = :userId AND gameId = :gameId', {
+  //             userId: firstAnsweredPlayer.userId,
+  //             gameId: game.gameId,
+  //           })
+  //           .execute();
+  //       }
+  //     }
+  //
+  //     await queryRunner.commitTransaction();
+  //     return;
+  //   } catch (e) {
+  //     console.log(e);
+  //     await queryRunner.rollbackTransaction();
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
+
+  async forceGameOver(event: DelayedForceGameOverEvent) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -196,64 +267,31 @@ export class QuizGameRepository implements IQuizGameRepository {
     try {
       const manager = queryRunner.manager;
 
-      const currentTime = new Date().toISOString();
-      const games: GameWhichNeedComplete[] = await this.dataSource.query(
-        this.findGameWhichNeedComplete(),
-        [Number(settings.gameRules.questionsCount), currentTime],
-      );
+      const query = `
+        SELECT g.status, ua."questionId",
+               (SELECT JSON_AGG(gq."questionId")
+                  FROM sql_game_questions gq
+                 WHERE gq."gameId" = g.id) AS questions
+          FROM sql_game g
+          JOIN sql_user_answer ua ON ua."gameId" = g.id
+         WHERE g.id = $1 
+           AND g.status = 'Active'
+           AND ua."userId" != $2
+         ORDER BY ua."addedAt" DESC
+         LIMIT 1;
+      `
+      console.log(event)
+      const game = await manager.query(query, [event.gameId, event.userId])
 
-      if (!games.length) return;
-      for (const game of games) {
-        const nextQuestionNumber = game.secondPlayerAnswerProgress;
-        const unansweredQuestions: { questionId: string; userId: string }[] =
-          await this.dataSource.query(this.getLastQuestionsIdQuery(), [
-            game.fistAnsweredPlayerId,
-            game.gameId,
-            nextQuestionNumber,
-          ]);
-
-        const lastQuestionsId =
-          unansweredQuestions[unansweredQuestions.length - 1].questionId;
-        const lastQuestionProgress: GameProgressDb[] = await manager.query(
-          this.getLastQuestionsProgressQuery(),
-          [game.gameId, lastQuestionsId],
-        );
-        const firstAnsweredPlayer = lastQuestionProgress[0];
-
-        const answers = unansweredQuestions.map(
-          (q) => new SqlUserAnswer(q.userId, game.gameId, q.questionId, null),
-        );
-
-        await manager.save(answers);
-
-        await manager
-          .createQueryBuilder()
-          .update(SqlGame)
-          .set({
-            status: GameStatus.Finished,
-            finishGameDate: new Date().toISOString(),
-          })
-          .where('id = :gameId', { gameId: game.gameId })
-          .execute();
-
-        const extraScore = 1;
-        if (firstAnsweredPlayer.score !== 0) {
-          await manager
-            .createQueryBuilder()
-            .update(SqlGameProgress)
-            .set({ score: () => `score + ${extraScore}` })
-            .where('userId = :userId AND gameId = :gameId', {
-              userId: firstAnsweredPlayer.userId,
-              gameId: game.gameId,
-            })
-            .execute();
-        }
+      if (game[0].status === GameStatus.Active) {
+        const lastAnsweredQuestionNumber = game[0].questions.indexOf(game[0].questionId)
+        console.log({lastAnsweredQuestionNumber})
       }
 
       await queryRunner.commitTransaction();
       return;
     } catch (e) {
-      console.log(e);
+      console.log(e)
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();

@@ -72,6 +72,10 @@ import { PairQuizGamePairsController } from './modules/public/pair-quiz-game/api
 import { ScheduleModule } from '@nestjs/schedule';
 import { TaskService } from './modules/public/pair-quiz-game/applications/task.service';
 import { Connection } from 'mongoose';
+import {CqrsModule, EventBus} from "@nestjs/cqrs";
+import {
+  DelayedForceGameOverHandler
+} from "./modules/public/pair-quiz-game/applications/delayed-force-game-over.handler";
 
 const controllers = [
   AuthController,
@@ -223,12 +227,14 @@ export const mongooseModels = [
 
 @Module({
   imports: [
+    CqrsModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ...configSwitcher(settings.currentRepository),
-    ScheduleModule.forRoot(),
+    //ScheduleModule.forRoot(),
   ],
   controllers: [...controllers],
   providers: [
+    DelayedForceGameOverHandler,
     Connection,
     ...repositories,
     ...services,
