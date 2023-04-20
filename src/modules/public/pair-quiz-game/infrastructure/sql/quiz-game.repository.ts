@@ -253,7 +253,6 @@ export class QuizGameRepository implements IQuizGameRepository {
       await queryRunner.commitTransaction();
       return;
     } catch (e) {
-      console.log(e);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
@@ -355,7 +354,7 @@ export class QuizGameRepository implements IQuizGameRepository {
        )
        GROUP BY g.id, ua."userId"
       HAVING COUNT(*) = $1
-         AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = 5 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '10 seconds');
+         AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = 5 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '9 seconds');
     `;
   };
 }

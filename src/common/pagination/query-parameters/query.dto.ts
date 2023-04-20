@@ -1,6 +1,7 @@
 import { giveSkipNumber } from '../../helpers';
 import { IsInt, IsOptional, Min } from 'class-validator';
 import { Type } from 'class-transformer';
+import {ApiProperty} from "@nestjs/swagger";
 
 export class QueryDto {
   constructor() {
@@ -14,12 +15,14 @@ export class QueryDto {
     });
   }
 
+  @ApiProperty({default: 1, required: false})
   @Type(() => Number)
   @IsInt()
   @Min(1)
   @IsOptional()
   pageNumber = 1;
 
+  @ApiProperty({default: 10, required: false})
   @Type(() => Number)
   @IsInt()
   @Min(1)
@@ -31,7 +34,7 @@ export class QueryDto {
    */
   skip = 0;
 
-  // skip1() {
+  // skip() {
   //   return giveSkipNumber(this.pageNumber, this.pageSize)
   // }
 }

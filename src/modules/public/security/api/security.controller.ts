@@ -8,17 +8,22 @@ import {
   Inject,
   NotFoundException,
   Param,
-  Req,
   UseGuards,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { SecurityService } from '../application/security.service';
-import { ViewSecurity } from './view/view-security';
-import { ISecurityQueryRepository } from '../infrastructure/i-security-query.repository';
-import { RefreshTokenValidationGuard } from '../../auth/guards/refresh-token-validation.guard';
-import { UserId } from '../../../../common/decorators/user.decorator';
-import { DeviceId } from '../../../../common/decorators/device.decorator';
+import {SecurityService} from '../application/security.service';
+import {ViewSecurity} from './view/view-security';
+import {ISecurityQueryRepository} from '../infrastructure/i-security-query.repository';
+import {RefreshTokenValidationGuard} from '../../auth/guards/refresh-token-validation.guard';
+import {UserId} from '../../../../common/decorators/user.decorator';
+import {DeviceId} from '../../../../common/decorators/device.decorator';
+import {ApiTags} from "@nestjs/swagger";
+import {
+  ApiDeleteAllActiveSessions,
+  ApiDeleteDeviceById,
+  ApiGetAllActiveSessions
+} from "../../../documentations/security.documentation";
 
+@ApiTags('Security')
 @UseGuards(RefreshTokenValidationGuard)
 @Controller('security/devices')
 export class SecurityController {
@@ -29,6 +34,7 @@ export class SecurityController {
   ) {}
 
   @Get()
+  @ApiGetAllActiveSessions()
   async getAllActiveSessions(
     @UserId() userId: string,
   ): Promise<ViewSecurity[]> {
@@ -37,6 +43,7 @@ export class SecurityController {
 
   @Delete()
   @HttpCode(204)
+  @ApiDeleteAllActiveSessions()
   async deleteActiveSessions(
     @DeviceId() deviceId: string,
     @UserId() userId: string,
@@ -53,8 +60,9 @@ export class SecurityController {
     return;
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiDeleteDeviceById()
   async deleteActiveSessionsById(
     @Param('id') deviceId: string,
     @UserId() userId: string,

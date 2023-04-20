@@ -23,7 +23,16 @@ import { ViewUser } from './view/view-user';
 import { UsersQueryDto } from './dto/query/users-query.dto';
 import { UpdateUserBanStatusDto } from './dto/update-user-ban-status.dto';
 import { CreateUserBySaUseCase } from '../use-cases/create-user-by-sa.use-case';
+import {ApiBasicAuth, ApiTags} from "@nestjs/swagger";
+import {
+  ApiCreateUser,
+  ApiDeleteUser,
+  ApiGetUsers,
+  ApiUpdateUserBanStatus
+} from "../../../documentations/sa.documentation";
 
+@ApiTags('SA')
+@ApiBasicAuth()
 @UseGuards(AuthBasicGuard)
 @Controller('sa/users')
 export class UsersController {
@@ -35,17 +44,20 @@ export class UsersController {
   ) {}
 
   @Post()
+  @ApiCreateUser()
   async createUser(@Body() dto: CreateUserDto): Promise<CreatedUser> {
     return this.createUserUseCase.execute(dto);
   }
 
   @Get()
+  @ApiGetUsers()
   async getUsers(@Query() query: UsersQueryDto): Promise<ViewPage<ViewUser>> {
     return await this.usersQueryRepository.getUsers(query);
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id/ban')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiUpdateUserBanStatus()
   async updateUserBanStatus(
     @Param('id') userId: string,
     @Body() dto: UpdateUserBanStatusDto,
@@ -53,8 +65,9 @@ export class UsersController {
     return await this.usersService.updateUserBanInfo(userId, dto);
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiDeleteUser()
   async deleteUser(@Param('id') userId: string) {
     const isDeleted = await this.usersService.deleteUser(userId);
 

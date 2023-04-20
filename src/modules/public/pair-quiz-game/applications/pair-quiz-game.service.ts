@@ -58,8 +58,7 @@ export class PairQuizGameService {
       isCorrectAnswer,
       isLastQuestions,
     );
-    console.log(gameId);
-    console.log(userId);
+
     if (isLastQuestions) {
       this.eventBus.publish(new DelayedForceGameOverEvent(userId, gameId));
     }

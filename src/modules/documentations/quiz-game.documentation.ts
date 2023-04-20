@@ -67,7 +67,7 @@ export function ApiGetUserGames() {
     ApiOkResponse({
       description:
         'Returns pair by id if current user is taking part in this pair',
-      type: ViewPage<ViewGame>,
+      type: ViewPage<ViewGame>
     }),
     ApiUnauthorizedResponse({
       description: 'Unauthorized',
@@ -141,7 +141,7 @@ export function ApiGetTopPlayers() {
     }),
     ApiQuery({ type: TopPlayersQueryDto }),
     ApiOkResponse({
-      type: ViewPage<ViewTopPlayers>,
+      type: ViewPage<ViewTopPlayers>
     }),
   );
 }

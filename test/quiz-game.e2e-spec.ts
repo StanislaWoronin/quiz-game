@@ -26,6 +26,7 @@ import { SortByGameField } from '../src/modules/public/pair-quiz-game/api/dto/qu
 import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
 import { TopPlayersSortField } from '../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field';
 import { sleep } from './helpers/helpers';
+import {preparedAnswer} from "./helpers/prepeared-data/prepared-answer";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -92,106 +93,124 @@ describe('/sa/quiz/questions (e2e)', () => {
         });
       });
 
-      // it('Shouldn`t send answer, if he is unauthorized', async () => {
-      //   const response = await game.sendAnswer(preparedAnswer.random);
-      //   expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
-      // });
-      //
-      // it('Should send answer', async () => {
-      //   const { firstUser } = expect.getState();
-      //
-      //   const response = await game.sendAnswer(
-      //     preparedAnswer.random,
-      //     firstUser.accessToken,
-      //   );
-      //   expect(response.status).toBe(HttpStatus.OK);
-      //   expect(response.body).toStrictEqual(
-      //     expectAnswer(AnswerStatus.Incorrect),
-      //   );
-      // });
-      //
-      // it('The user can`t send a response if he is not in an active pair', async () => {
-      //   const { thirdUser } = expect.getState();
-      //
-      //   const thirdUserAnswered = await game.sendAnswer(
-      //     preparedAnswer.random,
-      //     thirdUser.accessToken,
-      //   );
-      //   expect(thirdUserAnswered.status).toBe(HttpStatus.FORBIDDEN);
-      // });
-      //
-      // it(
-      //   'The user can`t send a response if he has already answered on' +
-      //     ' all questions',
-      //   async () => {
-      //     const { secondUser, questions } = expect.getState();
-      //
-      //     await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
-      //       1: AnswerStatus.Incorrect,
-      //       2: AnswerStatus.Incorrect,
-      //       3: AnswerStatus.Incorrect,
-      //       4: AnswerStatus.Incorrect,
-      //       5: AnswerStatus.Incorrect,
-      //     });
-      //     const response = await game.sendAnswer(
-      //       preparedAnswer.random,
-      //       secondUser.accessToken,
-      //     );
-      //     expect(response.status).toBe(HttpStatus.FORBIDDEN);
-      //   },
-      // );
-
-      it('Game over if the second player hasn`t answered all the questions', async () => {
-        const [fistPlayer, secondPlayer] =
-          await usersFactory.createAndLoginUsers(2, 3);
-        const activeGame = await gameFactory.createGame(
-          fistPlayer,
-          secondPlayer,
-        );
-        const questions = activeGame.body.questions;
-        await gameFactory.sendCorrectAnswer(
-          fistPlayer.accessToken,
-          questions[0],
-        );
-
-        await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
-          2: AnswerStatus.Incorrect,
-          3: AnswerStatus.Incorrect,
-          4: AnswerStatus.Correct,
-          5: AnswerStatus.Correct,
-        });
-        await gameFactory.sendManyAnswer(secondPlayer.accessToken, questions, {
-          1: AnswerStatus.Correct,
-          2: AnswerStatus.Correct,
-        });
-
-        await sleep(11);
-
-        const secondPlayerTryAnswered = await gameFactory.sendCorrectAnswer(
-          secondPlayer.accessToken,
-          activeGame.body.questions[1],
-        );
-        expect(secondPlayerTryAnswered.status).toBe(HttpStatus.FORBIDDEN);
-
-        const finishedGame = await game.getGameById(
-          activeGame.body.id,
-          fistPlayer.accessToken,
-        );
-        expect(finishedGame.status).toBe(HttpStatus.OK);
-        expect(finishedGame.body.status).toBe(GameStatus.Finished);
-        expect(finishedGame.body.secondPlayerProgress);
-        expect(finishedGame.body.secondPlayerProgress.score).toBe(2);
-
-        expect(finishedGame.body.secondPlayerProgress.answers).toEqual([
-          expectAnswer(AnswerStatus.Correct),
-          expectAnswer(AnswerStatus.Correct),
-          expectAnswer(AnswerStatus.Incorrect, false),
-          expectAnswer(AnswerStatus.Incorrect, false),
-          expectAnswer(AnswerStatus.Incorrect, false),
-        ]);
+      it('Shouldn`t send answer, if he is unauthorized', async () => {
+        const response = await game.sendAnswer(preparedAnswer.random);
+        expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
       });
+
+      it('Should send answer', async () => {
+        const { firstUser } = expect.getState();
+
+        const response = await game.sendAnswer(
+          preparedAnswer.random,
+          firstUser.accessToken,
+        );
+        expect(response.status).toBe(HttpStatus.OK);
+        expect(response.body).toStrictEqual(
+          expectAnswer(AnswerStatus.Incorrect),
+        );
+      });
+
+      it('The user can`t send a response if he is not in an active pair', async () => {
+        const { thirdUser } = expect.getState();
+
+        const thirdUserAnswered = await game.sendAnswer(
+          preparedAnswer.random,
+          thirdUser.accessToken,
+        );
+        expect(thirdUserAnswered.status).toBe(HttpStatus.FORBIDDEN);
+      });
+
+      it(
+        'The user can`t send a response if he has already answered on' +
+          ' all questions',
+        async () => {
+          const { secondUser, questions } = expect.getState();
+
+          await gameFactory.sendManyAnswer(secondUser.accessToken, questions, {
+            1: AnswerStatus.Incorrect,
+            2: AnswerStatus.Incorrect,
+            3: AnswerStatus.Incorrect,
+            4: AnswerStatus.Incorrect,
+            5: AnswerStatus.Incorrect,
+          });
+          const response = await game.sendAnswer(
+            preparedAnswer.random,
+            secondUser.accessToken,
+          );
+          expect(response.status).toBe(HttpStatus.FORBIDDEN);
+        },
+      );
     },
   );
+
+  describe('Game over if one player don`t answered all the questions', () => {
+      it('Clear data base', async () => {
+          await testing.clearDb();
+      });
+
+      it('Create questions', async () => {
+          await questionsFactories.createQuestions(
+              preparedGameData.length,
+              preparedGameData,
+          );
+      })
+
+      it('Fist player answered on all questions, second player ', async () => {
+          const [fistPlayer, secondPlayer] =
+              await usersFactory.createAndLoginUsers(2, 3);
+
+          const activeGame = await gameFactory.createGame(
+              fistPlayer,
+              secondPlayer,
+          );
+
+          const questions = activeGame.body.questions;
+
+          await gameFactory.sendManyAnswer(secondPlayer.accessToken, questions, {
+              1: AnswerStatus.Correct,
+              2: AnswerStatus.Correct,
+              3: AnswerStatus.Correct,
+          });
+          await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
+              1: AnswerStatus.Correct,
+              2: AnswerStatus.Correct,
+              3: AnswerStatus.Correct,
+              4: AnswerStatus.Correct,
+              5: AnswerStatus.Correct,
+          });
+
+          await sleep(10);
+
+          const secondPlayerTryAnswered = await gameFactory.sendCorrectAnswer(
+              secondPlayer.accessToken,
+              activeGame.body.questions[3],
+          );
+          expect(secondPlayerTryAnswered.status).toBe(HttpStatus.FORBIDDEN);
+
+          const myCurrentGame = await game.getMyCurrentGame(secondPlayer.accessToken)
+          expect(myCurrentGame.status).toBe(HttpStatus.NOT_FOUND)
+
+          const finishedGame = await game.getGameById(
+              activeGame.body.id,
+              fistPlayer.accessToken,
+          );
+          expect(finishedGame.status).toBe(HttpStatus.OK);
+          expect(finishedGame.body.status).toBe(GameStatus.Finished);
+          expect(finishedGame.body.secondPlayerProgress);
+          expect(finishedGame.body.secondPlayerProgress.score).toBe(3);
+          expect(finishedGame.body.firstPlayerProgress.score).toBe(6);
+
+          expect(finishedGame.body.secondPlayerProgress.answers).toEqual([
+              expectAnswer(AnswerStatus.Correct),
+              expectAnswer(AnswerStatus.Correct),
+              expectAnswer(AnswerStatus.Correct),
+              expectAnswer(AnswerStatus.Incorrect, false),
+              expectAnswer(AnswerStatus.Incorrect, false),
+          ]);
+      });
+
+  })
 
   describe(
     'POST -> "pair-game-quiz/pair/connection".' +

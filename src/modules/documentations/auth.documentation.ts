@@ -1,6 +1,6 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
+  ApiBadRequestResponse, ApiBearerAuth,
   ApiBody,
   ApiForbiddenResponse,
   ApiNoContentResponse,
@@ -18,6 +18,7 @@ import { RegistrationConfirmationDto } from '../public/auth/api/dto/registration
 import { PasswordRecoveryDto } from '../public/auth/api/dto/password-recovery.dto';
 import { NewPasswordDto } from '../public/auth/api/dto/new-password.dto';
 import { ViewAboutMe } from '../public/auth/api/view/view-about-me';
+import {AuthDto} from "../public/auth/api/dto/auth.dto";
 
 export function ApiRegistration() {
   return applyDecorators(
@@ -44,6 +45,7 @@ export function ApiRegistration() {
 export function ApiLogin() {
   return applyDecorators(
     ApiOperation({ summary: 'New user login after registration' }),
+    ApiBody({type: AuthDto}),
     ApiOkResponse({
       description:
         'Returns JWT accessToken (expired after 10 seconds) in body and JWT refreshToken in cookie (http-only, secure) (expired after 20 seconds)',
@@ -182,6 +184,7 @@ export function ApiAboutMe() {
     ApiOperation({
       summary: 'An authorized user requests information about their account',
     }),
+    ApiBearerAuth(),
     ApiOkResponse({
       description: 'Success',
       type: ViewAboutMe,

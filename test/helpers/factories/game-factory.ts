@@ -70,6 +70,7 @@ export class GameFactory {
       const [firstPlayer, secondPlayer] =
         await this.usersFactory.createAndLoginUsers(2);
     }
+
     await this.game.joinGame(firstPlayer.accessToken);
 
     return await this.game.joinGame(secondPlayer.accessToken);

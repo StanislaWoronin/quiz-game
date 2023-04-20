@@ -14,17 +14,26 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AuthBasicGuard } from '../../../public/auth/guards/auth-basic.guard';
-import { CreateQuestionDto } from './dto/create-question.dto';
-import { CreatedQuestions } from './view/created-questions';
-import { QuestionsService } from '../applications/questions.servise';
-import { IQuestionsQueryRepository } from '../infrastructure/i-questions-query.repository';
-import { ViewPage } from '../../../../common/pagination/view-page';
-import { QuestionsQueryDto } from './dto/query/questions-query.dto';
-import { UpdateQuestionDto } from './dto/update-question.dto';
-import { UpdatePublishStatusDto } from './dto/update-publish-status.dto';
-import { ViewQuestion } from './view/view-question';
+import {AuthBasicGuard} from '../../../public/auth/guards/auth-basic.guard';
+import {CreateQuestionDto} from './dto/create-question.dto';
+import {CreatedQuestions} from './view/created-questions';
+import {QuestionsService} from '../applications/questions.servise';
+import {IQuestionsQueryRepository} from '../infrastructure/i-questions-query.repository';
+import {ViewPage} from '../../../../common/pagination/view-page';
+import {QuestionsQueryDto} from './dto/query/questions-query.dto';
+import {UpdateQuestionDto} from './dto/update-question.dto';
+import {UpdatePublishStatusDto} from './dto/update-publish-status.dto';
+import {ViewQuestion} from './view/view-question';
+import {ApiBasicAuth, ApiTags} from "@nestjs/swagger";
+import {
+  ApiCreateQuestion, ApiDeleteQuestion,
+  ApiGetAllQuestions,
+  ApiUpdatePublishStatus,
+  ApiUpdateQuestion
+} from "../../../documentations/sa.documentation";
 
+@ApiTags('SA')
+@ApiBasicAuth()
 @UseGuards(AuthBasicGuard)
 @Controller('sa/quiz/questions')
 export class QuestionsController {
@@ -35,6 +44,7 @@ export class QuestionsController {
   ) {}
 
   @Post()
+  @ApiCreateQuestion()
   async createQuestion(
     @Body() dto: CreateQuestionDto,
   ): Promise<CreatedQuestions> {
@@ -42,14 +52,16 @@ export class QuestionsController {
   }
 
   @Get()
+  @ApiGetAllQuestions()
   async getQuestions(
     @Query() query: QuestionsQueryDto,
   ): Promise<ViewPage<ViewQuestion>> {
     return await this.questionsQueryRepository.getQuestions(query);
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiUpdateQuestion()
   async updateQuestion(
     @Param('id') questionId: string,
     @Body() dto: UpdateQuestionDto,
@@ -68,8 +80,9 @@ export class QuestionsController {
     return;
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id/publish')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiUpdatePublishStatus()
   async updatePublishStatus(
     @Param('id') questionId: string,
     @Body() dto: UpdatePublishStatusDto,
@@ -88,8 +101,9 @@ export class QuestionsController {
     return;
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiDeleteQuestion()
   async deleteQuestion(@Param('id') questionId: string) {
     const isDeleted = await this.questionsService.deleteQuestion(questionId);
 

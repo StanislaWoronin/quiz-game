@@ -1,4 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreatedUser } from './created-user';
+import {CreatedUser} from "./created-user";
 
-export class ViewUser extends PartialType(CreatedUser) {}
+export class ViewUser extends CreatedUser {}
