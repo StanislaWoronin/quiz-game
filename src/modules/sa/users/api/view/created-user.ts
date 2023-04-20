@@ -1,5 +1,5 @@
 import { SqlUsers } from '../../infrastructure/sql/entity/users.entity';
-import {ApiProperty} from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatedUser {
   @ApiProperty()

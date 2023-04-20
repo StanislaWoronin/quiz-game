@@ -14,23 +14,24 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {AuthBasicGuard} from '../../../public/auth/guards/auth-basic.guard';
-import {CreateQuestionDto} from './dto/create-question.dto';
-import {CreatedQuestions} from './view/created-questions';
-import {QuestionsService} from '../applications/questions.servise';
-import {IQuestionsQueryRepository} from '../infrastructure/i-questions-query.repository';
-import {ViewPage} from '../../../../common/pagination/view-page';
-import {QuestionsQueryDto} from './dto/query/questions-query.dto';
-import {UpdateQuestionDto} from './dto/update-question.dto';
-import {UpdatePublishStatusDto} from './dto/update-publish-status.dto';
-import {ViewQuestion} from './view/view-question';
-import {ApiBasicAuth, ApiTags} from "@nestjs/swagger";
+import { AuthBasicGuard } from '../../../public/auth/guards/auth-basic.guard';
+import { CreateQuestionDto } from './dto/create-question.dto';
+import { CreatedQuestions } from './view/created-questions';
+import { QuestionsService } from '../applications/questions.servise';
+import { IQuestionsQueryRepository } from '../infrastructure/i-questions-query.repository';
+import { ViewPage } from '../../../../common/pagination/view-page';
+import { QuestionsQueryDto } from './dto/query/questions-query.dto';
+import { UpdateQuestionDto } from './dto/update-question.dto';
+import { UpdatePublishStatusDto } from './dto/update-publish-status.dto';
+import { ViewQuestion } from './view/view-question';
+import { ApiBasicAuth, ApiTags } from '@nestjs/swagger';
 import {
-  ApiCreateQuestion, ApiDeleteQuestion,
+  ApiCreateQuestion,
+  ApiDeleteQuestion,
   ApiGetAllQuestions,
   ApiUpdatePublishStatus,
-  ApiUpdateQuestion
-} from "../../../documentations/sa.documentation";
+  ApiUpdateQuestion,
+} from '../../../documentations/sa.documentation';
 
 @ApiTags('SA')
 @ApiBasicAuth()

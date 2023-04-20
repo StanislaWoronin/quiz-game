@@ -1,5 +1,5 @@
 import { MongoQuestion } from '../../infrastructure/mongoose/schema/question.schema';
-import {ApiProperty} from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatedQuestions {
   @ApiProperty()
@@ -9,20 +9,22 @@ export class CreatedQuestions {
   @ApiProperty({
     isArray: true,
     example: [
-      'possible fist answer', 'possible second answer', 'possible third answer'
-    ]
+      'possible fist answer',
+      'possible second answer',
+      'possible third answer',
+    ],
   })
   readonly correctAnswers: string[];
-  @ApiProperty({default: false})
+  @ApiProperty({ default: false })
   readonly published: boolean;
   @ApiProperty({
     example: '2023-04-20T10:45:05.185Z',
-    description: 'Question creation date in IsoString format'
+    description: 'Question creation date in IsoString format',
   })
   readonly createdAt: string;
   @ApiProperty({
     example: '2023-04-21T10:45:05.185Z',
-    description: 'Question update  date in IsoString format'
+    description: 'Question update  date in IsoString format',
   })
   readonly updatedAt: string;
 

@@ -2,16 +2,16 @@ import { Questions } from '../../shared/questions';
 import { GameStatus } from '../../shared/game-status';
 import { ViewGameProgress } from './view-game-progress';
 import { SqlGame } from '../../infrastructure/sql/entity/sql-game.entity';
-import {ApiProperty} from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ViewGame {
   @ApiProperty()
   id: string;
-  @ApiProperty({type: ViewGameProgress})
+  @ApiProperty({ type: ViewGameProgress })
   firstPlayerProgress: ViewGameProgress;
-  @ApiProperty({type: ViewGameProgress})
+  @ApiProperty({ type: ViewGameProgress })
   secondPlayerProgress: ViewGameProgress | null;
-  @ApiProperty({type: [Questions]})
+  @ApiProperty({ type: [Questions] })
   questions: Questions[] | null;
   @ApiProperty()
   status: GameStatus;
@@ -20,7 +20,7 @@ export class ViewGame {
   })
   pairCreatedDate: string;
   @ApiProperty({
-    example: '2023-04-20T10:45:15.111Z'
+    example: '2023-04-20T10:45:15.111Z',
   })
   startGameDate: string;
   @ApiProperty({

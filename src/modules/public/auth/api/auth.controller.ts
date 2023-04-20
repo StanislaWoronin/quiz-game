@@ -45,7 +45,7 @@ import {
   ApiRegistrationConfirmation,
   ApiRegistrationEmailResending,
 } from '../../../documentations/auth.documentation';
-import {AccessToken} from "../../security/api/view/access-token";
+import { AccessToken } from '../../security/api/view/access-token';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -86,7 +86,7 @@ export class AuthController {
     @Ip() ipAddress: string,
     @UserId() userId: string,
     @Headers('user-agent') title: string,
-    @Res({passthrough: true}) res: Response,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<AccessToken> {
     const tokens = await this.securityService.createUserDevice(
       userId,
@@ -95,12 +95,12 @@ export class AuthController {
     );
 
     res.cookie('refreshToken', tokens.refreshToken, {
-        httpOnly: !this.isDev,
-        secure: !this.isDev,
-        maxAge: 24 * 60 * 60 * 1000,
-      })
+      httpOnly: !this.isDev,
+      secure: !this.isDev,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
-    return { accessToken: tokens.accessToken }
+    return { accessToken: tokens.accessToken };
   }
 
   @Post('registration-email-resending')
@@ -171,18 +171,18 @@ export class AuthController {
   @ApiRefreshToken()
   @Post('refresh-token')
   async createRefreshToken(
-      @Req() req: Request,
-      @Res({passthrough: true}) res: Response
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<AccessToken> {
     const tokens = await this.securityService.createNewRefreshToken(
       req.cookies.refreshToken,
     );
 
     res.cookie('refreshToken', tokens.refreshToken, {
-        httpOnly: !this.isDev,
-        secure: !this.isDev,
-        maxAge: 24 * 60 * 60 * 1000,
-      })
+      httpOnly: !this.isDev,
+      secure: !this.isDev,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     return { accessToken: tokens.accessToken };
   }

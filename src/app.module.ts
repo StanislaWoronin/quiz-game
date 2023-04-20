@@ -73,8 +73,8 @@ import { TaskService } from './modules/public/pair-quiz-game/applications/task.s
 import { Connection } from 'mongoose';
 import { CqrsModule } from '@nestjs/cqrs';
 import { DelayedForceGameOverHandler } from './modules/public/pair-quiz-game/applications/delayed-force-game-over.handler';
-import { ScheduleModule } from '@nestjs/schedule';
 import { SqlGameSubscriber } from './modules/public/pair-quiz-game/infrastructure/helpers/fisih-game.subscriber';
+import { ScheduleModule } from '@nestjs/schedule';
 
 const controllers = [
   AuthController,

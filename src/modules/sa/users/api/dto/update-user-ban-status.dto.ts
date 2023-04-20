@@ -5,8 +5,8 @@ import {
   Length,
   MinLength,
 } from 'class-validator';
-import {ApiProperty} from "@nestjs/swagger";
-import {settings} from "../../../../../settings";
+import { ApiProperty } from '@nestjs/swagger';
+import { settings } from '../../../../../settings';
 
 export class UpdateUserBanStatusDto {
   @ApiProperty()
@@ -14,7 +14,7 @@ export class UpdateUserBanStatusDto {
   @IsNotEmpty()
   isBanned: boolean;
 
-  @ApiProperty({minLength: settings.validationConstant.banReasonLength.min})
+  @ApiProperty({ minLength: settings.validationConstant.banReasonLength.min })
   @IsString()
   @MinLength(settings.validationConstant.banReasonLength.min)
   banReason: string;

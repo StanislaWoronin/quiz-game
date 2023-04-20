@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { TopPlayersSortField } from './top-players-sort-field';
 import { IsValidEnumValue } from '../../../../../../common/validators/is-valid-enum-value.validator';
-import {ApiProperty} from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class TopPlayersQueryDto extends QueryDto {
   // @IsEnum(TopPlayersSortField)

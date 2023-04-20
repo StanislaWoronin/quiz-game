@@ -1,6 +1,6 @@
 import { PageDto } from './page.dto';
 import { givePagesCount } from '../helpers';
-import {ApiProperty} from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ViewPage<I> {
   @ApiProperty()

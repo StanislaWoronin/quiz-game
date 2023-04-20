@@ -1,9 +1,9 @@
 import { ViewAnswer } from './view-answer';
 import { ViewPlayer } from './view-player';
-import {ApiProperty} from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ViewGameProgress {
-  @ApiProperty({type: [ViewAnswer]})
+  @ApiProperty({ type: [ViewAnswer] })
   answers: ViewAnswer[];
   @ApiProperty()
   player: ViewPlayer;

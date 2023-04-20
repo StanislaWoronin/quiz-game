@@ -10,18 +10,18 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
-import {SecurityService} from '../application/security.service';
-import {ViewSecurity} from './view/view-security';
-import {ISecurityQueryRepository} from '../infrastructure/i-security-query.repository';
-import {RefreshTokenValidationGuard} from '../../auth/guards/refresh-token-validation.guard';
-import {UserId} from '../../../../common/decorators/user.decorator';
-import {DeviceId} from '../../../../common/decorators/device.decorator';
-import {ApiTags} from "@nestjs/swagger";
+import { SecurityService } from '../application/security.service';
+import { ViewSecurity } from './view/view-security';
+import { ISecurityQueryRepository } from '../infrastructure/i-security-query.repository';
+import { RefreshTokenValidationGuard } from '../../auth/guards/refresh-token-validation.guard';
+import { UserId } from '../../../../common/decorators/user.decorator';
+import { DeviceId } from '../../../../common/decorators/device.decorator';
+import { ApiTags } from '@nestjs/swagger';
 import {
   ApiDeleteAllActiveSessions,
   ApiDeleteDeviceById,
-  ApiGetAllActiveSessions
-} from "../../../documentations/security.documentation";
+  ApiGetAllActiveSessions,
+} from '../../../documentations/security.documentation';
 
 @ApiTags('Security')
 @UseGuards(RefreshTokenValidationGuard)

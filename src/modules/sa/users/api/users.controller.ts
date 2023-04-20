@@ -23,13 +23,13 @@ import { ViewUser } from './view/view-user';
 import { UsersQueryDto } from './dto/query/users-query.dto';
 import { UpdateUserBanStatusDto } from './dto/update-user-ban-status.dto';
 import { CreateUserBySaUseCase } from '../use-cases/create-user-by-sa.use-case';
-import {ApiBasicAuth, ApiTags} from "@nestjs/swagger";
+import { ApiBasicAuth, ApiTags } from '@nestjs/swagger';
 import {
   ApiCreateUser,
   ApiDeleteUser,
   ApiGetUsers,
-  ApiUpdateUserBanStatus
-} from "../../../documentations/sa.documentation";
+  ApiUpdateUserBanStatus,
+} from '../../../documentations/sa.documentation';
 
 @ApiTags('SA')
 @ApiBasicAuth()

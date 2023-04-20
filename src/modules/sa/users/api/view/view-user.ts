@@ -1,3 +1,3 @@
-import {CreatedUser} from "./created-user";
+import { CreatedUser } from './created-user';
 
 export class ViewUser extends CreatedUser {}

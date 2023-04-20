@@ -9,7 +9,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { ITestingRepository } from '../infrastructure/i-testing.repository';
-import {ApiExcludeEndpoint, ApiOperation, ApiTags} from "@nestjs/swagger";
+import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Testing')
 @Controller('testing')
@@ -20,7 +20,7 @@ export class TestingController {
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('all-data')
-  @ApiOperation({summary: 'Clear data base'})
+  @ApiOperation({ summary: 'Clear data base' })
   async deleteAll(): Promise<boolean> {
     return this.testingRepository.deleteAll();
   }
