@@ -69,10 +69,10 @@ import { SqlEmailConfirmation } from './modules/sa/users/infrastructure/sql/enti
 import { SqlGameQuestions } from './modules/public/pair-quiz-game/infrastructure/sql/entity/sql-game-questions.entity';
 import { PairQuizGameUsersController } from './modules/public/pair-quiz-game/api/pair-quiz-game-users.controller';
 import { PairQuizGamePairsController } from './modules/public/pair-quiz-game/api/pair-quiz-game-pairs.controller';
-import { TaskService } from './modules/public/pair-quiz-game/applications/task.service';
+import { TaskService } from './modules/public/pair-quiz-game/forse-game-over/task.service';
 import { Connection } from 'mongoose';
 import { CqrsModule } from '@nestjs/cqrs';
-import { DelayedForceGameOverHandler } from './modules/public/pair-quiz-game/applications/delayed-force-game-over.handler';
+import { DelayedForceGameOverHandler } from './modules/public/pair-quiz-game/forse-game-over/delayed-force-game-over.handler';
 import { SqlGameSubscriber } from './modules/public/pair-quiz-game/infrastructure/helpers/fisih-game.subscriber';
 import { ScheduleModule } from '@nestjs/schedule';
 

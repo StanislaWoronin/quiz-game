@@ -1,6 +1,7 @@
 import { ViewGame } from '../api/view/view-game';
 import { ViewAnswer } from '../api/view/view-answer';
 import { SendAnswerDto } from '../applications/dto/send-answer.dto';
+import { DelayedForceGameOverEvent } from '../applications/dto/delayed-force-game-over.event';
 
 export interface IQuizGameRepository {
   createGame(userId): Promise<ViewGame>;
@@ -9,8 +10,8 @@ export interface IQuizGameRepository {
 
   sendAnswer(dto: SendAnswerDto): Promise<ViewAnswer>;
 
-  //forceGameOver(event: DelayedForceGameOverEvent);
-  forceGameOver();
+  forceGameOverSchedule()
+  forceGameOverTimeOut(event: DelayedForceGameOverEvent);
 }
 
 export const IQuizGameRepository = 'IQuizGameRepository';

@@ -1,32 +1,28 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { QuestionsFactory } from './helpers/factories/questions-factory';
-import { Questions } from './helpers/request/questions';
-import { Testing } from './helpers/request/testing';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../src/app.module';
-import { createApp } from '../src/config/create-app';
-import { Game } from './helpers/request/game';
-import { Users } from './helpers/request/users';
-import { UsersFactory } from './helpers/factories/users-factory';
-import { Auth } from './helpers/request/auth';
-import {
-  expectAnswer,
-  expectPlayerProgress,
-  expectQuestions,
-  expectViewGame,
-} from './helpers/expect-data/expect-game';
-import { GameStatus } from '../src/modules/public/pair-quiz-game/shared/game-status';
-import { AnswerStatus } from '../src/modules/public/pair-quiz-game/shared/answer-status';
-import { preparedGameData } from './helpers/prepeared-data/prepared-game-data';
-import { GameFactory } from './helpers/factories/game-factory';
-import { randomUUID } from 'crypto';
-import { faker } from '@faker-js/faker';
-import { expectPagination } from './helpers/expect-data/expect-pagination';
-import { SortByGameField } from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
-import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
-import { TopPlayersSortField } from '../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field';
-import { sleep } from './helpers/helpers';
-import { preparedAnswer } from './helpers/prepeared-data/prepared-answer';
+import {HttpStatus, INestApplication} from '@nestjs/common';
+import {QuestionsFactory} from './helpers/factories/questions-factory';
+import {Questions} from './helpers/request/questions';
+import {Testing} from './helpers/request/testing';
+import {Test, TestingModule} from '@nestjs/testing';
+import {AppModule} from '../src/app.module';
+import {createApp} from '../src/config/create-app';
+import {Game} from './helpers/request/game';
+import {Users} from './helpers/request/users';
+import {UsersFactory} from './helpers/factories/users-factory';
+import {Auth} from './helpers/request/auth';
+import {expectAnswer, expectPlayerProgress, expectQuestions, expectViewGame,} from './helpers/expect-data/expect-game';
+import {GameStatus} from '../src/modules/public/pair-quiz-game/shared/game-status';
+import {AnswerStatus} from '../src/modules/public/pair-quiz-game/shared/answer-status';
+import {preparedGameData} from './helpers/prepeared-data/prepared-game-data';
+import {GameFactory} from './helpers/factories/game-factory';
+import {randomUUID} from 'crypto';
+import {faker} from '@faker-js/faker';
+import {expectPagination} from './helpers/expect-data/expect-pagination';
+import {SortByGameField} from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
+import {SortDirection} from '../src/common/pagination/query-parameters/sort-direction';
+import {TopPlayersSortField} from '../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field';
+import {sleep} from './helpers/helpers';
+import {preparedAnswer} from './helpers/prepeared-data/prepared-answer';
+import {settings} from "../src/settings";
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -144,7 +140,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     },
   );
 
-  describe.skip('Game over if one player don`t answered all the questions', () => {
+  describe('Game over if one player don`t answered all the questions', () => {
     it('Clear data base', async () => {
       await testing.clearDb();
     });
@@ -156,60 +152,174 @@ describe('/sa/quiz/questions (e2e)', () => {
       );
     });
 
-    it('Fist player answered on all questions, second player ', async () => {
-      const [fistPlayer, secondPlayer] = await usersFactory.createAndLoginUsers(
-        2,
-        3,
-      );
+    const timer = Number(settings.gameRules.timeLimit)
 
-      const activeGame = await gameFactory.createGame(fistPlayer, secondPlayer);
+    it(
+      'Create game by user1, connect to game by user2. Add 5 correct answers by user1. ' +
+        'Await 10 sec. Get game by user1. Should return finished game - status: "Finished", ' +
+        'firstPlayerProgress.score: 6, secondPlayerProgress.score: 0, finishGameDate: not to be ' +
+        'null; status 200',
+      async () => {
+        const [fistPlayer, secondPlayer] =
+          await usersFactory.createAndLoginUsers(2);
+        const activeGame = await gameFactory.createGame(
+          fistPlayer,
+          secondPlayer,
+        );
+        const questions = activeGame.body.questions;
 
-      const questions = activeGame.body.questions;
+        await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
+          1: AnswerStatus.Correct,
+          2: AnswerStatus.Correct,
+          3: AnswerStatus.Correct,
+          4: AnswerStatus.Correct,
+          5: AnswerStatus.Correct,
+        });
 
-      await gameFactory.sendManyAnswer(secondPlayer.accessToken, questions, {
-        1: AnswerStatus.Correct,
-        2: AnswerStatus.Correct,
-        3: AnswerStatus.Correct,
-      });
-      await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
-        1: AnswerStatus.Correct,
-        2: AnswerStatus.Correct,
-        3: AnswerStatus.Correct,
-        4: AnswerStatus.Correct,
-        5: AnswerStatus.Correct,
-      });
+        await sleep(timer);
 
-      await sleep(10);
+        const finishedGame = await game.getGameById(
+          activeGame.body.id,
+          fistPlayer.accessToken,
+        );
+        expect(finishedGame.status).toBe(HttpStatus.OK);
+        expect(finishedGame.body.status).toBe(GameStatus.Finished);
+        expect(finishedGame.body.finishGameDate).toBeDefined();
+        expect(finishedGame.body.firstPlayerProgress.score).toBe(6);
+        expect(finishedGame.body.secondPlayerProgress.score).toBe(0);
+      },
+    );
 
-      const secondPlayerTryAnswered = await gameFactory.sendCorrectAnswer(
-        secondPlayer.accessToken,
-        activeGame.body.questions[3],
-      );
-      expect(secondPlayerTryAnswered.status).toBe(HttpStatus.FORBIDDEN);
+    it(
+      'Create game by user1, connect to game by user2. Add 3 correct answers by user2. ' +
+        'Add 5 correct answers by user1. Await 10 sec. Call "/pair-game-quiz/pairs/my-current" ' +
+        'endpoint by user2. Should return status 404. Get game by user1. Should return finished ' +
+        'game - status: "Finished", firstPlayerProgress.score: 6, secondPlayerProgress.score: 3, ' +
+        'finishGameDate: not to be null; status 200',
+      async () => {
+        const [fistPlayer, secondPlayer] =
+          await usersFactory.createAndLoginUsers(2, 3);
+        const activeGame = await gameFactory.createGame(
+          fistPlayer,
+          secondPlayer,
+        );
+        const questions = activeGame.body.questions;
 
-      const myCurrentGame = await game.getMyCurrentGame(
-        secondPlayer.accessToken,
-      );
-      expect(myCurrentGame.status).toBe(HttpStatus.NOT_FOUND);
+        await gameFactory.sendManyAnswer(secondPlayer.accessToken, questions, {
+          1: AnswerStatus.Correct,
+          2: AnswerStatus.Correct,
+          3: AnswerStatus.Correct,
+        });
+        await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
+          1: AnswerStatus.Correct,
+          2: AnswerStatus.Correct,
+          3: AnswerStatus.Correct,
+          4: AnswerStatus.Correct,
+          5: AnswerStatus.Correct,
+        });
 
-      const finishedGame = await game.getGameById(
-        activeGame.body.id,
-        fistPlayer.accessToken,
-      );
-      expect(finishedGame.status).toBe(HttpStatus.OK);
-      expect(finishedGame.body.status).toBe(GameStatus.Finished);
-      expect(finishedGame.body.secondPlayerProgress);
-      expect(finishedGame.body.secondPlayerProgress.score).toBe(3);
-      expect(finishedGame.body.firstPlayerProgress.score).toBe(6);
+        const currentGame = await game.getMyCurrentGame(secondPlayer.accessToken)
+        expect(currentGame.body).toBeDefined()
 
-      expect(finishedGame.body.secondPlayerProgress.answers).toEqual([
-        expectAnswer(AnswerStatus.Correct),
-        expectAnswer(AnswerStatus.Correct),
-        expectAnswer(AnswerStatus.Correct),
-        expectAnswer(AnswerStatus.Incorrect, false),
-        expectAnswer(AnswerStatus.Incorrect, false),
-      ]);
-    });
+        await sleep(timer);
+
+        const secondPlayerTryAnswered = await gameFactory.sendCorrectAnswer(
+          secondPlayer.accessToken,
+          activeGame.body.questions[3],
+        );
+        expect(secondPlayerTryAnswered.status).toBe(HttpStatus.FORBIDDEN);
+
+        const myCurrentGame = await game.getMyCurrentGame(
+          secondPlayer.accessToken,
+        );
+        expect(myCurrentGame.status).toBe(HttpStatus.NOT_FOUND);
+
+        const finishedGame = await game.getGameById(
+          activeGame.body.id,
+          fistPlayer.accessToken,
+        );
+        expect(finishedGame.status).toBe(HttpStatus.OK);
+        expect(finishedGame.body.status).toBe(GameStatus.Finished);
+        expect(finishedGame.body.finishGameDate).toBeDefined();
+        expect(finishedGame.body.firstPlayerProgress.score).toBe(6);
+        expect(finishedGame.body.secondPlayerProgress.score).toBe(3);
+        expect(finishedGame.body.secondPlayerProgress.answers).toEqual([
+          expectAnswer(AnswerStatus.Correct),
+          expectAnswer(AnswerStatus.Correct),
+          expectAnswer(AnswerStatus.Correct),
+          expectAnswer(AnswerStatus.Incorrect, false),
+          expectAnswer(AnswerStatus.Incorrect, false),
+        ]);
+      },
+    );
+
+    it('Create game1 by user1, connect to game by user2. Add 3 incorrect answers by user2. ' +
+        'Add 4 correct answers by user1. Create game2 by user3, connect to game by user4. Add 5 ' +
+        'correct answers by user3. Add 2 correct answers by user4. Add 2 correct answers by user2. ' +
+        'Await 10 sec. Get game1 by user2. Should return finished game - status: "Finished", ' +
+        'firstPlayerProgress.score: 4, secondPlayerProgress.score: 3, finishGameDate: not to be null. ' +
+        'Get game2 by user3. Should return finished game - status: "Finished", ' +
+        'firstPlayerProgress.score: 6, secondPlayerProgress.score: 2, finishGameDate: not to be null. ' +
+        'status 200', async () => {
+        const [fistPlayer, secondPlayer] =
+            await usersFactory.createAndLoginUsers(2, 5);
+        const fistGame = await gameFactory.createGame(
+            fistPlayer,
+            secondPlayer,
+        );
+        const fistGameQuestions = fistGame.body.questions;
+
+        await gameFactory.sendManyAnswer(secondPlayer.accessToken, fistGameQuestions, {
+            1: AnswerStatus.Incorrect,
+            2: AnswerStatus.Incorrect,
+            3: AnswerStatus.Incorrect,
+        });
+        await gameFactory.sendManyAnswer(fistPlayer.accessToken, fistGameQuestions, {
+            1: AnswerStatus.Correct,
+            2: AnswerStatus.Correct,
+            3: AnswerStatus.Correct,
+            4: AnswerStatus.Correct,
+        });
+
+        const [thirdPlayer, fourthPlayer] =
+            await usersFactory.createAndLoginUsers(2, 7);
+        const secondGame = await gameFactory.createGame(thirdPlayer, fourthPlayer)
+        const secondGameQuestions = secondGame.body.questions;
+
+        await gameFactory.sendManyAnswer(fourthPlayer.accessToken, secondGameQuestions, {
+            1: AnswerStatus.Correct,
+            2: AnswerStatus.Correct,
+        });
+
+        await gameFactory.sendManyAnswer(thirdPlayer.accessToken, secondGameQuestions, {
+            1: AnswerStatus.Correct,
+            2: AnswerStatus.Correct,
+            3: AnswerStatus.Correct,
+            4: AnswerStatus.Correct,
+            5: AnswerStatus.Correct,
+        });
+
+        await gameFactory.sendManyAnswer(secondPlayer.accessToken, fistGameQuestions, {
+            4: AnswerStatus.Correct,
+            5: AnswerStatus.Correct,
+        });
+
+        await sleep(timer)
+
+        const finishedFistGame = await game.getGameById(fistGame.body.id, secondPlayer.accessToken)
+        expect(finishedFistGame.status).toBe(HttpStatus.OK);
+        expect(finishedFistGame.body.status).toBe(GameStatus.Finished);
+        expect(finishedFistGame.body.finishGameDate).toBeDefined();
+        expect(finishedFistGame.body.firstPlayerProgress.score).toBe(4);
+        expect(finishedFistGame.body.secondPlayerProgress.score).toBe(3);
+
+        const finishedSecondGame = await game.getGameById(secondGame.body.id, thirdPlayer.accessToken)
+        expect(finishedSecondGame.status).toBe(HttpStatus.OK);
+        expect(finishedSecondGame.body.status).toBe(GameStatus.Finished);
+        expect(finishedSecondGame.body.finishGameDate).toBeDefined();
+        expect(finishedSecondGame.body.firstPlayerProgress.score).toBe(6);
+        expect(finishedSecondGame.body.secondPlayerProgress.score).toBe(2);
+    })
   });
 
   describe(

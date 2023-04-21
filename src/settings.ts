@@ -13,8 +13,8 @@ export const settings = {
   SALT_GENERATE_ROUND: '10',
   timeLife: {
     CONFIRMATION_CODE: '24', // hour
-    ACCESS_TOKEN: '10000', // sec
-    REFRESH_TOKEN: '20000', // sec
+    ACCESS_TOKEN: '10000', // msec
+    REFRESH_TOKEN: '20000', // msec
   },
   throttler: {
     CONNECTION_TIME_LIMIT: '10000', // msec
@@ -27,6 +27,7 @@ export const settings = {
   currentRepository: 'sql',
   gameRules: {
     questionsCount: '5',
+    timeLimit: '10'
   },
   validationConstant: {
     loginLength: {

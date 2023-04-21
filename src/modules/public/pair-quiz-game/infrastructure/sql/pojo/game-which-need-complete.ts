@@ -1,6 +1,8 @@
 export class GameWhichNeedComplete {
   gameId: string;
-  fistAnsweredPlayerId: string;
-  fistPlayerAnsweredTime: string;
+  firstAnsweredPlayerId: string;
+  secondAnsweredPlayerId: string;
   secondPlayerAnswerProgress: number;
+  firstAnsweredPlayerScore: number;
+  questions: string[]
 }

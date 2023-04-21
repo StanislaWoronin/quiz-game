@@ -15,6 +15,6 @@ export class TaskService {
   @Cron(CronExpression.EVERY_SECOND, { name: 'delayed_finished_game' })
   async forceGameOver() {
     // console.log('any');
-    await this.quizGameRepository.forceGameOver();
+    await this.quizGameRepository.forceGameOverSchedule();
   }
 }

@@ -17,6 +17,8 @@ import { SendAnswerDto } from '../../applications/dto/send-answer.dto';
 import { GameProgressDb } from './pojo/game-progress.db';
 import { GameWhichNeedComplete } from './pojo/game-which-need-complete';
 import { settings } from '../../../../../settings';
+import { DelayedForceGameOverEvent } from '../../applications/dto/delayed-force-game-over.event';
+import {GameInfoForTimeoutForceGameOver} from "./pojo/game-info-for-timeout-forsce-game-over";
 
 export class QuizGameRepository implements IQuizGameRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -188,7 +190,7 @@ export class QuizGameRepository implements IQuizGameRepository {
     }
   }
 
-  async forceGameOver() {
+  async forceGameOverSchedule() {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -204,24 +206,10 @@ export class QuizGameRepository implements IQuizGameRepository {
 
       if (!games.length) return;
       for (const game of games) {
-        const nextQuestionNumber = game.secondPlayerAnswerProgress;
-        const unansweredQuestions: { questionId: string; userId: string }[] =
-          await this.dataSource.query(this.getLastQuestionsIdQuery(), [
-            game.fistAnsweredPlayerId,
-            game.gameId,
-            nextQuestionNumber,
-          ]);
-
-        const lastQuestionsId =
-          unansweredQuestions[unansweredQuestions.length - 1].questionId;
-        const lastQuestionProgress: GameProgressDb[] = await manager.query(
-          this.getLastQuestionsProgressQuery(),
-          [game.gameId, lastQuestionsId],
-        );
-        const firstAnsweredPlayer = lastQuestionProgress[0];
-
+        console.log(games)
+        const unansweredQuestions = game.questions.slice(game.secondPlayerAnswerProgress)
         const answers = unansweredQuestions.map(
-          (q) => new SqlUserAnswer(q.userId, game.gameId, q.questionId, null),
+          (q) => new SqlUserAnswer(game.secondAnsweredPlayerId, game.gameId, q, null),
         );
 
         await manager.save(answers);
@@ -237,14 +225,78 @@ export class QuizGameRepository implements IQuizGameRepository {
           .execute();
 
         const extraScore = 1;
-        if (firstAnsweredPlayer.score !== 0) {
+        if (game.firstAnsweredPlayerScore !== 0) {
+          const newScore = game.firstAnsweredPlayerScore + extraScore
+          await manager
+            .createQueryBuilder()
+            .update(SqlGameProgress)
+            .set({ score: newScore })
+            .where('userId = :userId AND gameId = :gameId', {
+              userId: game.firstAnsweredPlayerId,
+              gameId: game.gameId,
+            })
+            .execute();
+        }
+      }
+
+      await queryRunner.commitTransaction();
+      return;
+    } catch (e) {
+      console.log(e)
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async forceGameOverTimeOut(event: DelayedForceGameOverEvent) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const manager = queryRunner.manager;
+
+      const [gameInfo]: GameInfoForTimeoutForceGameOver[] = await manager.query(this.getQueryForTimeOutForceGameOver(), [
+        event.gameId,
+        event.userId,
+        GameStatus.Active,
+      ]);
+
+      if (gameInfo) {
+        const unansweredQuestions = gameInfo.questions.slice(
+          gameInfo.countAnsweredQuestions,
+        );
+        const answers = unansweredQuestions.map(
+          (questionId) =>
+            new SqlUserAnswer(
+              gameInfo.playerIdWithoutAnswers,
+              event.gameId,
+              questionId,
+              null,
+            ),
+        );
+        await manager.save(answers);
+
+        await manager
+          .createQueryBuilder()
+          .update(SqlGame)
+          .set({
+            status: GameStatus.Finished,
+            finishGameDate: new Date().toISOString(),
+          })
+          .where('id = :gameId', { gameId: event.gameId })
+          .execute();
+
+        const extraScore = 1;
+        if (gameInfo.scoreFistAnsweredPlayer !== 0) {
           await manager
             .createQueryBuilder()
             .update(SqlGameProgress)
             .set({ score: () => `score + ${extraScore}` })
             .where('userId = :userId AND gameId = :gameId', {
-              userId: firstAnsweredPlayer.userId,
-              gameId: game.gameId,
+              userId: event.userId,
+              gameId: event.gameId,
             })
             .execute();
         }
@@ -259,46 +311,7 @@ export class QuizGameRepository implements IQuizGameRepository {
     }
   }
 
-  // async forceGameOver(event: DelayedForceGameOverEvent) {
-  //   const queryRunner = this.dataSource.createQueryRunner();
-  //   await queryRunner.connect();
-  //   await queryRunner.startTransaction();
-  //
-  //   try {
-  //     const manager = queryRunner.manager;
-  //
-  //     const query = `
-  //       SELECT g.status, ua."questionId",
-  //              (SELECT JSON_AGG(gq."questionId")
-  //                 FROM sql_game_questions gq
-  //                WHERE gq."gameId" = g.id) AS questions
-  //         FROM sql_game g
-  //         JOIN sql_user_answer ua ON ua."gameId" = g.id
-  //        WHERE g.id = $1
-  //          AND g.status = 'Active'
-  //          AND ua."userId" != $2
-  //        ORDER BY ua."addedAt" DESC
-  //        LIMIT 1;
-  //     `;
-  //     console.log(event);
-  //     const game = await manager.query(query, [event.gameId, event.userId]);
-  //
-  //     if (game[0].status === GameStatus.Active) {
-  //       const lastAnsweredQuestionNumber = game[0].questions.indexOf(
-  //         game[0].questionId,
-  //       );
-  //       console.log({ lastAnsweredQuestionNumber });
-  //     }
-  //
-  //     await queryRunner.commitTransaction();
-  //     return;
-  //   } catch (e) {
-  //     console.log(e);
-  //     await queryRunner.rollbackTransaction();
-  //   } finally {
-  //     await queryRunner.release();
-  //   }
-  // }
+  // *****************************************************************************
 
   private async getQuestions(): Promise<{ id: string }[]> {
     const query = `
@@ -322,39 +335,72 @@ export class QuizGameRepository implements IQuizGameRepository {
     `;
   }
 
-  private getLastQuestionsIdQuery(): string {
-    return `
-        SELECT gq."questionId", gp."userId"
-          FROM sql_game_questions gq
-          JOIN sql_game_progress gp ON gp."gameId" = gq."gameId" 
-           AND gp."userId" != $1
-         WHERE gq."gameId" = $2 
-        OFFSET $3;
-    `;
-  }
-
   private findGameWhichNeedComplete = (): string => {
+    // return `
+    //   SELECT g.id AS "gameId", ua."userId" AS "fistAnsweredPlayerId", MAX(ua."addedAt") AS "fistPlayerAnsweredTime",
+    //          (SELECT COUNT(*)
+    //             FROM sql_user_answer
+    //            WHERE "gameId" = g.id
+    //              AND "userId" != ua."userId") AS "secondPlayerAnswerProgress"
+    //     FROM sql_game g
+    //     JOIN (
+    //       SELECT *, ROW_NUMBER() OVER (PARTITION BY "gameId", "userId" ORDER BY "addedAt") AS rn
+    //       FROM sql_user_answer
+    //     ) ua ON ua."gameId" = g.id
+    //    WHERE ua."userId" IN (
+    //          SELECT "userId"
+    //          FROM sql_user_answer
+    //          WHERE "gameId" = g.id
+    //          GROUP BY "userId"
+    //          HAVING COUNT(*) = $1
+    //    ) AND g.status = 'Active'
+    //    GROUP BY g.id, ua."userId"
+    //   HAVING COUNT(*) = $1
+    //      AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = $1 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '$3 seconds');
+    // `;
+
     return `
-      SELECT g.id AS "gameId", ua."userId" AS "fistAnsweredPlayerId", MAX(ua."addedAt") AS "fistPlayerAnsweredTime",
+      SELECT g.id AS "gameId", 
+             fua."userId" AS "firstAnsweredPlayerId",
+             sgp."userId" AS "secondAnsweredPlayerId",
              (SELECT COUNT(*)
                 FROM sql_user_answer 
-               WHERE "gameId" = g.id 
-                 AND "userId" != ua."userId") AS "secondPlayerAnswerProgress"
+               WHERE "gameId" = g.id AND "userId" = sgp."userId") AS "secondPlayerAnswerProgress",
+             (SELECT score FROM sql_game_progress WHERE "userId" = fua."userId") AS "firstAnsweredPlayerScore",  
+             (SELECT JSON_AGG("questionId")
+                FROM sql_game_questions gq
+               WHERE "gameId" = g.id) AS questions  
         FROM sql_game g
-        JOIN (
-          SELECT *, ROW_NUMBER() OVER (PARTITION BY "gameId", "userId" ORDER BY "addedAt") AS rn
-          FROM sql_user_answer
-        ) ua ON ua."gameId" = g.id 
-       WHERE ua."userId" IN (
-             SELECT "userId"
-             FROM sql_user_answer
-             WHERE "gameId" = g.id
-             GROUP BY "userId"
-             HAVING COUNT(*) = $1
-       )
-       GROUP BY g.id, ua."userId"
+        JOIN sql_user_answer fua ON fua."gameId" = g.id
+        JOIN sql_game_progress sgp ON sgp."gameId" = g.id AND sgp."userId" != fua."userId"
+       WHERE g.status = 'Active'
+       GROUP BY g.id, fua."userId", sgp."userId"
       HAVING COUNT(*) = $1
-         AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = 5 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '10 seconds');
-    `;
+             AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - to_timestamp(MAX(fua."addedAt"), 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') >= interval '9 seconds');
+    `
   };
+
+  private getQueryForTimeOutForceGameOver = (): string => {
+    return `
+      SELECT g.status AS "gameStatus", 
+             (SELECT COUNT(*)
+                FROM sql_user_answer
+               WHERE "userId" != $2
+                 AND "gameId" = g.id) AS "countAnsweredQuestions",
+             (SELECT "userId" 
+                FROM sql_game_progress 
+               WHERE "userId" != $2
+                 AND "gameId" = g.id) AS "playerIdWithoutAnswers",
+             (SELECT score 
+                FROM sql_game_progress gp 
+               WHERE gp."gameId" = g.id
+                 AND gp."userId" = $2) AS "scoreFistAnsweredPlayer",
+             (SELECT JSON_AGG(gq."questionId")
+                FROM sql_game_questions gq
+               WHERE gq."gameId" = g.id) AS questions
+        FROM sql_game g
+       WHERE g.id = $1 
+         AND g.status = $3;
+    `
+  }
 }

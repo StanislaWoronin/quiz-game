@@ -1,8 +1,9 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
-import { DelayedForceGameOverEvent } from './dto/delayed-force-game-over.event';
+import { DelayedForceGameOverEvent } from '../applications/dto/delayed-force-game-over.event';
 import { Inject } from '@nestjs/common';
 import { IQuizGameRepository } from '../infrastructure/i-quiz-game.repository';
 import { sleep } from '../../../../../test/helpers/helpers';
+import {settings} from "../../../../settings";
 
 @EventsHandler(DelayedForceGameOverEvent)
 export class DelayedForceGameOverHandler
@@ -14,8 +15,8 @@ export class DelayedForceGameOverHandler
   ) {}
 
   async handle(event: DelayedForceGameOverEvent) {
-    await sleep(10);
-    const currentTime = Date.now();
-    //this.gameRepository.forceGameOver(event)
+    await sleep(Number(settings.gameRules.timeLimit));
+
+    this.gameRepository.forceGameOverTimeOut(event);
   }
 }
