@@ -4,5 +4,5 @@ export class GameWhichNeedComplete {
   secondAnsweredPlayerId: string;
   secondPlayerAnswerProgress: number;
   firstAnsweredPlayerScore: number;
-  questions: string[]
+  questions: string[];
 }

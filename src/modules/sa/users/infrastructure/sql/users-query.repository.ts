@@ -9,7 +9,6 @@ import { UserWithBanInfoDb } from './pojo/user-with-ban-info.db';
 import { toViewUser } from '../../../../../common/data-mapper/to-view-user';
 import { SqlUsers } from './entity/users.entity';
 import { SqlCredentials } from './entity/credentials.entity';
-import { SqlUserBanInfo } from './entity/ban-info.entity';
 import { IUsersQueryRepository } from '../i-users-query.repository';
 
 @Injectable()
@@ -42,7 +41,7 @@ export class UsersQueryRepository implements IUsersQueryRepository {
     const totalCount = await this.dataSource.query(countQuery);
 
     return new ViewPage<ViewUser>({
-      items: items ?? [],
+      items,
       query: queryDto,
       totalCount: Number(totalCount[0].count),
     });

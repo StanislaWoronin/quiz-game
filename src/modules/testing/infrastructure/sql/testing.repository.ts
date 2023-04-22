@@ -54,22 +54,25 @@ export class TestingRepository implements ITestingRepository {
     return true;
   }
 
-  async deleteAll(): Promise<boolean> {
+  async deleteAll() {
     try {
       const entities = this.dataSource.entityMetadatas;
       const tableNames = entities
         .map((entity) => `"${entity.tableName}"`)
         .join(', ');
 
-      await this.dataSource.query(`TRUNCATE ${tableNames} CASCADE;`);
+      const deleted = await this.dataSource.query(
+        `TRUNCATE ${tableNames} CASCADE;`,
+      );
 
       // const queryRunner = this.dataSource.manager.connection.createQueryRunner()
       //
       // await queryRunner.dropSchema('public', false, true);
       // await queryRunner.createSchema('public', true);
       // await this.dataSource.manager.synchronize()
-      return true;
+      return deleted;
     } catch (e) {
+      console.log(e);
       return false;
     }
   }

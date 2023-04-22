@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { IQuizGameQueryRepository } from '../infrastructure/i-quiz-game-query.repository';
 import { IQuizGameRepository } from '../infrastructure/i-quiz-game.repository';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class TaskService {
@@ -12,9 +12,8 @@ export class TaskService {
     protected quizGameRepository: IQuizGameRepository,
   ) {}
 
-  @Cron(CronExpression.EVERY_SECOND, { name: 'delayed_finished_game' })
+  @Cron(CronExpression.EVERY_SECOND)
   async forceGameOver() {
-    // console.log('any');
     await this.quizGameRepository.forceGameOverSchedule();
   }
 }

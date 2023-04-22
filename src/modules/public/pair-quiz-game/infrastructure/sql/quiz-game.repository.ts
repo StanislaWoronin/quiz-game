@@ -18,7 +18,7 @@ import { GameProgressDb } from './pojo/game-progress.db';
 import { GameWhichNeedComplete } from './pojo/game-which-need-complete';
 import { settings } from '../../../../../settings';
 import { DelayedForceGameOverEvent } from '../../applications/dto/delayed-force-game-over.event';
-import {GameInfoForTimeoutForceGameOver} from "./pojo/game-info-for-timeout-forsce-game-over";
+import { GameInfoForTimeoutForceGameOver } from './pojo/game-info-for-timeout-forsce-game-over';
 
 export class QuizGameRepository implements IQuizGameRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -192,8 +192,8 @@ export class QuizGameRepository implements IQuizGameRepository {
 
   async forceGameOverSchedule() {
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    // await queryRunner.connect();
+    // await queryRunner.startTransaction();
 
     try {
       const manager = queryRunner.manager;
@@ -203,13 +203,21 @@ export class QuizGameRepository implements IQuizGameRepository {
         this.findGameWhichNeedComplete(),
         [Number(settings.gameRules.questionsCount), currentTime],
       );
-
+      console.log(games.length, Date.now());
       if (!games.length) return;
+
       for (const game of games) {
-        console.log(games)
-        const unansweredQuestions = game.questions.slice(game.secondPlayerAnswerProgress)
+        const unansweredQuestions = game.questions.slice(
+          game.secondPlayerAnswerProgress,
+        );
         const answers = unansweredQuestions.map(
-          (q) => new SqlUserAnswer(game.secondAnsweredPlayerId, game.gameId, q, null),
+          (q) =>
+            new SqlUserAnswer(
+              game.secondAnsweredPlayerId,
+              game.gameId,
+              q,
+              null,
+            ),
         );
 
         await manager.save(answers);
@@ -226,7 +234,7 @@ export class QuizGameRepository implements IQuizGameRepository {
 
         const extraScore = 1;
         if (game.firstAnsweredPlayerScore !== 0) {
-          const newScore = game.firstAnsweredPlayerScore + extraScore
+          const newScore = game.firstAnsweredPlayerScore + extraScore;
           await manager
             .createQueryBuilder()
             .update(SqlGameProgress)
@@ -239,14 +247,13 @@ export class QuizGameRepository implements IQuizGameRepository {
         }
       }
 
-      await queryRunner.commitTransaction();
+      //await queryRunner.commitTransaction();
       return;
     } catch (e) {
-      console.log(e)
-      await queryRunner.rollbackTransaction();
-    } finally {
-      await queryRunner.release();
-    }
+      //await queryRunner.rollbackTransaction();
+    } //finally {
+    //   await queryRunner.release();
+    // }
   }
 
   async forceGameOverTimeOut(event: DelayedForceGameOverEvent) {
@@ -257,11 +264,10 @@ export class QuizGameRepository implements IQuizGameRepository {
     try {
       const manager = queryRunner.manager;
 
-      const [gameInfo]: GameInfoForTimeoutForceGameOver[] = await manager.query(this.getQueryForTimeOutForceGameOver(), [
-        event.gameId,
-        event.userId,
-        GameStatus.Active,
-      ]);
+      const [gameInfo]: GameInfoForTimeoutForceGameOver[] = await manager.query(
+        this.getQueryForTimeOutForceGameOver(),
+        [event.gameId, event.userId, GameStatus.Active],
+      );
 
       if (gameInfo) {
         const unansweredQuestions = gameInfo.questions.slice(
@@ -336,29 +342,6 @@ export class QuizGameRepository implements IQuizGameRepository {
   }
 
   private findGameWhichNeedComplete = (): string => {
-    // return `
-    //   SELECT g.id AS "gameId", ua."userId" AS "fistAnsweredPlayerId", MAX(ua."addedAt") AS "fistPlayerAnsweredTime",
-    //          (SELECT COUNT(*)
-    //             FROM sql_user_answer
-    //            WHERE "gameId" = g.id
-    //              AND "userId" != ua."userId") AS "secondPlayerAnswerProgress"
-    //     FROM sql_game g
-    //     JOIN (
-    //       SELECT *, ROW_NUMBER() OVER (PARTITION BY "gameId", "userId" ORDER BY "addedAt") AS rn
-    //       FROM sql_user_answer
-    //     ) ua ON ua."gameId" = g.id
-    //    WHERE ua."userId" IN (
-    //          SELECT "userId"
-    //          FROM sql_user_answer
-    //          WHERE "gameId" = g.id
-    //          GROUP BY "userId"
-    //          HAVING COUNT(*) = $1
-    //    ) AND g.status = 'Active'
-    //    GROUP BY g.id, ua."userId"
-    //   HAVING COUNT(*) = $1
-    //      AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = $1 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '$3 seconds');
-    // `;
-
     return `
       SELECT g.id AS "gameId", 
              fua."userId" AS "firstAnsweredPlayerId",
@@ -377,7 +360,7 @@ export class QuizGameRepository implements IQuizGameRepository {
        GROUP BY g.id, fua."userId", sgp."userId"
       HAVING COUNT(*) = $1
              AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - to_timestamp(MAX(fua."addedAt"), 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') >= interval '9 seconds');
-    `
+    `;
   };
 
   private getQueryForTimeOutForceGameOver = (): string => {
@@ -401,6 +384,6 @@ export class QuizGameRepository implements IQuizGameRepository {
         FROM sql_game g
        WHERE g.id = $1 
          AND g.status = $3;
-    `
-  }
+    `;
+  };
 }

@@ -57,7 +57,6 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Create data', async () => {
-      await questionsFactories.createQuestions(1);
       await usersFactory.crateAndBanUsers(1);
       const [fistUser, secondUser] = await usersFactory.createAndLoginUsers(
         2,
@@ -74,7 +73,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
       const rowCount = await testing.getAllRowCount();
       expect(rowCount).not.toBe(0);
-
+      console.log(rowCount, 'rowCount');
       expect.setState({ rowCount });
     });
 

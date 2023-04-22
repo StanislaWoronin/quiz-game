@@ -27,7 +27,7 @@ export const settings = {
   currentRepository: 'sql',
   gameRules: {
     questionsCount: '5',
-    timeLimit: '10'
+    timeLimit: '10',
   },
   validationConstant: {
     loginLength: {

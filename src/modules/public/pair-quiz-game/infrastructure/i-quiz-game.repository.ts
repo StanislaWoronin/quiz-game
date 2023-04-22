@@ -10,7 +10,7 @@ export interface IQuizGameRepository {
 
   sendAnswer(dto: SendAnswerDto): Promise<ViewAnswer>;
 
-  forceGameOverSchedule()
+  forceGameOverSchedule();
   forceGameOverTimeOut(event: DelayedForceGameOverEvent);
 }
 

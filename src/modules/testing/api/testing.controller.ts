@@ -22,7 +22,11 @@ export class TestingController {
   @Delete('all-data')
   @ApiOperation({ summary: 'Clear data base' })
   async deleteAll(): Promise<boolean> {
-    return this.testingRepository.deleteAll();
+    try {
+      return await this.testingRepository.deleteAll();
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   @Get(`all-row-count`)
