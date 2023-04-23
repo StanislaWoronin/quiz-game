@@ -203,7 +203,6 @@ export class QuizGameRepository implements IQuizGameRepository {
         this.findGameWhichNeedComplete(),
         [Number(settings.gameRules.questionsCount), currentTime],
       );
-      console.log(games.length, Date.now());
       if (!games.length) return;
 
       for (const game of games) {
@@ -250,6 +249,7 @@ export class QuizGameRepository implements IQuizGameRepository {
       //await queryRunner.commitTransaction();
       return;
     } catch (e) {
+      return null;
       //await queryRunner.rollbackTransaction();
     } //finally {
     //   await queryRunner.release();
@@ -359,7 +359,7 @@ export class QuizGameRepository implements IQuizGameRepository {
        WHERE g.status = 'Active'
        GROUP BY g.id, fua."userId", sgp."userId"
       HAVING COUNT(*) = $1
-             AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - to_timestamp(MAX(fua."addedAt"), 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') >= interval '9 seconds');
+             AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - to_timestamp(MAX(fua."addedAt"), 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') >= interval '8 seconds');
     `;
   };
 

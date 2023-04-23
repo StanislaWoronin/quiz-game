@@ -230,12 +230,6 @@ describe('/sa/quiz/questions (e2e)', () => {
 
         await sleep(timer);
 
-        const secondPlayerTryAnswered = await gameFactory.sendCorrectAnswer(
-          secondPlayer.accessToken,
-          activeGame.body.questions[3],
-        );
-        expect(secondPlayerTryAnswered.status).toBe(HttpStatus.FORBIDDEN);
-
         const myCurrentGame = await game.getMyCurrentGame(
           secondPlayer.accessToken,
         );

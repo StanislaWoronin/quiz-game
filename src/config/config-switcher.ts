@@ -1,6 +1,6 @@
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongooseConfig } from './mongoose.config';
-import { entity, mongooseModels } from '../app.module';
+import { mongooseModels } from '../app.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { settings } from '../settings';
 import { typeOrmConfig } from './migrations/postgresql.config';
@@ -15,8 +15,5 @@ export const configSwitcher = (repositoryType: string) => {
     ];
   }
 
-  return [
-    TypeOrmModule.forRoot(typeOrmConfig),
-    //TypeOrmModule.forFeature([...entity]),
-  ];
+  return [TypeOrmModule.forRoot(typeOrmConfig)];
 };
