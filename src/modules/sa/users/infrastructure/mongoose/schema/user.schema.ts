@@ -41,7 +41,8 @@ export class MongoUsers {
     this.email = userDto.email
     this.password = password
     this.emailConfirmation.confirmationCode = emailConfirmationDto.confirmationCode
-    this.emailConfirmation.banIn
+    this.emailConfirmation.expirationDate = emailConfirmationDto.expirationDate
+    this.emailConfirmation.isConfirmed = emailConfirmationDto.isConfirmed
   }
 }
 

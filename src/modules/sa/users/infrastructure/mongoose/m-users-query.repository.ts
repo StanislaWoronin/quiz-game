@@ -6,26 +6,28 @@ import { UsersQueryDto } from '../../api/dto/query/users-query.dto';
 import { ViewPage } from '../../../../../common/pagination/view-page';
 import { ViewUser } from '../../api/view/view-user';
 import { BanStatus } from '../../api/dto/query/ban-status';
-import {IUsersRepository} from "../i-users.repository";
 import {IUsersQueryRepository} from "../i-users-query.repository";
+import {SqlUsers} from "../sql/entity/users.entity";
+import {ObjectId} from "mongodb";
 
 @Injectable()
 export class MUsersQueryRepository implements IUsersQueryRepository {
   constructor(
-    @InjectModel(MongoUsers.name) private usersRepository: Model<UsersDocument>,
+    @InjectModel(MongoUsers.name)
+    private userModel: Model<UsersDocument>,
   ) {}
 
   async getUsers(query: UsersQueryDto): Promise<ViewPage<ViewUser>> {
     const filter = this.getFilter(query);
 
-    const users = await this.usersRepository.aggregate([
+    const users = await this.userModel.aggregate([
       { $match: { $and: filter } },
       { $sort: { [query.sortBy]: query.sortDirection === 'asc' ? 1 : -1 } },
       { $skip: query.skip },
       { $limit: query.pageSize },
-      { $project: { _id: false, __v: false } },
+      { $project: { _id: false, password: false, __v: false } },
     ]);
-    const totalCount = await this.usersRepository.countDocuments({
+    const totalCount = await this.userModel.countDocuments({
       $and: filter,
     });
 
@@ -34,6 +36,16 @@ export class MUsersQueryRepository implements IUsersQueryRepository {
       query: query,
       totalCount,
     });
+  }
+
+  async getUserByLoginOrEmail(loginOrEmail: string): Promise<SqlUsers | null> {
+    const user = await this.userModel.findOne({
+      $or: [
+        {login: loginOrEmail},
+        {email: loginOrEmail}
+      ]}).select('_id login email createdAt')
+
+    return user
   }
 
   private getFilter(query: UsersQueryDto) {

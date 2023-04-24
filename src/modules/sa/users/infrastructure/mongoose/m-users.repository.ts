@@ -1,19 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { MongoUsers, UsersDocument } from './schema/user.schema';
-import { ClientSession, Connection, Model } from 'mongoose';
+import {ClientSession, Connection, Model, Schema, Types} from 'mongoose';
 import { CreatedUser } from '../../api/view/created-user';
 import { UpdateUserBanStatusDto } from '../../api/dto/update-user-ban-status.dto';
 import { CreateUserDto } from '../../api/dto/create-user.dto';
 import {IUsersRepository} from "../i-users.repository";
 import {EmailConfirmationDto} from "../../applications/dto/email-confirmation.dto";
+import {ObjectId} from "mongodb";
 
 @Injectable()
 export class MUsersRepository implements IUsersRepository {
   constructor(
     @InjectConnection() private readonly connection: Connection,
     @InjectModel(MongoUsers.name)
-    private usersRepository: Model<UsersDocument>,
+    private userModel: Model<UsersDocument>,
   ) {}
 
   async createUser(
@@ -26,11 +27,10 @@ export class MUsersRepository implements IUsersRepository {
     try {
       await session.withTransaction(async () => {
         const user = new MongoUsers(userDto, hash, emailConfirmationDto);
-        const r = await this.usersRepository.create([{ ...user }], { session });
-        console.log(r, 'mongo repo');
+        const createdUser = await this.userModel.create(user);
+        console.log(createdUser, 'mongo repo');
 
-        // @ts-ignore
-        return r as CreatedUser;
+        return CreatedUser.createdUserWithObjectId(createdUser)
       });
     } finally {
       await session.endSession();
@@ -46,8 +46,8 @@ export class MUsersRepository implements IUsersRepository {
     if (!dto.isBanned) {
       banDate = null;
     }
-    const result = await this.usersRepository.updateOne(
-      { id: userId },
+    const result = await this.userModel.updateOne(
+      { _id: new ObjectId(userId) },
       {
         $set: {
           'banInfo.isBanned': dto.isBanned,
@@ -55,10 +55,19 @@ export class MUsersRepository implements IUsersRepository {
           'banInfo.banDate': banDate,
         },
       },
-      { upsert: true },
+      //{ upsert: true },
     );
 
     return result.matchedCount === 1;
+  }
+
+  async updateUserPassword(userId: string, passwordHash: string): Promise<boolean> {
+    const result = await this.userModel.updateOne(
+      {_id: new ObjectId(userId)},
+        {$set: {password: passwordHash}}
+    )
+
+    return result.matchedCount === 1
   }
 
   async removeBanStatus(userId: string): Promise<boolean> {
@@ -74,8 +83,7 @@ export class MUsersRepository implements IUsersRepository {
 
     try {
       await session.withTransaction(async () => {
-        await this.usersRepository.deleteOne([{ id: userId }], { session });
-        await this.credentialsRepository.deleteOne({ userId }, { session });
+        await this.userModel.deleteOne([{ _id: new ObjectId(userId) }], { session });
       });
 
       return true;
