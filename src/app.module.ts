@@ -20,15 +20,11 @@ import { SqlUsers } from './modules/sa/users/infrastructure/sql/entity/users.ent
 import {
   MongoUsers,
   UserSchema,
-} from './modules/sa/users/infrastructure/mongoose/schema/userSchema';
+} from './modules/sa/users/infrastructure/mongoose/schema/user.schema';
 import {
   MongoUserBanInfo,
   UserBanInfoSchema,
 } from './modules/sa/users/infrastructure/mongoose/schema/user-ban-info.schema';
-import {
-  CredentialSchema,
-  MongoCredentials,
-} from './modules/sa/users/infrastructure/mongoose/schema/credential.schema';
 import {
   AnswerSchema,
   MongoAnswers,
@@ -219,7 +215,6 @@ export const entity = [
 export const mongooseModels = [
   { name: MongoAnswers.name, schema: AnswerSchema },
   { name: MongoQuestion.name, schema: QuestionSchema },
-  { name: MongoCredentials.name, schema: CredentialSchema },
   { name: MongoUserBanInfo.name, schema: UserBanInfoSchema },
   { name: MongoUsers.name, schema: UserSchema },
 ];

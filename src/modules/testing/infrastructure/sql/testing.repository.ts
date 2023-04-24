@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { SqlCredentials } from '../../../sa/users/infrastructure/sql/entity/credentials.entity';
 import { ITestingRepository } from '../i-testing.repository';
+import {SqlEmailConfirmation} from "../../../sa/users/infrastructure/sql/entity/sql-email-confirmation.entity";
 
 @Injectable()
 export class TestingRepository implements ITestingRepository {
@@ -30,7 +31,7 @@ export class TestingRepository implements ITestingRepository {
 
   async checkUserConfirmed(userId: string) {
     const result = await this.dataSource
-      .getRepository('email_confirmation')
+      .getRepository(SqlEmailConfirmation)
       .createQueryBuilder('ec')
       .select('ec.isConfirmed')
       .where('ec.userId = :id', { id: userId })
@@ -41,7 +42,7 @@ export class TestingRepository implements ITestingRepository {
 
   async makeExpired(userId: string, expirationDate: string): Promise<boolean> {
     const builder = this.dataSource
-      .getRepository('sql_email_confirmation')
+      .getRepository(SqlEmailConfirmation)
       .createQueryBuilder('ec')
       .update()
       .set({ expirationDate })

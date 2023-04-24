@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { MongoUsers, UsersDocument } from './schema/userSchema';
+import { MongoUsers, UsersDocument } from './schema/user.schema';
 import { Model } from 'mongoose';
 import { UsersQueryDto } from '../../api/dto/query/users-query.dto';
 import { ViewPage } from '../../../../../common/pagination/view-page';
 import { ViewUser } from '../../api/view/view-user';
 import { BanStatus } from '../../api/dto/query/ban-status';
+import {IUsersRepository} from "../i-users.repository";
+import {IUsersQueryRepository} from "../i-users-query.repository";
 
 @Injectable()
-export class MUsersQueryRepository {
+export class MUsersQueryRepository implements IUsersQueryRepository {
   constructor(
     @InjectModel(MongoUsers.name) private usersRepository: Model<UsersDocument>,
   ) {}

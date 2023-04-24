@@ -3,11 +3,14 @@ import { SqlUsers } from './users.entity';
 
 @Entity({ name: 'sql_email_confirmation' })
 export class SqlEmailConfirmation {
-  @Column({ default: null }) confirmationCode: string | null;
+  @Column({ default: null })
+  confirmationCode: string | null;
 
-  @Column({ default: null }) expirationDate: string | null;
+  @Column({ default: null })
+  expirationDate: string | null;
 
-  @Column({ default: false }) isConfirmed: boolean;
+  @Column({ default: false })
+  isConfirmed: boolean;
 
   @OneToOne(() => SqlUsers, (u) => u.emailConfirmation)
   @JoinColumn()
