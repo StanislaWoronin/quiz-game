@@ -19,7 +19,9 @@ import { GameWhichNeedComplete } from './pojo/game-which-need-complete';
 import { settings } from '../../../../../settings';
 import { DelayedForceGameOverEvent } from '../../applications/dto/delayed-force-game-over.event';
 import { GameInfoForTimeoutForceGameOver } from './pojo/game-info-for-timeout-forsce-game-over';
+import {Injectable} from "@nestjs/common";
 
+@Injectable()
 export class QuizGameRepository implements IQuizGameRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
@@ -80,27 +82,10 @@ export class QuizGameRepository implements IQuizGameRepository {
         .where('id = :gameId', { gameId })
         .execute();
 
-      const gameQuery = `
-        SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
-               gp."userId", 
-               gq."questionId",
-               (SELECT u.login 
-                  FROM sql_users u
-                 WHERE u.id = gp."userId"),
-               (SELECT q.body
-                  FROM sql_questions q
-                 WHERE q.id = gq."questionId")
-          FROM sql_game g
-          LEFT JOIN sql_game_progress gp
-            ON gp."gameId" = g.id
-          LEFT JOIN sql_game_questions gq  
-            ON gq."gameId" = g.id
-         WHERE g.id = $1;  
-      `;
-      const game: SimpleGameDb[] = await manager.query(gameQuery, [gameId]);
+      const startedGame: SimpleGameDb[] = await manager.query(this.getStartedGame(), [gameId]);
 
       await queryRunner.commitTransaction();
-      return toViewJoinGame(game);
+      return toViewJoinGame(startedGame);
     } catch (e) {
       await queryRunner.rollbackTransaction();
     } finally {
@@ -326,6 +311,26 @@ export class QuizGameRepository implements IQuizGameRepository {
        LIMIT 5
     `;
     return await this.dataSource.query(query);
+  }
+
+  private getStartedGame(): string {
+    return `
+        SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate",
+               gp."userId", 
+               gq."questionId",
+               (SELECT u.login 
+                  FROM sql_users u
+                 WHERE u.id = gp."userId"),
+               (SELECT q.body
+                  FROM sql_questions q
+                 WHERE q.id = gq."questionId")
+          FROM sql_game g
+          LEFT JOIN sql_game_progress gp
+            ON gp."gameId" = g.id
+          LEFT JOIN sql_game_questions gq  
+            ON gq."gameId" = g.id
+         WHERE g.id = $1;  
+      `;
   }
 
   private getLastQuestionsProgressQuery(): string {

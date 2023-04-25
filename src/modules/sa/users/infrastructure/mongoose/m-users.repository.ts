@@ -27,9 +27,9 @@ export class MUsersRepository implements IUsersRepository {
     try {
       await session.withTransaction(async () => {
         const user = new MongoUsers(userDto, hash, emailConfirmationDto);
-        const createdUser = await this.userModel.create(user);
+        const createdUser = await this.userModel.create([user], { session });
         console.log(createdUser, 'mongo repo');
-
+        // @ts-ignore
         return CreatedUser.createdUserWithObjectId(createdUser)
       });
     } finally {
