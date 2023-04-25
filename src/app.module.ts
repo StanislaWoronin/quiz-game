@@ -22,14 +22,6 @@ import {
   UserSchema,
 } from './modules/sa/users/infrastructure/mongoose/schema/user.schema';
 import {
-  MongoUserBanInfo,
-  UserBanInfoSchema,
-} from './modules/sa/users/infrastructure/mongoose/schema/user-ban-info.schema';
-import {
-  AnswerSchema,
-  MongoAnswers,
-} from './modules/sa/questions/infrastructure/mongoose/schema/answerSchema';
-import {
   MongoQuestion,
   QuestionSchema,
 } from './modules/sa/questions/infrastructure/mongoose/schema/question.schema';
@@ -71,6 +63,10 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { DelayedForceGameOverHandler } from './modules/public/pair-quiz-game/forse-game-over/delayed-force-game-over.handler';
 import { SqlGameSubscriber } from './modules/public/pair-quiz-game/infrastructure/helpers/fisih-game.subscriber';
 import { ScheduleModule } from '@nestjs/schedule';
+import {
+  MongoTokenBlackList,
+  TokenBlackListSchema
+} from "./modules/public/auth/infrastructure/mongoose/schema/token-black-list.schema";
 
 const controllers = [
   AuthController,
@@ -213,9 +209,8 @@ export const entity = [
 ];
 
 export const mongooseModels = [
-  { name: MongoAnswers.name, schema: AnswerSchema },
+  { name: MongoTokenBlackList.name, schema: TokenBlackListSchema},
   { name: MongoQuestion.name, schema: QuestionSchema },
-  { name: MongoUserBanInfo.name, schema: UserBanInfoSchema },
   { name: MongoUsers.name, schema: UserSchema },
 ];
 

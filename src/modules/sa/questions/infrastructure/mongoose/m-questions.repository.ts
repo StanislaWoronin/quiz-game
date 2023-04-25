@@ -5,33 +5,32 @@ import { Model } from 'mongoose';
 import { CreatedQuestions } from '../../api/view/created-questions';
 import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
 import { CreateQuestionDto } from '../../api/dto/create-question.dto';
-import { MongoAnswers } from './schema/answerSchema';
+import {IQuestionsRepository} from "../i-questions.repository";
+import {ObjectId} from "mongodb";
 
 @Injectable()
-export class MQuestionsRepository {
+export class MQuestionsRepository implements IQuestionsRepository {
   constructor(
     @InjectModel(MongoQuestion.name)
-    private questionsRepository: Model<QuestionsDocument>,
+    private questionModel: Model<QuestionsDocument>,
   ) {
-    console.log('repo');
   }
 
   async createQuestion(
     dto: CreateQuestionDto,
   ): Promise<CreatedQuestions | null> {
-    const answers = dto.correctAnswers.map((el) => new MongoAnswers(el));
-    const question = new MongoQuestion(dto, answers);
-    await this.questionsRepository.create(question);
+    const question = new MongoQuestion(dto, dto.correctAnswers);
+    const createdQuestion = await this.questionModel.create(question);
 
-    return new CreatedQuestions(question);
+    return new CreatedQuestions(createdQuestion);
   }
 
   async updateQuestion(
     questionId: string,
     dto: UpdateQuestionDto,
   ): Promise<boolean> {
-    const result = await this.questionsRepository.updateOne(
-      { id: questionId },
+    const result = await this.questionModel.updateOne(
+      { _id: new ObjectId(questionId) },
       {
         $set: {
           body: dto.body,
@@ -48,16 +47,36 @@ export class MQuestionsRepository {
     questionId: string,
     published: boolean,
   ): Promise<boolean> {
-    const result = await this.questionsRepository.updateOne(
-      { id: questionId, correctAnswers: { $exists: true } },
-      { published, updatedAt: new Date().toISOString() },
-    );
+    // const questions = await this.questionModel.findOne(
+    //   {
+    //     _id: new ObjectId(questionId),
+    //   },
+    // )
+    //
+    // if (!questions || !questions.correctAnswers.length) return false
+    // const result = await this.questionModel.updateOne({
+    //   _id: new ObjectId(questionId),
+    // }, {
+    //   published
+    // })
+    //
+    // return result.matchedCount === 1;
 
-    return result.matchedCount === 1;
+    const result = await this.questionModel.findOneAndUpdate(
+        {
+          _id: new ObjectId(questionId),
+          correctAnswers: { $exists: true, $not: { $size: 0 } },
+        },
+        { published },
+        { new: true },
+    );
+    console.log(result, 'updatePublishStatus')
+    console.log(!!result)
+    return !!result
   }
 
   async deleteQuestion(questionId: string): Promise<boolean> {
-    const result = await this.questionsRepository.deleteOne({ id: questionId });
+    const result = await this.questionModel.deleteOne({ _id: new ObjectId(questionId) });
 
     return result.deletedCount === 1;
   }

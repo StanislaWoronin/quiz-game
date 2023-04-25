@@ -5,8 +5,7 @@ import { SqlEmailConfirmation } from './entity/sql-email-confirmation.entity';
 import { IEmailConfirmationRepository } from '../i-email-confirmation.repository';
 
 @Injectable()
-export class EmailConfirmationRepository
-  implements IEmailConfirmationRepository
+export class EmailConfirmationRepository implements IEmailConfirmationRepository
 {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
@@ -76,17 +75,17 @@ export class EmailConfirmationRepository
     return true;
   }
 
-  async deleteEmailConfirmationById(userId: string): Promise<boolean> {
-    const result = await this.dataSource
-      .createQueryBuilder()
-      .delete()
-      .from(SqlEmailConfirmation)
-      .where('userId = :id', { id: userId })
-      .execute();
-
-    if (result.affected != 1) {
-      return false;
-    }
-    return true;
-  }
+  // async deleteEmailConfirmationById(userId: string): Promise<boolean> {
+  //   const result = await this.dataSource
+  //     .createQueryBuilder()
+  //     .delete()
+  //     .from(SqlEmailConfirmation)
+  //     .where('userId = :id', { id: userId })
+  //     .execute();
+  //
+  //   if (result.affected != 1) {
+  //     return false;
+  //   }
+  //   return true;
+  // } /? TODO delete
 }

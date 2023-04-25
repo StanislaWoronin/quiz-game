@@ -1,14 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { MongoAnswers } from './answerSchema';
 import { HydratedDocument } from 'mongoose';
-import { randomUUID } from 'crypto';
 import { CreateQuestionDto } from '../../../api/dto/create-question.dto';
 
 @Schema({ id: false, versionKey: false })
 export class MongoQuestion {
-  @Prop({ required: true, unique: true, type: String })
-  id: string;
-
   @Prop({ required: true, unique: true, type: String })
   body: string;
 
@@ -21,11 +16,10 @@ export class MongoQuestion {
   @Prop({ required: false, type: String, default: null })
   updatedAt: string | null;
 
-  @Prop({ required: true, type: MongoAnswers })
-  correctAnswers: MongoAnswers[];
+  @Prop({ required: true, type: [String], default: []})
+  correctAnswers: string[];
 
-  constructor(dto: CreateQuestionDto, answers: MongoAnswers[]) {
-    this.id = randomUUID();
+  constructor(dto: CreateQuestionDto, answers: string[]) {
     this.body = dto.body;
     this.correctAnswers = answers;
   }

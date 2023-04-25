@@ -24,14 +24,15 @@ export class MQuestionsQueryRepository {
       { $sort: { [query.sortBy]: query.sortDirection === 'asc' ? 1 : -1 } },
       { $skip: query.skip },
       { $limit: query.pageSize },
-      { $project: { _id: false, __v: false } },
+      { $project: { __v: false } },
     ]);
+    const items = questions.map(q => new ViewQuestion(q))
     const totalCount = await this.questionsRepository.countDocuments({
       $and: filter,
     });
 
     return new ViewPage<ViewQuestion>({
-      items: questions ?? [],
+      items: items,
       query,
       totalCount,
     });

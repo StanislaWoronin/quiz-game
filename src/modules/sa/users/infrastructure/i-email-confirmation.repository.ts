@@ -11,7 +11,7 @@ export interface IEmailConfirmationRepository {
     confirmationCode: string,
     expirationDate: string,
   ): Promise<boolean>;
-  deleteEmailConfirmationById(userId: string): Promise<boolean>;
+  //deleteEmailConfirmationById(userId: string): Promise<boolean>;
 }
 
 export const IEmailConfirmationRepository = 'IEmailConfirmationRepository';
