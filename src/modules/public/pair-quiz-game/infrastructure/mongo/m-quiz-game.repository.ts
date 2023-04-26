@@ -9,6 +9,10 @@ import {ViewGameProgress} from "../../api/view/view-game-progress";
 import {GameStatus} from "../../shared/game-status";
 import {SendAnswerDto} from "../../applications/dto/send-answer.dto";
 import {ViewAnswer} from "../../api/view/view-answer";
+import {AnswerStatus} from "../../shared/answer-status";
+import {settings} from "../../../../../settings";
+import {DelayedForceGameOverEvent} from "../../applications/dto/delayed-force-game-over.event";
+import {SqlUserAnswer} from "../sql/entity/sql-user-answer.entity";
 
 export class MQuizGameRepository implements IQuizGameRepository {
     constructor(
@@ -52,25 +56,27 @@ export class MQuizGameRepository implements IQuizGameRepository {
         const session: ClientSession = await this.connection.startSession();
 
         try {
-            const secondPlayerLogin = await this.userModel
-                .findOne({ _id: new ObjectId(userId)}, null,{session})
-                .select({ login: 1 })
-            console.log(secondPlayerLogin, 'login from createGame')
-            // @ts-ignore
-            const secondPlayerGameProgress = new ViewGameProgress(userId, secondPlayerLogin)
+            await session.withTransaction(async () => {
+                const secondPlayerLogin = await this.userModel
+                    .findOne({ _id: new ObjectId(userId)}, null,{session})
+                    .select({ login: 1 })
+                console.log(secondPlayerLogin, 'login from createGame')
+                // @ts-ignore
+                const secondPlayerGameProgress = new ViewGameProgress(userId, secondPlayerLogin)
 
-            const startedGame = await this.quizGameModel.findOneAndUpdate(
-                { _id: new ObjectId(gameId)},
-                {$set: {
-                    secondPlayerProgress: secondPlayerGameProgress,
-                    status: GameStatus.Active,
-                    startGameDate: new Date().toISOString()
-                }},
-                { new: true, session }
-            )
-            console.log(startedGame, 'joinGame')
-            // @ts-ignore
-            return MongoQuizGame.gameWithId(startedGame)
+                const startedGame = await this.quizGameModel.findOneAndUpdate(
+                    { _id: new ObjectId(gameId)},
+                    {$set: {
+                        secondPlayerProgress: secondPlayerGameProgress,
+                        status: GameStatus.Active,
+                        startGameDate: new Date().toISOString()
+                    }},
+                    { new: true, session }
+                )
+                console.log(startedGame, 'joinGame')
+                // @ts-ignore
+                return MongoQuizGame.gameWithId(startedGame)
+            })
         } finally {
             await session.endSession();
             return null;
@@ -78,6 +84,101 @@ export class MQuizGameRepository implements IQuizGameRepository {
     }
 
     async sendAnswer(dto: SendAnswerDto): Promise<ViewAnswer> {
+        const session: ClientSession = await this.connection.startSession();
 
+        try {
+            await session.withTransaction(async () => {
+                const game = await this.quizGameModel.findOne({_id: new ObjectId(dto.gameId)}, null, {session})
+                const answer = new ViewAnswer(
+                    dto.questionsId,
+                    dto.answerStatus,
+                    new Date().toISOString()
+                )
+
+                const score = dto.answerStatus === AnswerStatus.Correct ? 1 : 0;
+                const playerProgress = game.firstPlayerProgress.player.id === dto.userId ? game.firstPlayerProgress : game.secondPlayerProgress;
+                playerProgress.answers.push(answer)
+                playerProgress.score += score
+
+                if (dto.isLastQuestions && game.firstPlayerProgress.answers.length === Number(settings.gameRules.questionsCount) && game.secondPlayerProgress.answers.length === Number(settings.gameRules.questionsCount)) {
+                    game.status = GameStatus.Finished
+                    game.finishGameDate = new Date().toISOString()
+
+                    const extraScore = 1
+                    const playerScore = game.firstPlayerProgress.player.id === dto.userId ? game.secondPlayerProgress.score : game.firstPlayerProgress.score;
+                    if (playerScore != 0) {
+                        game.firstPlayerProgress.score += extraScore
+                    }
+                }
+
+                await game.save({session})
+
+                return answer
+            })
+        } finally {
+            await session.endSession();
+            return null;
+        }
+    }
+
+    async forceGameOverSchedule() {
+        const session: ClientSession = await this.connection.startSession();
+
+        try {
+            await session.withTransaction(async () => {
+                const tenSecondsAgo = new Date(Date.now() - 10 * 1000);
+
+                const games = await this.quizGameModel.aggregate([{
+                    $match: {
+                        $or: [
+                            {
+                                'firstPlayerProgress.answers.addedAt': { $lt: tenSecondsAgo },
+                                'firstPlayerProgress.answers': { $size: 5 }
+                            },
+                            {
+                                'secondPlayerProgress.answers.addedAt': { $lt: tenSecondsAgo },
+                                'secondPlayerProgress.answers': { $size: 5 }
+                            }
+                        ]
+                    }
+                }]);
+
+                if (!games.length) return;
+
+                for (const game: MongoQuizGame of games) {
+                    const playerAnswerProgress = game.firstPlayerProgress.answers.length !== settings.gameRules.questionsCount ? game.firstPlayerProgress : game.secondPlayerProgress
+                    const unansweredQuestions = game.questions.slice(
+                        game.secondPlayerAnswerProgress,
+                    );
+                    const answers = unansweredQuestions.map(
+                        (q) =>
+                            new SqlUserAnswer(
+                                game.secondAnsweredPlayerId,
+                                game.gameId,
+                                q,
+                                null,
+                            ),
+                    );
+
+                    game.
+                }
+            })
+        } finally {
+            await session.endSession();
+            return null;
+        }
+    }
+
+    async forceGameOverTimeOut(event: DelayedForceGameOverEvent) {
+        const session: ClientSession = await this.connection.startSession();
+
+        try {
+            await session.withTransaction(async () => {
+                const game = await this.quizGameModel.findOne()
+            })
+        } finally {
+            await session.endSession();
+            return null;
+        }
     }
 }

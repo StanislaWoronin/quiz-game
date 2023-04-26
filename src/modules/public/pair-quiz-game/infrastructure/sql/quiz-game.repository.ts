@@ -157,9 +157,6 @@ export class QuizGameRepository implements IQuizGameRepository {
               .execute();
           }
         }
-
-        if (lastQuestionProgress.length === 1) {
-        }
       }
 
       await queryRunner.commitTransaction();
