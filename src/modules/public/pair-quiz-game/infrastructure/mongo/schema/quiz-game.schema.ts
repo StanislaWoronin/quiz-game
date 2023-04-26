@@ -4,6 +4,7 @@ import {ViewGameProgress} from "../../../api/view/view-game-progress";
 import {Questions} from "../../../shared/questions";
 import {HydratedDocument} from "mongoose";
 import {WithId} from "mongodb";
+import {ViewGame} from "../../../api/view/view-game";
 
 @Schema({ versionKey: false })
 export class MongoQuizGame {
@@ -34,12 +35,13 @@ export class MongoQuizGame {
         this.questions = questions
     }
 
-    gameWithId(game: WithId<MongoQuizGame>) {
+    gameWithId(game: WithId<MongoQuizGame>): ViewGame {
+        const questions = game.questions.map(q => { return { id: q.id.toString(), body: q.body }})
         return {
             id: game._id.toString(),
             firstPlayerProgress: game.firstPlayerProgress,
             secondPlayerProgress: game.secondPlayerProgress,
-            questions: game.questions,
+            questions,
             status: game.status,
             pairCreatedDate: game.pairCreatedDate,
             startGameDate: game.startGameDate,

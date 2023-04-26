@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import {WithId} from "mongodb";
+import {MongoQuizGame} from "../../infrastructure/mongo/schema/quiz-game.schema";
 
 export class ViewUserStatistic {
   @ApiProperty()

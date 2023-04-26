@@ -20,6 +20,10 @@ import {
   MEmailConfirmationRepository
 } from "../../modules/sa/users/infrastructure/mongoose/m-email-confirmation.repository";
 import {MJwtRepository} from "../../modules/public/auth/infrastructure/mongoose/m-jwt.repository";
+import {MQuizGameRepository} from "../../modules/public/pair-quiz-game/infrastructure/mongo/m-quiz-game.repository";
+import {
+  MQuizGameQueryRepository
+} from "../../modules/public/pair-quiz-game/infrastructure/mongo/schema/m-quiz-game-query.repository";
 
 export const repositories = {
   sql: {
@@ -39,8 +43,8 @@ export const repositories = {
   mongo: {
     banInfoRepository: MBanInfoRepository,
     emailConfirmation: MEmailConfirmationRepository,
-    gameRepository: ,
-    gameQueryRepository: ,
+    gameRepository: MQuizGameRepository,
+    gameQueryRepository: MQuizGameQueryRepository,
     questionsRepository: MQuestionsRepository,
     questionsQueryRepository: MQuestionsQueryRepository,
     jwt: MJwtRepository,

@@ -13,14 +13,22 @@ import {AnswerStatus} from "../../shared/answer-status";
 import {settings} from "../../../../../settings";
 import {DelayedForceGameOverEvent} from "../../applications/dto/delayed-force-game-over.event";
 import {SqlUserAnswer} from "../sql/entity/sql-user-answer.entity";
+import {Injectable} from "@nestjs/common";
+import {
+    MongoQuestion,
+    QuestionsDocument
+} from "../../../../sa/questions/infrastructure/mongoose/schema/question.schema";
 
+@Injectable()
 export class MQuizGameRepository implements IQuizGameRepository {
     constructor(
         @InjectConnection() private readonly connection: Connection,
         @InjectModel(MongoQuizGame.name)
         private quizGameModel: Model<QuizGameDocument>,
         @InjectModel(MongoUsers.name)
-        private userModel: Model<UsersDocument>
+        private userModel: Model<UsersDocument>,
+        @InjectModel(MongoQuestion.name)
+        private questionModel: Model<QuestionsDocument>,
     ) {
     }
 
@@ -29,10 +37,9 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
         try {
             await session.withTransaction(async () => {
-                const questions = await this.quizGameModel.aggregate([
+                const questions = await this.questionModel.aggregate([
                     { $sample: { size: 5 } },
-                    { $project: { __v: false } }
-                ], {session});
+                ], {session}).project({_id: 1, body: 1})
 
                 const fistPlayerLogin = await this.userModel
                     .findOne({ _id: new ObjectId(userId)}, {session})
@@ -145,23 +152,32 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
                 if (!games.length) return;
 
-                for (const game: MongoQuizGame of games) {
-                    const playerAnswerProgress = game.firstPlayerProgress.answers.length !== settings.gameRules.questionsCount ? game.firstPlayerProgress : game.secondPlayerProgress
+                for (const game of games) {
+                    const playerAnswerProgress = game.firstPlayerProgress.answers.length !== Number(settings.gameRules.questionsCount) ? game.firstPlayerProgress : game.secondPlayerProgress
+                    const opponent = game.firstPlayerProgress.answers.length === settings.gameRules.questionsCount ? game.firstPlayerProgress : game.secondPlayerProgress
                     const unansweredQuestions = game.questions.slice(
-                        game.secondPlayerAnswerProgress,
+                        playerAnswerProgress.answers.length - 1,
                     );
                     const answers = unansweredQuestions.map(
                         (q) =>
                             new SqlUserAnswer(
                                 game.secondAnsweredPlayerId,
                                 game.gameId,
-                                q,
+                                q.id,
                                 null,
                             ),
                     );
+                    playerAnswerProgress.answers.concat(answers)
+                    game.status = GameStatus.Finished
+                    game.finishGameDate = new Date().toISOString()
 
-                    game.
+                    const extraScore = 1;
+                    if (opponent.score !== 0) {
+                        opponent.score += extraScore
+                    }
+                    await game.save({session})
                 }
+                return
             })
         } finally {
             await session.endSession();
@@ -174,7 +190,32 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
         try {
             await session.withTransaction(async () => {
-                const game = await this.quizGameModel.findOne()
+                const game = await this.quizGameModel.findOne({_id: new ObjectId(event.userId), status: GameStatus.Active}, null, {session})
+
+                const playerAnswerProgress = game.firstPlayerProgress.player.id !== event.userId ? game.firstPlayerProgress : game.secondPlayerProgress
+                const opponent = game.firstPlayerProgress.player.id === event.userId ? game.firstPlayerProgress : game.secondPlayerProgress
+
+                const unansweredQuestions = game.questions.slice(
+                    playerAnswerProgress.answers.length - 1,
+                );
+                const answers = unansweredQuestions.map(
+                    (q) =>
+                        new SqlUserAnswer(
+                            playerAnswerProgress.player.id,
+                            event.gameId,
+                            q.id,
+                            null,
+                        ),
+                );
+                playerAnswerProgress.answers.concat(answers)
+                game.status = GameStatus.Finished
+                game.finishGameDate = new Date().toISOString()
+
+                const extraScore = 1;
+                if (opponent.score !== 0) {
+                    opponent.score += extraScore
+                }
+                await game.save({session})
             })
         } finally {
             await session.endSession();
