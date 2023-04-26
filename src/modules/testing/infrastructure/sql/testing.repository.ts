@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { SqlCredentials } from '../../../sa/users/infrastructure/sql/entity/credentials.entity';
 import { ITestingRepository } from '../i-testing.repository';
-import {SqlEmailConfirmation} from "../../../sa/users/infrastructure/sql/entity/sql-email-confirmation.entity";
+import { SqlEmailConfirmation } from '../../../sa/users/infrastructure/sql/entity/sql-email-confirmation.entity';
 
 @Injectable()
 export class TestingRepository implements ITestingRepository {

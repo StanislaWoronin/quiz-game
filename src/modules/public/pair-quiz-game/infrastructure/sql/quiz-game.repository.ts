@@ -19,7 +19,7 @@ import { GameWhichNeedComplete } from './pojo/game-which-need-complete';
 import { settings } from '../../../../../settings';
 import { DelayedForceGameOverEvent } from '../../applications/dto/delayed-force-game-over.event';
 import { GameInfoForTimeoutForceGameOver } from './pojo/game-info-for-timeout-forsce-game-over';
-import {Injectable} from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class QuizGameRepository implements IQuizGameRepository {
@@ -82,7 +82,10 @@ export class QuizGameRepository implements IQuizGameRepository {
         .where('id = :gameId', { gameId })
         .execute();
 
-      const startedGame: SimpleGameDb[] = await manager.query(this.getStartedGame(), [gameId]);
+      const startedGame: SimpleGameDb[] = await manager.query(
+        this.getStartedGame(),
+        [gameId],
+      );
 
       await queryRunner.commitTransaction();
       return toViewJoinGame(startedGame);

@@ -5,16 +5,15 @@ import { Model } from 'mongoose';
 import { CreatedQuestions } from '../../api/view/created-questions';
 import { UpdateQuestionDto } from '../../api/dto/update-question.dto';
 import { CreateQuestionDto } from '../../api/dto/create-question.dto';
-import {IQuestionsRepository} from "../i-questions.repository";
-import {ObjectId} from "mongodb";
+import { IQuestionsRepository } from '../i-questions.repository';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class MQuestionsRepository implements IQuestionsRepository {
   constructor(
     @InjectModel(MongoQuestion.name)
     private questionModel: Model<QuestionsDocument>,
-  ) {
-  }
+  ) {}
 
   async createQuestion(
     dto: CreateQuestionDto,
@@ -63,20 +62,22 @@ export class MQuestionsRepository implements IQuestionsRepository {
     // return result.matchedCount === 1;
 
     const result = await this.questionModel.findOneAndUpdate(
-        {
-          _id: new ObjectId(questionId),
-          correctAnswers: { $exists: true, $not: { $size: 0 } },
-        },
-        { published },
-        { new: true },
+      {
+        _id: new ObjectId(questionId),
+        correctAnswers: { $exists: true, $not: { $size: 0 } },
+      },
+      { published },
+      { new: true },
     );
-    console.log(result, 'updatePublishStatus')
-    console.log(!!result)
-    return !!result
+    console.log(result, 'updatePublishStatus');
+    console.log(!!result);
+    return !!result;
   }
 
   async deleteQuestion(questionId: string): Promise<boolean> {
-    const result = await this.questionModel.deleteOne({ _id: new ObjectId(questionId) });
+    const result = await this.questionModel.deleteOne({
+      _id: new ObjectId(questionId),
+    });
 
     return result.deletedCount === 1;
   }

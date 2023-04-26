@@ -6,10 +6,10 @@ import { UsersQueryDto } from '../../api/dto/query/users-query.dto';
 import { ViewPage } from '../../../../../common/pagination/view-page';
 import { ViewUser } from '../../api/view/view-user';
 import { BanStatus } from '../../api/dto/query/ban-status';
-import {IUsersQueryRepository} from "../i-users-query.repository";
-import {SqlUsers} from "../sql/entity/users.entity";
-import {ObjectId} from "mongodb";
-import {SqlCredentials} from "../sql/entity/credentials.entity";
+import { IUsersQueryRepository } from '../i-users-query.repository';
+import { SqlUsers } from '../sql/entity/users.entity';
+import { ObjectId } from 'mongodb';
+import { SqlCredentials } from '../sql/entity/credentials.entity';
 
 @Injectable()
 export class MUsersQueryRepository implements IUsersQueryRepository {
@@ -40,66 +40,63 @@ export class MUsersQueryRepository implements IUsersQueryRepository {
   }
 
   async checkUserExists(userId: string): Promise<boolean> {
-    const result = await this.userModel.exists({_id: new ObjectId(userId)})
-    console.log(result, 'checkUserExists')
+    const result = await this.userModel.exists({ _id: new ObjectId(userId) });
+    console.log(result, 'checkUserExists');
     // @ts-ignore
-    return result
+    return result;
   }
 
   async isLoginOrEmailExist(loginOrEmail: string): Promise<boolean> {
     const result = await this.userModel.exists({
-      $or: [
-        {login: loginOrEmail},
-        {email: loginOrEmail}
-      ]
-    })
-    console.log(result, 'isLoginOrEmailExist')
+      $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
+    });
+    console.log(result, 'isLoginOrEmailExist');
     // @ts-ignore
-    return result
+    return result;
   }
 
   async getCredentialByLoginOrEmail(
-      loginOrEmail: string,
+    loginOrEmail: string,
   ): Promise<SqlCredentials | null> {
-    const credential = await this.userModel.findOne({
-      $or: [
-        {login: loginOrEmail},
-        {email: loginOrEmail}
-      ]
-    }).select({
-      password: 0
-    })
-    console.log(credential, 'getCredentialByLoginOrEmail')
+    const credential = await this.userModel
+      .findOne({
+        $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
+      })
+      .select({
+        password: 0,
+      });
+    console.log(credential, 'getCredentialByLoginOrEmail');
     // @ts-ignore
-    return credential
+    return credential;
   }
 
   async getUserByLoginOrEmail(loginOrEmail: string): Promise<SqlUsers | null> {
-    const user = await this.userModel.findOne({
-      $or: [
-        {login: loginOrEmail},
-        {email: loginOrEmail}
-      ]}).select({
+    const user = await this.userModel
+      .findOne({
+        $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
+      })
+      .select({
         _id: 1,
         login: 1,
-        createdAt: 1
-      })
-    console.log(user, 'getUserByLoginOrEmail')
+        createdAt: 1,
+      });
+    console.log(user, 'getUserByLoginOrEmail');
 
     // @ts-ignore
-    return user
+    return user;
   }
 
   async getUserById(userId: string): Promise<SqlUsers | null> {
-    const user = await this.userModel.findOne({_id: new ObjectId(userId)})
-        .select({
-          _id: 1,
-          login: 1,
-          createdAt: 1
-        })
-    console.log(user, 'getUserById')
+    const user = await this.userModel
+      .findOne({ _id: new ObjectId(userId) })
+      .select({
+        _id: 1,
+        login: 1,
+        createdAt: 1,
+      });
+    console.log(user, 'getUserById');
     // @ts-ignore
-    return user
+    return user;
   }
 
   private getFilter(query: UsersQueryDto) {

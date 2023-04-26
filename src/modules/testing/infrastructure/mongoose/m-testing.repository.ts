@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import {Connection, Model} from 'mongoose';
-import {InjectConnection, InjectModel} from '@nestjs/mongoose';
-import {ITestingRepository} from "../i-testing.repository";
-import {MongoUsers, UsersDocument} from "../../../sa/users/infrastructure/mongoose/schema/user.schema";
+import { Connection, Model } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { ITestingRepository } from '../i-testing.repository';
+import {
+  MongoUsers,
+  UsersDocument,
+} from '../../../sa/users/infrastructure/mongoose/schema/user.schema';
 
 @Injectable()
 export class MTestingRepository implements ITestingRepository {
   constructor(
-      @InjectConnection() private connection: Connection,
-      @InjectModel(MongoUsers.name)
-      private readonly userModel: Model<UsersDocument>,
+    @InjectConnection() private connection: Connection,
+    @InjectModel(MongoUsers.name)
+    private readonly userModel: Model<UsersDocument>,
   ) {}
 
   async deleteAll(): Promise<boolean> {
@@ -36,33 +39,32 @@ export class MTestingRepository implements ITestingRepository {
   }
 
   async getUserPassword(userId: string): Promise<string> {
-    const result = await this.userModel
-        .findById(userId)
-        .select('password')
-    console.log(result, 'getUserPassword')
-    return result.password
+    const result = await this.userModel.findById(userId).select('password');
+    console.log(result, 'getUserPassword');
+    return result.password;
   }
 
   async getConfirmationCode(userId: string): Promise<string> {
     const result = await this.userModel
-        .findById(userId)
-        .select('emailConfirmation.confirmationCode')
-    console.log(result, 'getConfirmationCode')
-    return ''
+      .findById(userId)
+      .select('emailConfirmation.confirmationCode');
+    console.log(result, 'getConfirmationCode');
+    return '';
   }
 
   async checkUserConfirmed(userId: string) {
     const result = await this.userModel
-        .findById(userId)
-        .select('emailConfirmation.isConfirmed')
-    console.log(result, 'checkUserConfirmed')
-    return result
+      .findById(userId)
+      .select('emailConfirmation.isConfirmed');
+    console.log(result, 'checkUserConfirmed');
+    return result;
   }
 
   async makeExpired(userId: string, expirationDate: string): Promise<boolean> {
-    const result = await this.userModel
-        .findByIdAndUpdate(userId, {expirationDate})
-    console.log(result, 'makeExpired')
-    return true
+    const result = await this.userModel.findByIdAndUpdate(userId, {
+      expirationDate,
+    });
+    console.log(result, 'makeExpired');
+    return true;
   }
 }

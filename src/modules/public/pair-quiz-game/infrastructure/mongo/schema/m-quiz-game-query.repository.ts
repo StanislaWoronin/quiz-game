@@ -15,6 +15,8 @@ import {
     QuestionsDocument
 } from "../../../../../sa/questions/infrastructure/mongoose/schema/question.schema";
 import {ViewUserStatistic} from "../../../api/view/view-user-statistic";
+import {TopPlayersQueryDto} from "../../../api/dto/query/top-players-query.dto";
+import {ViewTopPlayers} from "../../../api/view/view-top-players";
 
 @Injectable()
 export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
@@ -114,6 +116,31 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
             ]
         })
 
+        const statistic = MongoQuizGame.getUserStatistic(games, userId)
+        return statistic
+    }
+
+    async getTopPlayers(
+      queryDto: TopPlayersQueryDto,
+    ): Promise<ViewPage<ViewTopPlayers>> {
+        const statistic = await this.quizGameModel.aggregate([
+            {
+                $project: {
+                    firstPlayerId: "$firstPlayerProgress.player.id",
+                    secondPlayerId: "$secondPlayerProgress.player.id",
+                    firstPlayerScore: "$firstPlayerProgress.score",
+                    secondPlayerScore: "$secondPlayerProgress.score",
+                },
+            }
+        ])
+
+        return
+    }
+
+    async checkUserCurrentGame(
+      userId: string,
+      status?: GameStatus,
+    ): Promise<string | null> {
 
     }
 }

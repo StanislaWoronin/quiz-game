@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { MongoUsers, UsersDocument } from './schema/user.schema';
-import {ClientSession, Connection, Model, Schema, Types} from 'mongoose';
+import { ClientSession, Connection, Model, Schema, Types } from 'mongoose';
 import { CreatedUser } from '../../api/view/created-user';
 import { UpdateUserBanStatusDto } from '../../api/dto/update-user-ban-status.dto';
 import { CreateUserDto } from '../../api/dto/create-user.dto';
-import {IUsersRepository} from "../i-users.repository";
-import {EmailConfirmationDto} from "../../applications/dto/email-confirmation.dto";
-import {ObjectId} from "mongodb";
+import { IUsersRepository } from '../i-users.repository';
+import { EmailConfirmationDto } from '../../applications/dto/email-confirmation.dto';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class MUsersRepository implements IUsersRepository {
@@ -20,7 +20,7 @@ export class MUsersRepository implements IUsersRepository {
   async createUser(
     userDto: CreateUserDto,
     hash: string,
-    emailConfirmationDto: EmailConfirmationDto
+    emailConfirmationDto: EmailConfirmationDto,
   ): Promise<CreatedUser | null> {
     const session: ClientSession = await this.connection.startSession();
 
@@ -30,7 +30,7 @@ export class MUsersRepository implements IUsersRepository {
         const createdUser = await this.userModel.create([user], { session });
         console.log(createdUser, 'mongo repo');
         // @ts-ignore
-        return CreatedUser.createdUserWithObjectId(createdUser)
+        return CreatedUser.createdUserWithObjectId(createdUser);
       });
     } finally {
       await session.endSession();
@@ -61,13 +61,16 @@ export class MUsersRepository implements IUsersRepository {
     return result.matchedCount === 1;
   }
 
-  async updateUserPassword(userId: string, passwordHash: string): Promise<boolean> {
+  async updateUserPassword(
+    userId: string,
+    passwordHash: string,
+  ): Promise<boolean> {
     const result = await this.userModel.updateOne(
-      {_id: new ObjectId(userId)},
-        {$set: {password: passwordHash}}
-    )
+      { _id: new ObjectId(userId) },
+      { $set: { password: passwordHash } },
+    );
 
-    return result.matchedCount === 1
+    return result.matchedCount === 1;
   }
 
   async removeBanStatus(userId: string): Promise<boolean> {
@@ -83,7 +86,9 @@ export class MUsersRepository implements IUsersRepository {
 
     try {
       await session.withTransaction(async () => {
-        await this.userModel.deleteOne([{ _id: new ObjectId(userId) }], { session });
+        await this.userModel.deleteOne([{ _id: new ObjectId(userId) }], {
+          session,
+        });
       });
 
       return true;

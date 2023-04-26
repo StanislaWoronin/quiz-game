@@ -11,8 +11,6 @@ import { GameQueryDto } from '../../api/dto/query/game-query.dto';
 import { ViewUserStatistic } from '../../api/view/view-user-statistic';
 import { ViewTopPlayers } from '../../api/view/view-top-players';
 import { TopPlayersQueryDto } from '../../api/dto/query/top-players-query.dto';
-import { GameWhichNeedComplete } from './pojo/game-which-need-complete';
-import { settings } from '../../../../../settings';
 import { gameQueryOptions } from '../helpers/game-query-options.type';
 
 export class QuizGameQueryRepository implements IQuizGameQueryRepository {
@@ -118,8 +116,6 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
       const result: ViewUserStatistic[] = await this.dataSource.query(query, [
         userId,
       ]);
-      console.log(result);
-      result[0].avgScores = Number(result[0].avgScores); // TODO FIXIT
 
       return result[0];
     } catch (e) {
@@ -139,11 +135,11 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
              CAST(SUM(CASE WHEN fp.score > sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "winsCount",
              CAST(SUM(CASE WHEN fp.score < sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "lossesCount",
              CAST(SUM(CASE WHEN fp.score = sp.score THEN 1 ELSE 0 END) AS INTEGER) AS "drawsCount",
-             CASE 
+             CAST(CASE 
                 WHEN AVG(fp.score) % 1 = 0 
                 THEN CAST(AVG(fp.score) AS INTEGER)
                 ELSE CAST(ROUND(AVG(fp.score), 2) AS NUMERIC(10,2))
-             END AS "avgScores"
+             END AS DOUBLE PRECISION) AS "avgScores"
         FROM sql_game_progress fp
         JOIN sql_game_progress sp ON sp."gameId" = fp."gameId" AND sp."userId" != fp."userId"
         JOIN sql_users u ON u.id = fp."userId"
@@ -155,17 +151,6 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
       queryDto.skip,
       queryDto.pageSize,
     ]);
-    const res = result.map((r) => {
-      return {
-        player: r.player,
-        gamesCount: r.gamesCount,
-        sumScore: r.sumScore,
-        avgScores: Number(r.avgScores),
-        winsCount: r.winsCount,
-        lossesCount: r.lossesCount,
-        drawsCount: r.drawsCount,
-      };
-    }); // TODO FIXIT
 
     const totalCountQuery = `
       SELECT CAST(COUNT(*) AS INTEGER)
@@ -175,7 +160,7 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     const totalCount = await this.dataSource.query(totalCountQuery);
 
     return new ViewPage<ViewTopPlayers>({
-      items: res,
+      items: result,
       query: queryDto,
       totalCount: totalCount[0].count,
     });
@@ -235,36 +220,36 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     return result[0].count;
   }
 
-  async findGamesWhichNeedComplete(
-    currentTime: string,
-  ): Promise<GameWhichNeedComplete[]> {
-    const query = `
-      SELECT g.id AS "gameId", ua."userId" AS "fistAnsweredPlayerId", MAX(ua."addedAt") AS "fistPlayerAnsweredTime",
-             (SELECT COUNT(*)
-                FROM sql_user_answer
-               WHERE "gameId" = g.id
-                 AND "userId" != ua."userId") AS "secondPlayerAnswerProgress"
-        FROM sql_game g
-        JOIN (
-          SELECT *, ROW_NUMBER() OVER (PARTITION BY "gameId", "userId" ORDER BY "addedAt") AS rn
-          FROM sql_user_answer
-        ) ua ON ua."gameId" = g.id
-       WHERE ua."userId" IN (
-             SELECT "userId"
-             FROM sql_user_answer
-             WHERE "gameId" = g.id
-             GROUP BY "userId"
-             HAVING COUNT(*) = $1
-       )
-       GROUP BY g.id, ua."userId"
-      HAVING COUNT(*) = $1
-         AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = 5 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '10 seconds');
-    `;
-    return await this.dataSource.query(query, [
-      Number(settings.gameRules.questionsCount),
-      currentTime,
-    ]);
-  }
+  // async findGamesWhichNeedComplete(
+  //   currentTime: string,
+  // ): Promise<GameWhichNeedComplete[]> {
+  //   const query = `
+  //     SELECT g.id AS "gameId", ua."userId" AS "fistAnsweredPlayerId", MAX(ua."addedAt") AS "fistPlayerAnsweredTime",
+  //            (SELECT COUNT(*)
+  //               FROM sql_user_answer
+  //              WHERE "gameId" = g.id
+  //                AND "userId" != ua."userId") AS "secondPlayerAnswerProgress"
+  //       FROM sql_game g
+  //       JOIN (
+  //         SELECT *, ROW_NUMBER() OVER (PARTITION BY "gameId", "userId" ORDER BY "addedAt") AS rn
+  //         FROM sql_user_answer
+  //       ) ua ON ua."gameId" = g.id
+  //      WHERE ua."userId" IN (
+  //            SELECT "userId"
+  //            FROM sql_user_answer
+  //            WHERE "gameId" = g.id
+  //            GROUP BY "userId"
+  //            HAVING COUNT(*) = $1
+  //      )
+  //      GROUP BY g.id, ua."userId"
+  //     HAVING COUNT(*) = $1
+  //        AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = 5 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '10 seconds');
+  //   `;
+  //   return await this.dataSource.query(query, [
+  //     Number(settings.gameRules.questionsCount),
+  //     currentTime,
+  //   ]);
+  // }
 
   private getGameQuery({
     _gameIdFilter,

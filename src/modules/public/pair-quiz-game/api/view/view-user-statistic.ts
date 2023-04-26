@@ -1,6 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {WithId} from "mongodb";
-import {MongoQuizGame} from "../../infrastructure/mongo/schema/quiz-game.schema";
 
 export class ViewUserStatistic {
   @ApiProperty()
@@ -15,4 +13,8 @@ export class ViewUserStatistic {
   lossesCount: number;
   @ApiProperty()
   drawsCount: number;
+
+  static avg(sumScore, gamesCount): number {
+    return sumScore / gamesCount;
+  }
 }

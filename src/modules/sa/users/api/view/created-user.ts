@@ -1,7 +1,10 @@
 import { SqlUsers } from '../../infrastructure/sql/entity/users.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import {MongoUsers, UsersDocument} from "../../infrastructure/mongoose/schema/user.schema";
-import type { WithId } from 'mongodb'
+import {
+  MongoUsers,
+  UsersDocument,
+} from '../../infrastructure/mongoose/schema/user.schema';
+import type { WithId } from 'mongodb';
 
 export class CreatedUser {
   @ApiProperty()
@@ -41,7 +44,7 @@ export class CreatedUser {
         isBanned: false,
         banReason: null,
         banDate: null,
-      }
-    }
+      },
+    };
   }
 }

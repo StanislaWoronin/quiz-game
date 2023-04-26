@@ -1,6 +1,6 @@
 import { MongoQuestion } from '../../infrastructure/mongoose/schema/question.schema';
 import { ApiProperty } from '@nestjs/swagger';
-import {WithId} from "mongodb";
+import { WithId } from 'mongodb';
 
 export class CreatedQuestions {
   @ApiProperty()
@@ -36,7 +36,7 @@ export class CreatedQuestions {
   constructor(createdQuestions: WithId<MongoQuestion>) {
     this.id = createdQuestions._id.toString();
     this.body = createdQuestions.body;
-    this.correctAnswers = createdQuestions.correctAnswers
+    this.correctAnswers = createdQuestions.correctAnswers;
     this.published = false;
     this.createdAt = createdQuestions.createdAt;
     this.updatedAt = null;

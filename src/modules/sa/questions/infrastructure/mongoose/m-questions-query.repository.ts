@@ -26,7 +26,7 @@ export class MQuestionsQueryRepository {
       { $limit: query.pageSize },
       { $project: { __v: false } },
     ]);
-    const items = questions.map(q => new ViewQuestion(q))
+    const items = questions.map((q) => new ViewQuestion(q));
     const totalCount = await this.questionsRepository.countDocuments({
       $and: filter,
     });
