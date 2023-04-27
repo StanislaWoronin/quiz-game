@@ -9,7 +9,6 @@ import { SendAnswerDto } from './dto/send-answer.dto';
 import { settings } from '../../../../settings';
 import { EventBus } from '@nestjs/cqrs';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { DelayedForceGameOverEvent } from './dto/delayed-force-game-over.event';
 
 @Injectable()
 export class PairQuizGameService {
@@ -61,10 +60,10 @@ export class PairQuizGameService {
       isLastQuestions,
     );
 
-    // TimeOut
-    if (isLastQuestions) {
-      this.eventBus.publish(new DelayedForceGameOverEvent(userId, gameId));
-    }
+    // // TimeOut
+    // if (isLastQuestions) {
+    //   this.eventBus.publish(new DelayedForceGameOverEvent(userId, gameId));
+    // }
 
     // // Cron 2.0
     // if (isLastQuestions) {

@@ -190,6 +190,9 @@ export class QuizGameRepository implements IQuizGameRepository {
       );
       if (!games.length) return;
 
+      const setAnswersPromises = [];
+      const updateGameStatusPromises = [];
+      const setExtraScorePromises = [];
       for (const game of games) {
         const unansweredQuestions = game.questions.slice(
           game.secondPlayerAnswerProgress,
@@ -203,33 +206,39 @@ export class QuizGameRepository implements IQuizGameRepository {
               null,
             ),
         );
-        await manager.save(answers);
+        setAnswersPromises.push(manager.save(answers));
 
-        await manager
-          .createQueryBuilder()
-          .update(SqlGame)
-          .set({
-            status: GameStatus.Finished,
-            finishGameDate: new Date().toISOString(),
-          })
-          .where('id = :gameId', { gameId: game.gameId })
-          .execute();
+        updateGameStatusPromises.push(
+          manager
+            .createQueryBuilder()
+            .update(SqlGame)
+            .set({
+              status: GameStatus.Finished,
+              finishGameDate: new Date().toISOString(),
+            })
+            .where('id = :gameId', { gameId: game.gameId })
+            .execute(),
+        );
 
         const extraScore = 1;
         if (game.firstAnsweredPlayerScore !== 0) {
           const newScore = game.firstAnsweredPlayerScore + extraScore;
-          await manager
-            .createQueryBuilder()
-            .update(SqlGameProgress)
-            .set({ score: newScore })
-            .where('userId = :userId AND gameId = :gameId', {
-              userId: game.firstAnsweredPlayerId,
-              gameId: game.gameId,
-            })
-            .execute();
+          setExtraScorePromises.push(
+            await manager
+              .createQueryBuilder()
+              .update(SqlGameProgress)
+              .set({ score: newScore })
+              .where('userId = :userId AND gameId = :gameId', {
+                userId: game.firstAnsweredPlayerId,
+                gameId: game.gameId,
+              })
+              .execute(),
+          );
         }
       }
-
+      await Promise.all(setAnswersPromises);
+      await Promise.all(updateGameStatusPromises);
+      await Promise.all(setExtraScorePromises);
       //await queryRunner.commitTransaction();
       return;
     } catch (e) {

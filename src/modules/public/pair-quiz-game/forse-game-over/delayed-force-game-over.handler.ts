@@ -17,8 +17,8 @@ export class DelayedForceGameOverHandler
   async handle(event: DelayedForceGameOverEvent) {
     await sleep(Number(settings.gameRules.timeLimit));
 
-    //this.gameRepository.forceGameOverTimeOut(event);
-    this.gameRepository.forceGameOverSchedule();
+    this.gameRepository.forceGameOverTimeOut(event);
+    //this.gameRepository.forceGameOverSchedule();
     return;
   }
 }
