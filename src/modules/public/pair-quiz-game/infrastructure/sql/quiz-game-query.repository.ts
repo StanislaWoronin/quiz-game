@@ -220,37 +220,6 @@ export class QuizGameQueryRepository implements IQuizGameQueryRepository {
     return result[0].count;
   }
 
-  // async findGamesWhichNeedComplete(
-  //   currentTime: string,
-  // ): Promise<GameWhichNeedComplete[]> {
-  //   const query = `
-  //     SELECT g.id AS "gameId", ua."userId" AS "fistAnsweredPlayerId", MAX(ua."addedAt") AS "fistPlayerAnsweredTime",
-  //            (SELECT COUNT(*)
-  //               FROM sql_user_answer
-  //              WHERE "gameId" = g.id
-  //                AND "userId" != ua."userId") AS "secondPlayerAnswerProgress"
-  //       FROM sql_game g
-  //       JOIN (
-  //         SELECT *, ROW_NUMBER() OVER (PARTITION BY "gameId", "userId" ORDER BY "addedAt") AS rn
-  //         FROM sql_user_answer
-  //       ) ua ON ua."gameId" = g.id
-  //      WHERE ua."userId" IN (
-  //            SELECT "userId"
-  //            FROM sql_user_answer
-  //            WHERE "gameId" = g.id
-  //            GROUP BY "userId"
-  //            HAVING COUNT(*) = $1
-  //      )
-  //      GROUP BY g.id, ua."userId"
-  //     HAVING COUNT(*) = $1
-  //        AND (to_timestamp($2, 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') - MAX(CASE WHEN rn = 5 THEN to_timestamp(ua."addedAt", 'YYYY-MM-DD"T"HH24:MI:SS.MS""Z"') END) >= interval '10 seconds');
-  //   `;
-  //   return await this.dataSource.query(query, [
-  //     Number(settings.gameRules.questionsCount),
-  //     currentTime,
-  //   ]);
-  // }
-
   private getGameQuery({
     _gameIdFilter,
     gameStatus,

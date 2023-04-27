@@ -23,7 +23,11 @@ import {MJwtRepository} from "../../modules/public/auth/infrastructure/mongoose/
 import {MQuizGameRepository} from "../../modules/public/pair-quiz-game/infrastructure/mongo/m-quiz-game.repository";
 import {
   MQuizGameQueryRepository
-} from "../../modules/public/pair-quiz-game/infrastructure/mongo/schema/m-quiz-game-query.repository";
+} from "../../modules/public/pair-quiz-game/infrastructure/mongo/m-quiz-game-query.repository";
+import {MSecurityRepository} from "../../modules/public/security/infrastructure/mongo/m-security.repository";
+import {
+  MSecurityQueryRepository
+} from "../../modules/public/security/infrastructure/mongo/schema/m-security-query.repository";
 
 export const repositories = {
   sql: {
@@ -40,18 +44,18 @@ export const repositories = {
     usersRepository: UsersRepository,
     usersQueryRepository: UsersQueryRepository,
   },
-  mongo: {
-    banInfoRepository: MBanInfoRepository,
-    emailConfirmation: MEmailConfirmationRepository,
-    gameRepository: MQuizGameRepository,
-    gameQueryRepository: MQuizGameQueryRepository,
-    questionsRepository: MQuestionsRepository,
-    questionsQueryRepository: MQuestionsQueryRepository,
-    jwt: MJwtRepository,
-    testingRepository: MTestingRepository,
-    securityRepository: ,
-    securityQueryRepository: ,
-    usersRepository: MUsersRepository,
-    usersQueryRepository: MUsersQueryRepository,
-  },
+  // mongo: {
+  //   banInfoRepository: MBanInfoRepository,
+  //   emailConfirmation: MEmailConfirmationRepository,
+  //   gameRepository: MQuizGameRepository,
+  //   gameQueryRepository: MQuizGameQueryRepository,
+  //   questionsRepository: MQuestionsRepository,
+  //   questionsQueryRepository: MQuestionsQueryRepository,
+  //   jwt: MJwtRepository,
+  //   testingRepository: MTestingRepository,
+  //   securityRepository: MSecurityRepository,
+  //   securityQueryRepository: MSecurityQueryRepository,
+  //   usersRepository: MUsersRepository,
+  //   usersQueryRepository: MUsersQueryRepository,
+  // },
 };

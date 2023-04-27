@@ -16,7 +16,7 @@ export class MongoQuestion {
   @Prop({ required: false, type: String, default: null })
   updatedAt: string | null;
 
-  @Prop({ required: true, type: [String], default: [] })
+  @Prop({ required: true, default: [] })
   correctAnswers: string[];
 
   constructor(dto: CreateQuestionDto, answers: string[]) {

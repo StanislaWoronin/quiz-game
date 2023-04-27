@@ -17,15 +17,15 @@ export class SecurityService {
     protected querySecurityRepository: ISecurityQueryRepository,
   ) {}
 
-  async getDeviceById(deviceId: string): Promise<SqlSecurity | null> {
-    const device = await this.querySecurityRepository.getDeviseById(deviceId);
-
-    if (!device) {
-      return null;
-    }
-
-    return device;
-  }
+  // async getDeviceById(deviceId: string): Promise<SqlSecurity | null> {
+  //   const device = await this.querySecurityRepository.getDeviseById(deviceId);
+  //
+  //   if (!device) {
+  //     return null;
+  //   }
+  //
+  //   return device;
+  // }  // TODO delete
 
   async createUserDevice(
     userId: string,

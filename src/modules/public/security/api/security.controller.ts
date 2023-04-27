@@ -67,7 +67,7 @@ export class SecurityController {
     @Param('id') deviceId: string,
     @UserId() userId: string,
   ) {
-    const userDevice = await this.querySecurityRepository.getDeviseById(
+    const userDevice = await this.querySecurityRepository.getDeviceById(
       deviceId,
     );
 

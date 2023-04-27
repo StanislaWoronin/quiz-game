@@ -12,8 +12,8 @@ export class TaskService {
     protected quizGameRepository: IQuizGameRepository,
   ) {}
 
-  @Cron(CronExpression.EVERY_SECOND)
-  async forceGameOver() {
-    await this.quizGameRepository.forceGameOverSchedule();
-  }
+  // @Cron(CronExpression.EVERY_SECOND)
+  // async forceGameOver() {
+  //   await this.quizGameRepository.forceGameOverSchedule();
+  // }
 }

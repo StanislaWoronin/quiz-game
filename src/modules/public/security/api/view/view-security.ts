@@ -12,4 +12,11 @@ export class ViewSecurity {
   ip: string;
   @ApiProperty()
   lastActiveDate: string;
+
+  constructor(session: {deviceId: string, deviceTitle: string, ipAddress: string, iat: string}) {
+      this.deviceId = session.deviceId
+      this.title = session.deviceTitle
+      this.ip = session.ipAddress
+      this.lastActiveDate = session.iat
+  }
 }

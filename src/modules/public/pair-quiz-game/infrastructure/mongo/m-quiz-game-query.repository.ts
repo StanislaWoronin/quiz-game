@@ -1,22 +1,23 @@
 import {Injectable} from "@nestjs/common";
-import {IQuizGameQueryRepository} from "../../i-quiz-game-query.repository";
+import {IQuizGameQueryRepository} from "../i-quiz-game-query.repository";
 import {InjectConnection, InjectModel} from "@nestjs/mongoose";
 import {Connection, Model} from "mongoose";
-import {MongoQuizGame, QuizGameDocument} from "./quiz-game.schema";
-import {GameQueryDto} from "../../../api/dto/query/game-query.dto";
-import {ViewPage} from "../../../../../../common/pagination/view-page";
-import {ViewGame} from "../../../api/view/view-game";
-import {GameStatus} from "../../../shared/game-status";
+import {MongoQuizGame, QuizGameDocument} from "./schema/quiz-game.schema";
+import {GameQueryDto} from "../../api/dto/query/game-query.dto";
+import {ViewPage} from "../../../../../common/pagination/view-page";
+import {ViewGame} from "../../api/view/view-game";
+import {GameStatus} from "../../shared/game-status";
 import {ObjectId, WithId} from "mongodb";
-import {PlayerIdDb} from "../../sql/pojo/player-id.db";
-import {GetCorrectAnswerDb} from "../../sql/pojo/get-correct-answer.db";
+import {PlayerIdDb} from "../sql/pojo/player-id.db";
+import {GetCorrectAnswerDb} from "../sql/pojo/get-correct-answer.db";
 import {
     MongoQuestion,
     QuestionsDocument
-} from "../../../../../sa/questions/infrastructure/mongoose/schema/question.schema";
-import {ViewUserStatistic} from "../../../api/view/view-user-statistic";
-import {TopPlayersQueryDto} from "../../../api/dto/query/top-players-query.dto";
-import {ViewTopPlayers} from "../../../api/view/view-top-players";
+} from "../../../../sa/questions/infrastructure/mongoose/schema/question.schema";
+import {ViewUserStatistic} from "../../api/view/view-user-statistic";
+import {TopPlayersQueryDto} from "../../api/dto/query/top-players-query.dto";
+import {ViewTopPlayers} from "../../api/view/view-top-players";
+import {MongoUsers, UsersDocument} from "../../../../sa/users/infrastructure/mongoose/schema/user.schema";
 
 @Injectable()
 export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
@@ -26,6 +27,8 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
         private quizGameModel: Model<QuizGameDocument>,
         @InjectModel(MongoQuestion.name)
         private questionModel: Model<QuestionsDocument>,
+        @InjectModel(MongoUsers.name)
+        private userModel: Model<UsersDocument>,
     ) {
     }
 
@@ -64,7 +67,7 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
         return MongoQuizGame.gameWithId(currentGame)
     }
 
-    async getGameById(userId: string, gameId: string): Promise<ViewGame | null {
+    async getGameById(userId: string, gameId: string): Promise<ViewGame | null> {
         const game = await this.quizGameModel.findOne({_id: new ObjectId(gameId)})
         if (!game) return null
         console.log(game, 'game')
@@ -104,7 +107,46 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
     }
 
     async getUserStatistic(userId: string): Promise<ViewUserStatistic> {
-        const games = await this.quizGameModel.find({
+        const statistic = await this.userModel
+            .findOne({_id: new ObjectId(userId)})
+            .select({statistic: 1})
+        // @ts-ignore
+        return statistic
+    }
+
+    async getTopPlayers(
+      query: TopPlayersQueryDto,
+    ): Promise<ViewPage<ViewTopPlayers>> {
+        // const statistic = await this.quizGameModel.aggregate([
+        //     {
+        //         $project: {
+        //             firstPlayerId: "$firstPlayerProgress.player.id",
+        //             secondPlayerId: "$secondPlayerProgress.player.id",
+        //             firstPlayerScore: "$firstPlayerProgress.score",
+        //             secondPlayerScore: "$secondPlayerProgress.score",
+        //         },
+        //     }
+        // ]) // TODO
+        const sortFilter = this.getSortFilter(query.sort)
+        const topPlayers = await this.userModel.aggregate([
+            { $sort: sortFilter },
+            { $skip: query.skip },
+            { $limit: query.pageSize },
+        ])
+        console.log(topPlayers, 'getTopPlayers')
+        // @ts-ignore
+        return topPlayers
+    }
+
+    async checkUserCurrentGame(
+      userId: string,
+      status?: GameStatus,
+    ): Promise<string | null> {
+        let filter = {}
+        if (status) {
+            filter = {status: status}
+        }
+        const game = await this.quizGameModel.findOne({
             $and: [
                 {
                     $or: [
@@ -112,35 +154,46 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
                         { 'secondPlayerProgress.player.id': userId }
                     ]
                 },
-                { status: { $ne: GameStatus.Finished } }
+                filter
             ]
         })
-
-        const statistic = MongoQuizGame.getUserStatistic(games, userId)
-        return statistic
+        console.log(game, 'checkUserCurrentGame')
+        // @ts-ignore
+        return game
     }
 
-    async getTopPlayers(
-      queryDto: TopPlayersQueryDto,
-    ): Promise<ViewPage<ViewTopPlayers>> {
-        const statistic = await this.quizGameModel.aggregate([
-            {
-                $project: {
-                    firstPlayerId: "$firstPlayerProgress.player.id",
-                    secondPlayerId: "$secondPlayerProgress.player.id",
-                    firstPlayerScore: "$firstPlayerProgress.score",
-                    secondPlayerScore: "$secondPlayerProgress.score",
-                },
-            }
-        ])
-
-        return
+    async checkOpenGame(): Promise<string | null> {
+        const openGame = await this.quizGameModel.findOne({status: GameStatus.PendingSecondPlayer})
+        console.log(openGame, 'checkOpenGame')
+        // @ts-ignore
+        return openGame
     }
 
-    async checkUserCurrentGame(
-      userId: string,
-      status?: GameStatus,
-    ): Promise<string | null> {
+    async currentGameAnswerProgress(
+        userId: string,
+        gameId: string,
+    ): Promise<number> {
+        const result = await this.quizGameModel.findOne({_id: new ObjectId(gameId)}).select({firstPlayerProgress: 1, secondPlayerProgress: 1})
+        if (result.firstPlayerProgress.player.id === userId) {
+            return result.firstPlayerProgress.answers.length
+        }
+        return result.secondPlayerProgress.answers.length
+    }
 
+    private getSortFilter(sortBy: string | string[]) {
+        let parametrs = [];
+        if (typeof sortBy === 'string') {
+            parametrs.push(sortBy);
+        } else {
+            parametrs = sortBy;
+        }
+
+        let result = {}
+        for (const parametr of parametrs) {
+            const [field, direction] = parametr.split(' ');
+            result[field] = direction === 'asc' ? 1 : -1
+        }
+
+        return result;
     }
 }

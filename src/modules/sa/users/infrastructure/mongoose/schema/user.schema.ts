@@ -4,6 +4,9 @@ import { MongoUserBanInfo } from './user-ban-info.schema';
 import { MongoEmailConfirmation } from './email-confirmation.schema';
 import { CreateUserDto } from '../../../api/dto/create-user.dto';
 import { EmailConfirmationDto } from '../../../applications/dto/email-confirmation.dto';
+import {ViewUserStatistic} from "../../../../../public/pair-quiz-game/api/view/view-user-statistic";
+import {ApiProperty} from "@nestjs/swagger";
+import {Statistic} from "./statistic.type";
 
 @Schema({ versionKey: false })
 export class MongoUsers {
@@ -35,6 +38,12 @@ export class MongoUsers {
     type: MongoEmailConfirmation,
   })
   emailConfirmation: MongoEmailConfirmation;
+
+  @Prop({
+    type: Statistic,
+    default: new Statistic(),
+  })
+  statistic: Statistic;
 
   constructor(
     userDto: CreateUserDto,

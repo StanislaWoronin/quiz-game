@@ -67,6 +67,11 @@ import {
   MongoTokenBlackList,
   TokenBlackListSchema,
 } from './modules/public/auth/infrastructure/mongoose/schema/token-black-list.schema';
+import {
+  MongoQuizGame,
+  QuizGameSchema
+} from "./modules/public/pair-quiz-game/infrastructure/mongo/schema/quiz-game.schema";
+import {MongoSecurity, SecuritySchema} from "./modules/public/security/infrastructure/mongo/schema/security.schema";
 
 const controllers = [
   AuthController,
@@ -209,9 +214,11 @@ export const entity = [
 ];
 
 export const mongooseModels = [
-  { name: MongoTokenBlackList.name, schema: TokenBlackListSchema },
-  { name: MongoQuestion.name, schema: QuestionSchema },
-  { name: MongoUsers.name, schema: UserSchema },
+  // { name: MongoTokenBlackList.name, schema: TokenBlackListSchema },
+  // { name: MongoQuizGame.name, schema: QuizGameSchema },
+  // { name: MongoQuestion.name, schema: QuestionSchema },
+  // { name: MongoSecurity.name, schema: SecuritySchema},
+  // { name: MongoUsers.name, schema: UserSchema },
 ];
 
 @Module({

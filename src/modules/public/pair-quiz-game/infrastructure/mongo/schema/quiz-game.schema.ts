@@ -15,8 +15,8 @@ export class MongoQuizGame {
   @Prop({ type: ViewGameProgress })
   secondPlayerProgress: ViewGameProgress | null;
 
-  @Prop({ type: [Questions] })
-  questions: Questions[] | null;
+  @Prop({ type: [Questions], array: true })
+  questions: [Questions];
 
   @Prop({ required: true, default: GameStatus.PendingSecondPlayer })
   status: GameStatus;
@@ -32,7 +32,7 @@ export class MongoQuizGame {
 
   constructor(
     fistPlayerProgress: ViewGameProgress,
-    questions: Questions[],
+    questions: [Questions],
     secondPlayerProgress?: ViewGameProgress,
   ) {
     this.firstPlayerProgress = fistPlayerProgress;
@@ -40,7 +40,7 @@ export class MongoQuizGame {
     this.questions = questions;
   }
 
-  gameWithId(game: WithId<MongoQuizGame>): ViewGame {
+  static gameWithId(game: WithId<MongoQuizGame>): ViewGame {
     const questions = game.questions.map((q) => {
       return { id: q.id.toString(), body: q.body };
     });
@@ -56,35 +56,35 @@ export class MongoQuizGame {
     };
   }
 
-  static getUserStatistic(
-    games: WithId<MongoQuizGame>[],
-    userId: string,
-  ): ViewUserStatistic {
-    const userStatistic = new ViewUserStatistic();
-    for (const game of games) {
-      const userScore =
-        game.firstPlayerProgress.player.id === userId
-          ? game.firstPlayerProgress.score
-          : game.secondPlayerProgress.score;
-      const opponentScore =
-        game.firstPlayerProgress.player.id !== userId
-          ? game.firstPlayerProgress.score
-          : game.secondPlayerProgress.score;
-
-      if (userScore > opponentScore) userStatistic.winsCount++;
-      if (userScore < opponentScore) userStatistic.lossesCount++;
-      if (userScore === opponentScore) userStatistic.drawsCount++;
-
-      userStatistic.sumScore += userScore;
-      userStatistic.gamesCount++;
-      userStatistic.avgScores = ViewUserStatistic.avg(
-        userStatistic.sumScore,
-        userStatistic.gamesCount,
-      );
-    }
-
-    return userStatistic;
-  }
+  // static getUserStatistic(
+  //   games: WithId<MongoQuizGame>[],
+  //   userId: string,
+  // ): ViewUserStatistic {
+  //   const userStatistic = new ViewUserStatistic();
+  //   for (const game of games) {
+  //     const userScore =
+  //       game.firstPlayerProgress.player.id === userId
+  //         ? game.firstPlayerProgress.score
+  //         : game.secondPlayerProgress.score;
+  //     const opponentScore =
+  //       game.firstPlayerProgress.player.id !== userId
+  //         ? game.firstPlayerProgress.score
+  //         : game.secondPlayerProgress.score;
+  //
+  //     if (userScore > opponentScore) userStatistic.winsCount++;
+  //     if (userScore < opponentScore) userStatistic.lossesCount++;
+  //     if (userScore === opponentScore) userStatistic.drawsCount++;
+  //
+  //     userStatistic.sumScore += userScore;
+  //     userStatistic.gamesCount++;
+  //     userStatistic.avgScores = ViewUserStatistic.avg(
+  //       userStatistic.sumScore,
+  //       userStatistic.gamesCount,
+  //     );
+  //   }
+  //
+  //   return userStatistic;
+  // }
 }
 
 export const QuizGameSchema = SchemaFactory.createForClass(MongoQuizGame);

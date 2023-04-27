@@ -22,7 +22,7 @@ export class SecurityQueryRepository implements ISecurityQueryRepository {
     return await builder.getRawMany();
   }
 
-  async getDeviseById(deviceId: string): Promise<SqlSecurity | null> {
+  async getDeviceById(deviceId: string): Promise<SqlSecurity | null> {
     const builder = this.dataSource
       .createQueryBuilder()
       .select('s.userId', 'userId')

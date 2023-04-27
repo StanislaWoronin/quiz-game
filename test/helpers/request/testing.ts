@@ -9,7 +9,7 @@ export class Testing {
     const response = await request(this.server).delete(
       endpoints.testing.allData,
     );
-    console.log(response.status, 'status from delete');
+
     return response.status;
   }
 

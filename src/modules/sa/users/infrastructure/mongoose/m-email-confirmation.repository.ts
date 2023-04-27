@@ -29,9 +29,12 @@ export class MEmailConfirmationRepository
     console.log(emailConfirmation, 'getEmailConfirmationByCode');
     // @ts-ignore
     return new SqlEmailConfirmation(
-      emailConfirmation._id,
+      emailConfirmation._id.toString(),
+        // @ts-ignore
       emailConfirmation.isConfirmed,
+        // @ts-ignore
       emailConfirmation.confirmationCode,
+        // @ts-ignore
       emailConfirmation.expirationDate,
     );
   }

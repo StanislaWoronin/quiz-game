@@ -24,7 +24,7 @@ export const settings = {
     mongoose: 'mongo',
     sql: 'sql',
   },
-  currentRepository: 'mongo',
+  currentRepository: 'sql',
   gameRules: {
     questionsCount: '5',
     timeLimit: '10',
