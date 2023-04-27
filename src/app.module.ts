@@ -69,9 +69,12 @@ import {
 } from './modules/public/auth/infrastructure/mongoose/schema/token-black-list.schema';
 import {
   MongoQuizGame,
-  QuizGameSchema
-} from "./modules/public/pair-quiz-game/infrastructure/mongo/schema/quiz-game.schema";
-import {MongoSecurity, SecuritySchema} from "./modules/public/security/infrastructure/mongo/schema/security.schema";
+  QuizGameSchema,
+} from './modules/public/pair-quiz-game/infrastructure/mongo/schema/quiz-game.schema';
+import {
+  MongoSecurity,
+  SecuritySchema,
+} from './modules/public/security/infrastructure/mongo/schema/security.schema';
 
 const controllers = [
   AuthController,

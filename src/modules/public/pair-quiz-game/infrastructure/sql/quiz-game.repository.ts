@@ -203,7 +203,6 @@ export class QuizGameRepository implements IQuizGameRepository {
               null,
             ),
         );
-
         await manager.save(answers);
 
         await manager

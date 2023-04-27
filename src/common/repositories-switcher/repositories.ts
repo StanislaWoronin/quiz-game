@@ -15,19 +15,13 @@ import { EmailConfirmationRepository } from '../../modules/sa/users/infrastructu
 import { UserBanInfoRepository } from '../../modules/sa/users/infrastructure/sql/ban-info.repository';
 import { SecurityQueryRepository } from '../../modules/public/security/infrastructure/sql/security-query-repository.service';
 import { QuizGameQueryRepository } from '../../modules/public/pair-quiz-game/infrastructure/sql/quiz-game-query.repository';
-import {MBanInfoRepository} from "../../modules/sa/users/infrastructure/mongoose/schema/m-ban-info.repository";
-import {
-  MEmailConfirmationRepository
-} from "../../modules/sa/users/infrastructure/mongoose/m-email-confirmation.repository";
-import {MJwtRepository} from "../../modules/public/auth/infrastructure/mongoose/m-jwt.repository";
-import {MQuizGameRepository} from "../../modules/public/pair-quiz-game/infrastructure/mongo/m-quiz-game.repository";
-import {
-  MQuizGameQueryRepository
-} from "../../modules/public/pair-quiz-game/infrastructure/mongo/m-quiz-game-query.repository";
-import {MSecurityRepository} from "../../modules/public/security/infrastructure/mongo/m-security.repository";
-import {
-  MSecurityQueryRepository
-} from "../../modules/public/security/infrastructure/mongo/schema/m-security-query.repository";
+import { MBanInfoRepository } from '../../modules/sa/users/infrastructure/mongoose/schema/m-ban-info.repository';
+import { MEmailConfirmationRepository } from '../../modules/sa/users/infrastructure/mongoose/m-email-confirmation.repository';
+import { MJwtRepository } from '../../modules/public/auth/infrastructure/mongoose/m-jwt.repository';
+import { MQuizGameRepository } from '../../modules/public/pair-quiz-game/infrastructure/mongo/m-quiz-game.repository';
+import { MQuizGameQueryRepository } from '../../modules/public/pair-quiz-game/infrastructure/mongo/m-quiz-game-query.repository';
+import { MSecurityRepository } from '../../modules/public/security/infrastructure/mongo/m-security.repository';
+import { MSecurityQueryRepository } from '../../modules/public/security/infrastructure/mongo/schema/m-security-query.repository';
 
 export const repositories = {
   sql: {

@@ -19,6 +19,6 @@ export class DelayedForceGameOverHandler
 
     //this.gameRepository.forceGameOverTimeOut(event);
     this.gameRepository.forceGameOverSchedule();
-    return
+    return;
   }
 }

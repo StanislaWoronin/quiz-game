@@ -1,25 +1,25 @@
-import {Prop, Schema, SchemaFactory} from "@nestjs/mongoose";
-import {HydratedDocument} from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
 
-@Schema({_id: false, versionKey: false })
+@Schema({ _id: false, versionKey: false })
 export class MongoSecurity {
-    @Prop()
-    userId: string;
+  @Prop()
+  userId: string;
 
-    @Prop()
-    deviceId: string;
+  @Prop()
+  deviceId: string;
 
-    @Prop()
-    deviceTitle: string;
+  @Prop()
+  deviceTitle: string;
 
-    @Prop()
-    ipAddress: string;
+  @Prop()
+  ipAddress: string;
 
-    @Prop()
-    iat: string;
+  @Prop()
+  iat: string;
 
-    @Prop()
-    exp: string;
+  @Prop()
+  exp: string;
 }
 
 export const SecuritySchema = SchemaFactory.createForClass(MongoSecurity);

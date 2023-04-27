@@ -21,7 +21,7 @@ import {
   MongoQuestion,
   QuestionsDocument,
 } from '../../../../sa/questions/infrastructure/mongoose/schema/question.schema';
-import {Questions} from "../../shared/questions";
+import { Questions } from '../../shared/questions';
 
 @Injectable()
 export class MQuizGameRepository implements IQuizGameRepository {
@@ -51,7 +51,7 @@ export class MQuizGameRepository implements IQuizGameRepository {
         // @ts-ignore
         const fistPlayerProgress = new ViewGameProgress(
           userId,
-            // @ts-ignore
+          // @ts-ignore
           fistPlayerLogin,
         );
         // @ts-ignore
@@ -81,7 +81,7 @@ export class MQuizGameRepository implements IQuizGameRepository {
         // @ts-ignore
         const secondPlayerGameProgress = new ViewGameProgress(
           userId,
-            // @ts-ignore
+          // @ts-ignore
           secondPlayerLogin,
         );
 
@@ -127,17 +127,15 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
         const score = dto.answerStatus === AnswerStatus.Correct ? 1 : 0;
         const playerProgress =
-            fistPlayer.player.id === dto.userId
-            ? fistPlayer
-            : secondPlayer;
+          fistPlayer.player.id === dto.userId ? fistPlayer : secondPlayer;
         playerProgress.answers.push(answer);
         playerProgress.score += score;
 
         if (
           dto.isLastQuestions &&
-            fistPlayer.answers.length ===
+          fistPlayer.answers.length ===
             Number(settings.gameRules.questionsCount) &&
-            secondPlayer.answers.length ===
+          secondPlayer.answers.length ===
             Number(settings.gameRules.questionsCount)
         ) {
           game.status = GameStatus.Finished;
@@ -145,7 +143,7 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
           const extraScore = 1;
           const fistAnsweredPlayerScore =
-              fistPlayer.player.id !== dto.userId
+            fistPlayer.player.id !== dto.userId
               ? secondPlayer.score
               : fistPlayer.score;
           if (fistAnsweredPlayerScore != 0) {
@@ -154,38 +152,54 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
           let winner = fistPlayer;
           let loser = secondPlayer;
-          let itDraw = false
+          let itDraw = false;
           if (fistPlayer.score < secondPlayer.score) {
-            winner = secondPlayer
-            loser = fistPlayer
+            winner = secondPlayer;
+            loser = fistPlayer;
           }
           if (fistPlayer.score === secondPlayer.score) {
-            itDraw = true
+            itDraw = true;
           }
 
           if (itDraw) {
             await this.userModel.updateOne(
-                { _id: { $in: [new ObjectId(winner.player.id), new ObjectId(loser.player.id)] } },
-                {$inc: [
-                    {'statistic.drawsCount': 1},
-                    {'statistic.gamesCount': 1},
-                    {'statistic.sumScore': winner.score}
-                  ]})
+              {
+                _id: {
+                  $in: [
+                    new ObjectId(winner.player.id),
+                    new ObjectId(loser.player.id),
+                  ],
+                },
+              },
+              {
+                $inc: [
+                  { 'statistic.drawsCount': 1 },
+                  { 'statistic.gamesCount': 1 },
+                  { 'statistic.sumScore': winner.score },
+                ],
+              },
+            );
           } else {
             await this.userModel.updateOne(
-                { _id: new ObjectId(winner.player.id) },
-                {$inc: [
-                    {'statistic.winsCount': 1},
-                    {'statistic.gamesCount': 1},
-                    {'statistic.sumScore': winner.score}
-                  ]})
+              { _id: new ObjectId(winner.player.id) },
+              {
+                $inc: [
+                  { 'statistic.winsCount': 1 },
+                  { 'statistic.gamesCount': 1 },
+                  { 'statistic.sumScore': winner.score },
+                ],
+              },
+            );
             await this.userModel.updateOne(
-                { _id: new ObjectId(loser.player.id) },
-                {$inc: [
-                    {'statistic.lossesCount': 1},
-                    {'statistic.gamesCount': 1},
-                    {'statistic.sumScore': loser.score}
-                  ]})
+              { _id: new ObjectId(loser.player.id) },
+              {
+                $inc: [
+                  { 'statistic.lossesCount': 1 },
+                  { 'statistic.gamesCount': 1 },
+                  { 'statistic.sumScore': loser.score },
+                ],
+              },
+            );
           }
         }
 

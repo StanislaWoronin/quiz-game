@@ -30,11 +30,11 @@ export class MEmailConfirmationRepository
     // @ts-ignore
     return new SqlEmailConfirmation(
       emailConfirmation._id.toString(),
-        // @ts-ignore
+      // @ts-ignore
       emailConfirmation.isConfirmed,
-        // @ts-ignore
+      // @ts-ignore
       emailConfirmation.confirmationCode,
-        // @ts-ignore
+      // @ts-ignore
       emailConfirmation.expirationDate,
     );
   }
