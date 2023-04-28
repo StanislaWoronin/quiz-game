@@ -21,6 +21,7 @@ export class MTestingRepository implements ITestingRepository {
 
       return true;
     } catch (e) {
+      console.log(e)
       return false;
     }
   }
@@ -34,7 +35,7 @@ export class MTestingRepository implements ITestingRepository {
       const count = await this.connection.db.collection(name).countDocuments();
       totalCount += count;
     }
-
+    console.log(totalCount, 'm--testing')
     return totalCount;
   }
 

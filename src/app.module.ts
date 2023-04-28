@@ -61,7 +61,6 @@ import { TaskService } from './modules/public/pair-quiz-game/forse-game-over/tas
 import { Connection } from 'mongoose';
 import { CqrsModule } from '@nestjs/cqrs';
 import { DelayedForceGameOverHandler } from './modules/public/pair-quiz-game/forse-game-over/delayed-force-game-over.handler';
-import { SqlGameSubscriber } from './modules/public/pair-quiz-game/infrastructure/helpers/fisih-game.subscriber';
 import { ScheduleModule } from '@nestjs/schedule';
 import {
   MongoTokenBlackList,
@@ -217,11 +216,11 @@ export const entity = [
 ];
 
 export const mongooseModels = [
-  // { name: MongoTokenBlackList.name, schema: TokenBlackListSchema },
-  // { name: MongoQuizGame.name, schema: QuizGameSchema },
-  // { name: MongoQuestion.name, schema: QuestionSchema },
-  // { name: MongoSecurity.name, schema: SecuritySchema},
-  // { name: MongoUsers.name, schema: UserSchema },
+  { name: MongoTokenBlackList.name, schema: TokenBlackListSchema },
+  { name: MongoQuizGame.name, schema: QuizGameSchema },
+  { name: MongoQuestion.name, schema: QuestionSchema },
+  { name: MongoSecurity.name, schema: SecuritySchema},
+  { name: MongoUsers.name, schema: UserSchema },
 ];
 
 @Module({
@@ -239,7 +238,6 @@ export const mongooseModels = [
     ...services,
     ...validators,
     ...useCases,
-    SqlGameSubscriber,
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: LoggingInterceptor

@@ -16,7 +16,12 @@ export class MongoUsers {
   @Prop({ required: true, unique: true, type: String })
   email: string;
 
-  @Prop({ required: true, type: String, default: new Date().toISOString })
+  @Prop({
+    required: true,
+    type: String,
+    timestamps: true,
+    // default: new Date().toISOString TODO try create default ISODate
+  })
   createdAt: string;
 
   @Prop({ required: true, type: String })
@@ -53,10 +58,8 @@ export class MongoUsers {
     this.login = userDto.login;
     this.email = userDto.email;
     this.password = password;
-    this.emailConfirmation.confirmationCode =
-      emailConfirmationDto.confirmationCode;
-    this.emailConfirmation.expirationDate = emailConfirmationDto.expirationDate;
-    this.emailConfirmation.isConfirmed = emailConfirmationDto.isConfirmed;
+    this.createdAt = new Date().toISOString()
+    this.emailConfirmation = emailConfirmationDto as MongoEmailConfirmation
   }
 }
 

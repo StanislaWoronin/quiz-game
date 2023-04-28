@@ -15,7 +15,7 @@ import { EmailConfirmationRepository } from '../../modules/sa/users/infrastructu
 import { UserBanInfoRepository } from '../../modules/sa/users/infrastructure/sql/ban-info.repository';
 import { SecurityQueryRepository } from '../../modules/public/security/infrastructure/sql/security-query-repository.service';
 import { QuizGameQueryRepository } from '../../modules/public/pair-quiz-game/infrastructure/sql/quiz-game-query.repository';
-import { MBanInfoRepository } from '../../modules/sa/users/infrastructure/mongoose/schema/m-ban-info.repository';
+import { MBanInfoRepository } from '../../modules/sa/users/infrastructure/mongoose/m-ban-info.repository';
 import { MEmailConfirmationRepository } from '../../modules/sa/users/infrastructure/mongoose/m-email-confirmation.repository';
 import { MJwtRepository } from '../../modules/public/auth/infrastructure/mongoose/m-jwt.repository';
 import { MQuizGameRepository } from '../../modules/public/pair-quiz-game/infrastructure/mongo/m-quiz-game.repository';
@@ -38,18 +38,18 @@ export const repositories = {
     usersRepository: UsersRepository,
     usersQueryRepository: UsersQueryRepository,
   },
-  // mongo: {
-  //   banInfoRepository: MBanInfoRepository,
-  //   emailConfirmation: MEmailConfirmationRepository,
-  //   gameRepository: MQuizGameRepository,
-  //   gameQueryRepository: MQuizGameQueryRepository,
-  //   questionsRepository: MQuestionsRepository,
-  //   questionsQueryRepository: MQuestionsQueryRepository,
-  //   jwt: MJwtRepository,
-  //   testingRepository: MTestingRepository,
-  //   securityRepository: MSecurityRepository,
-  //   securityQueryRepository: MSecurityQueryRepository,
-  //   usersRepository: MUsersRepository,
-  //   usersQueryRepository: MUsersQueryRepository,
-  // },
+  mongo: {
+    banInfoRepository: MBanInfoRepository,
+    emailConfirmation: MEmailConfirmationRepository,
+    gameRepository: MQuizGameRepository,
+    gameQueryRepository: MQuizGameQueryRepository,
+    questionsRepository: MQuestionsRepository,
+    questionsQueryRepository: MQuestionsQueryRepository,
+    jwt: MJwtRepository,
+    testingRepository: MTestingRepository,
+    securityRepository: MSecurityRepository,
+    securityQueryRepository: MSecurityQueryRepository,
+    usersRepository: MUsersRepository,
+    usersQueryRepository: MUsersQueryRepository,
+  },
 };

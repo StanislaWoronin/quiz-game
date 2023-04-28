@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { IUserBanInfoRepository } from '../../i-user-ban-info.repository';
+import { IUserBanInfoRepository } from '../i-user-ban-info.repository';
 import { InjectModel } from '@nestjs/mongoose';
-import { MongoUsers, UsersDocument } from './user.schema';
+import { MongoUsers, UsersDocument } from './schema/user.schema';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 

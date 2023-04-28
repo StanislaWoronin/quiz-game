@@ -46,7 +46,8 @@ export class UsersController {
   @Post()
   @ApiCreateUser()
   async createUser(@Body() dto: CreateUserDto): Promise<CreatedUser> {
-    return this.createUserUseCase.execute(dto);
+    //console.log(res)
+    return await this.createUserUseCase.execute(dto);
   }
 
   @Get()

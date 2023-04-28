@@ -5,7 +5,6 @@ import { Questions } from '../../../shared/questions';
 import { HydratedDocument } from 'mongoose';
 import { WithId } from 'mongodb';
 import { ViewGame } from '../../../api/view/view-game';
-import { ViewUserStatistic } from '../../../api/view/view-user-statistic';
 
 @Schema({ versionKey: false })
 export class MongoQuizGame {
@@ -15,8 +14,8 @@ export class MongoQuizGame {
   @Prop({ type: ViewGameProgress })
   secondPlayerProgress: ViewGameProgress | null;
 
-  @Prop({ type: [Questions], array: true })
-  questions: [Questions];
+  @Prop({ array: true })
+  questions: Questions[]
 
   @Prop({ required: true, default: GameStatus.PendingSecondPlayer })
   status: GameStatus;
