@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { MongoUsers, UsersDocument } from './schema/user.schema';
-import { ClientSession, Connection, Model, Schema, Types } from 'mongoose';
+import { ClientSession, Connection, Model } from 'mongoose';
 import { CreatedUser } from '../../api/view/created-user';
 import { UpdateUserBanStatusDto } from '../../api/dto/update-user-ban-status.dto';
 import { CreateUserDto } from '../../api/dto/create-user.dto';
@@ -17,7 +17,6 @@ export class MUsersRepository implements IUsersRepository {
     private userModel: Model<UsersDocument>,
   ) {}
 
-
   async createUser(
     userDto: CreateUserDto,
     hash: string,
@@ -26,12 +25,16 @@ export class MUsersRepository implements IUsersRepository {
     const session: ClientSession = await this.connection.startSession();
 
     try {
-      await session.withTransaction(async () => {
+      const createdUser = await session.withTransaction(async () => {
         const user = new MongoUsers(userDto, hash, emailConfirmationDto);
-        const [createdUser] = await this.userModel.create([user], {session});
-
+        const [createdUser] = await this.userModel.create([user], { session });
         return CreatedUser.createdUserWithObjectId(createdUser);
-      })
+      });
+
+      // @ts-ignore
+      return createdUser;
+    } catch (e) {
+      console.log(e);
     } finally {
       await session.endSession();
       return null;

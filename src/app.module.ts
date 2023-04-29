@@ -74,12 +74,14 @@ import {
   MongoSecurity,
   SecuritySchema,
 } from './modules/public/security/infrastructure/mongo/schema/security.schema';
+import { SecurityController } from './modules/public/security/api/security.controller';
 
 const controllers = [
   AuthController,
   QuestionsController,
   PairQuizGamePairsController,
   PairQuizGameUsersController,
+  SecurityController,
   TestingController,
   UsersController,
 ];
@@ -219,7 +221,7 @@ export const mongooseModels = [
   { name: MongoTokenBlackList.name, schema: TokenBlackListSchema },
   { name: MongoQuizGame.name, schema: QuizGameSchema },
   { name: MongoQuestion.name, schema: QuestionSchema },
-  { name: MongoSecurity.name, schema: SecuritySchema},
+  { name: MongoSecurity.name, schema: SecuritySchema },
   { name: MongoUsers.name, schema: UserSchema },
 ];
 

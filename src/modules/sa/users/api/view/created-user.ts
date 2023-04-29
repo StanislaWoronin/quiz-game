@@ -1,9 +1,6 @@
 import { SqlUsers } from '../../infrastructure/sql/entity/users.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  MongoUsers,
-  UsersDocument,
-} from '../../infrastructure/mongoose/schema/user.schema';
+import { MongoUsers } from '../../infrastructure/mongoose/schema/user.schema';
 import type { WithId } from 'mongodb';
 
 export class CreatedUser {
@@ -34,7 +31,7 @@ export class CreatedUser {
     };
   }
 
-  static createdUserWithObjectId(createdUser: WithId<MongoUsers>) {
+  static createdUserWithObjectId(createdUser: WithId<MongoUsers>): CreatedUser {
     return {
       id: createdUser._id.toString(),
       login: createdUser.login,
