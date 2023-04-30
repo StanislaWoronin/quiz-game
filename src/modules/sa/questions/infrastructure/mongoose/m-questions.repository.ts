@@ -18,10 +18,14 @@ export class MQuestionsRepository implements IQuestionsRepository {
   async createQuestion(
     dto: CreateQuestionDto,
   ): Promise<CreatedQuestions | null> {
-    const question = new MongoQuestion(dto, dto.correctAnswers);
-    const createdQuestion = await this.questionModel.create(question);
-
-    return new CreatedQuestions(createdQuestion);
+    try {
+      const question = new MongoQuestion(dto, dto.correctAnswers);
+      const createdQuestion = await this.questionModel.create(question);
+      return new CreatedQuestions(createdQuestion);
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
   }
 
   async updateQuestion(
@@ -46,32 +50,16 @@ export class MQuestionsRepository implements IQuestionsRepository {
     questionId: string,
     published: boolean,
   ): Promise<boolean> {
-    // const questions = await this.questionModel.findOne(
-    //   {
-    //     _id: new ObjectId(questionId),
-    //   },
-    // )
-    //
-    // if (!questions || !questions.correctAnswers.length) return false
-    // const result = await this.questionModel.updateOne({
-    //   _id: new ObjectId(questionId),
-    // }, {
-    //   published
-    // })
-    //
-    // return result.matchedCount === 1;
-
-    const result = await this.questionModel.findOneAndUpdate(
-      {
-        _id: new ObjectId(questionId),
-        correctAnswers: { $exists: true, $not: { $size: 0 } },
-      },
-      { published },
-      { new: true },
-    );
-    console.log(result, 'updatePublishStatus');
-    console.log(!!result);
-    return !!result;
+    try {
+      const result = await this.questionModel.updateOne(
+        { _id: new ObjectId(questionId) },
+        { $set: { published: published } },
+      );
+      console.log(result);
+      return result.matchedCount === 1;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async deleteQuestion(questionId: string): Promise<boolean> {

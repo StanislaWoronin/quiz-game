@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { MongoUsers, UsersDocument } from './schema/user.schema';
-import { ClientSession, Connection, Model } from 'mongoose';
+import { Connection, Model } from 'mongoose';
 import { CreatedUser } from '../../api/view/created-user';
 import { UpdateUserBanStatusDto } from '../../api/dto/update-user-ban-status.dto';
 import { CreateUserDto } from '../../api/dto/create-user.dto';
@@ -22,21 +22,12 @@ export class MUsersRepository implements IUsersRepository {
     hash: string,
     emailConfirmationDto: EmailConfirmationDto,
   ): Promise<CreatedUser | null> {
-    const session: ClientSession = await this.connection.startSession();
-
     try {
-      const createdUser = await session.withTransaction(async () => {
-        const user = new MongoUsers(userDto, hash, emailConfirmationDto);
-        const [createdUser] = await this.userModel.create([user], { session });
-        return CreatedUser.createdUserWithObjectId(createdUser);
-      });
-
-      // @ts-ignore
-      return createdUser;
+      const user = new MongoUsers(userDto, hash, emailConfirmationDto);
+      const createdUser = await this.userModel.create(user);
+      return CreatedUser.userWithObjectId(createdUser);
     } catch (e) {
       console.log(e);
-    } finally {
-      await session.endSession();
       return null;
     }
   }
@@ -85,18 +76,13 @@ export class MUsersRepository implements IUsersRepository {
   }
 
   async deleteUser(userId: string): Promise<boolean> {
-    const session: ClientSession = await this.connection.startSession();
-
     try {
-      await session.withTransaction(async () => {
-        await this.userModel.deleteOne([{ _id: new ObjectId(userId) }], {
-          session,
-        });
+      const result = await this.userModel.deleteOne({
+        _id: new ObjectId(userId),
       });
-
-      return true;
-    } finally {
-      await session.endSession();
+      return result.deletedCount === 1;
+    } catch (e) {
+      console.log(e);
     }
   }
 }

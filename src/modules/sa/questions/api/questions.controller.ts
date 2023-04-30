@@ -67,6 +67,7 @@ export class QuestionsController {
     @Param('id') questionId: string,
     @Body() dto: UpdateQuestionDto,
   ) {
+    console.log(questionId);
     const isUpdated = await this.questionsService.updateQuestion(
       questionId,
       dto,
@@ -75,6 +76,7 @@ export class QuestionsController {
     if (isUpdated === null) {
       throw new NotFoundException();
     }
+
     if (!isUpdated) {
       throw new BadRequestException();
     }
@@ -92,7 +94,6 @@ export class QuestionsController {
       questionId,
       dto,
     );
-
     if (isUpdated === null) {
       throw new NotFoundException();
     }

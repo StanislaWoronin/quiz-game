@@ -31,16 +31,16 @@ export class CreatedUser {
     };
   }
 
-  static createdUserWithObjectId(createdUser: WithId<MongoUsers>): CreatedUser {
+  static userWithObjectId(createdUser: WithId<MongoUsers>): CreatedUser {
     return {
       id: createdUser._id.toString(),
       login: createdUser.login,
       email: createdUser.email,
       createdAt: createdUser.createdAt,
       banInfo: {
-        isBanned: false,
-        banReason: null,
-        banDate: null,
+        isBanned: createdUser.banInfo.isBanned,
+        banReason: createdUser.banInfo.banReason,
+        banDate: createdUser.banInfo.banDate,
       },
     };
   }

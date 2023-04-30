@@ -10,6 +10,7 @@ import { IUsersQueryRepository } from '../i-users-query.repository';
 import { SqlUsers } from '../sql/entity/users.entity';
 import { ObjectId } from 'mongodb';
 import { SqlCredentials } from '../sql/entity/credentials.entity';
+import { CreatedUser } from '../../api/view/created-user';
 
 @Injectable()
 export class MUsersQueryRepository implements IUsersQueryRepository {
@@ -26,14 +27,15 @@ export class MUsersQueryRepository implements IUsersQueryRepository {
       { $sort: { [query.sortBy]: query.sortDirection === 'asc' ? 1 : -1 } },
       { $skip: query.skip },
       { $limit: query.pageSize },
-      { $project: { _id: false, password: false, __v: false } },
+      { $project: { password: false, __v: false, emailConfirmation: false } },
     ]);
+    const items = users.map((u) => CreatedUser.userWithObjectId(u));
     const totalCount = await this.userModel.countDocuments({
       $and: filter,
     });
 
     return new ViewPage<ViewUser>({
-      items: users ?? [],
+      items,
       query: query,
       totalCount,
     });

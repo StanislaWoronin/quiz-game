@@ -165,7 +165,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       expect(question.body.items[1].published).toBe(true);
       expect(question.body.items[1].updatedAt).not.toBeNull();
     });
-
+    // *********************
     it('Should update "published" status. Set status "false"', async () => {
       const { questionId } = expect.getState();
 

@@ -21,13 +21,11 @@ export class UsersService {
     try {
       const salt = await bcrypt.genSalt(Number(settings.SALT_GENERATE_ROUND));
       const hash = await bcrypt.hash(dto.password, salt);
-      const res = await this.usersRepository.createUser(
+      return await this.usersRepository.createUser(
         dto,
         hash,
         emailConfirmationDto,
       );
-      console.log(res, 'from service');
-      return res;
     } catch (e) {
       // Error try again
     }

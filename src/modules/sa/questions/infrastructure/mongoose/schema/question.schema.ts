@@ -10,7 +10,7 @@ export class MongoQuestion {
   @Prop({ type: Boolean, default: false })
   published: boolean;
 
-  @Prop({ required: true, type: String, default: new Date().toISOString })
+  @Prop({ required: true, type: String })
   createdAt: string;
 
   @Prop({ required: false, type: String, default: null })
@@ -22,6 +22,7 @@ export class MongoQuestion {
   constructor(dto: CreateQuestionDto, answers: string[]) {
     this.body = dto.body;
     this.correctAnswers = answers;
+    this.createdAt = new Date().toISOString();
   }
 }
 
