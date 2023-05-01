@@ -43,18 +43,20 @@ export class MUsersQueryRepository implements IUsersQueryRepository {
 
   async checkUserExists(userId: string): Promise<boolean> {
     const result = await this.userModel.exists({ _id: new ObjectId(userId) });
-    console.log(result, 'checkUserExists');
-    // @ts-ignore
-    return result;
+
+    if (!result) return false;
+    return true;
   }
 
   async isLoginOrEmailExist(loginOrEmail: string): Promise<boolean> {
     const result = await this.userModel.exists({
       $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
-    });
-    console.log(result, 'isLoginOrEmailExist');
-    // @ts-ignore
-    return result;
+    }); // exist return _id if exists and null if not exists
+
+    if (!result) {
+      return false;
+    }
+    return true;
   }
 
   async getCredentialByLoginOrEmail(
@@ -65,27 +67,20 @@ export class MUsersQueryRepository implements IUsersQueryRepository {
         $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
       })
       .select({
-        password: 0,
+        password: 1,
       });
-    console.log(credential, 'getCredentialByLoginOrEmail');
-    // @ts-ignore
-    return credential;
+
+    if (!credential) return null;
+    return new SqlCredentials(credential._id.toString(), credential.password);
   }
 
-  async getUserByLoginOrEmail(loginOrEmail: string): Promise<SqlUsers | null> {
-    const user = await this.userModel
-      .findOne({
-        $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
-      })
-      .select({
-        _id: 1,
-        login: 1,
-        createdAt: 1,
-      });
-    console.log(user, 'getUserByLoginOrEmail');
+  async getUserByLoginOrEmail(loginOrEmail: string): Promise<string | null> {
+    const user = await this.userModel.exists({
+      $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
+    });
 
-    // @ts-ignore
-    return user;
+    if (!user) return null;
+    return user._id.toString();
   }
 
   async getUserById(userId: string): Promise<SqlUsers | null> {
@@ -94,11 +89,16 @@ export class MUsersQueryRepository implements IUsersQueryRepository {
       .select({
         _id: 1,
         login: 1,
+        email: 1,
         createdAt: 1,
       });
-    console.log(user, 'getUserById');
-    // @ts-ignore
-    return user;
+
+    return {
+      id: user._id.toString(),
+      login: user.login,
+      email: user.email,
+      createdAt: user.createdAt,
+    } as SqlUsers;
   }
 
   private getFilter(query: UsersQueryDto) {

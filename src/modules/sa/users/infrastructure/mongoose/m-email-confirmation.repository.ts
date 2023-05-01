@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { IEmailConfirmationRepository } from '../i-email-confirmation.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { MongoUsers, UsersDocument } from './schema/user.schema';
@@ -22,21 +22,16 @@ export class MEmailConfirmationRepository
       .findOne({ 'emailConfirmation.confirmationCode': confirmationCode })
       .select({
         _id: 1,
-        'emailConfirmation.confirmationCode': 1,
-        'emailConfirmation.expirationDate': 1,
-        'emailConfirmation.isConfirmed': 1,
+        emailConfirmation: 1,
       });
-    console.log(emailConfirmation, 'getEmailConfirmationByCode');
-    // @ts-ignore
-    return new SqlEmailConfirmation(
-      emailConfirmation._id.toString(),
-      // @ts-ignore
-      emailConfirmation.isConfirmed,
-      // @ts-ignore
-      emailConfirmation.confirmationCode,
-      // @ts-ignore
-      emailConfirmation.expirationDate,
-    );
+
+    if (!emailConfirmation) return null;
+    return {
+      userId: emailConfirmation._id.toString(),
+      confirmationCode: emailConfirmation.emailConfirmation.confirmationCode,
+      expirationDate: emailConfirmation.emailConfirmation.expirationDate,
+      isConfirmed: emailConfirmation.emailConfirmation.isConfirmed,
+    } as SqlEmailConfirmation;
   }
 
   async checkConfirmation(userId: string): Promise<boolean | null> {
@@ -44,13 +39,11 @@ export class MEmailConfirmationRepository
       .findOne({ _id: new ObjectId(userId) })
       .select({
         'emailConfirmation.isConfirmed': 1,
+        _id: 0,
       });
-    console.log(result, 'checkConfirmation');
-    if (!result) {
-      return null;
-    }
-    // @ts-ignore
-    return result;
+
+    if (!result) return null;
+    return result.emailConfirmation.isConfirmed;
   }
 
   async updateConfirmationInfo(confirmationCode: string): Promise<boolean> {
@@ -70,8 +63,10 @@ export class MEmailConfirmationRepository
     const result = await this.userModel.updateOne(
       { _id: new ObjectId(userId) },
       {
-        'emailConfirmation.confirmationCode': confirmationCode,
-        'emailConfirmation.expirationDate': expirationDate,
+        $set: {
+          'emailConfirmation.confirmationCode': confirmationCode,
+          'emailConfirmation.expirationDate': expirationDate,
+        },
       },
     );
 

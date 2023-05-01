@@ -19,7 +19,7 @@ export class CreatedQuestions {
   readonly correctAnswers: string[];
 
   @ApiProperty({ default: false })
-  readonly published: boolean;
+  published: boolean;
 
   @ApiProperty({
     example: '2023-04-20T10:45:05.185Z',
@@ -31,14 +31,14 @@ export class CreatedQuestions {
     example: '2023-04-21T10:45:05.185Z',
     description: 'Question update  date in IsoString format',
   })
-  readonly updatedAt: string;
+  updatedAt: string;
 
   constructor(createdQuestions: WithId<MongoQuestion>) {
     this.id = createdQuestions._id.toString();
     this.body = createdQuestions.body;
     this.correctAnswers = createdQuestions.correctAnswers;
-    this.published = false;
     this.createdAt = createdQuestions.createdAt;
-    this.updatedAt = null;
+    this.published = createdQuestions.published;
+    this.updatedAt = createdQuestions.updatedAt;
   }
 }

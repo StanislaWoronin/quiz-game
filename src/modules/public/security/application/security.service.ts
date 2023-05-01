@@ -3,7 +3,6 @@ import { ISecurityRepository } from '../infrastructure/i-security.repository';
 import { ISecurityQueryRepository } from '../infrastructure/i-security-query.repository';
 import { JwtService } from '../../auth/applications/jwt.service';
 import { Tokens } from '../../../../common/dto/tokens';
-import { TokenPayload } from '../../../../common/dto/token-payload';
 import { randomUUID } from 'crypto';
 import { SqlSecurity } from '../infrastructure/sql/entity/security';
 

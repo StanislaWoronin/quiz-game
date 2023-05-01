@@ -9,13 +9,13 @@ import { preparedUser } from './helpers/prepeared-data/prepared-user';
 import { getErrorsMessage } from './helpers/expect-data/expect-errors-messages';
 import { expectCreatedUser } from './helpers/expect-data/expect-user';
 import { UsersFactory } from './helpers/factories/users-factory';
-import { randomUUID } from 'crypto';
 import { SortByUserField } from '../src/modules/sa/users/api/dto/query/users-sort-field';
 import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
 import { BanStatus } from '../src/modules/sa/users/api/dto/query/ban-status';
 import { Auth } from './helpers/request/auth';
 import { expectPagination } from './helpers/expect-data/expect-pagination';
 import { CreatedUser } from '../src/modules/sa/users/api/view/created-user';
+import { getRandomId } from './helpers/helpers';
 
 describe('/sa/users (e2e)', () => {
   const second = 1000;
@@ -252,7 +252,7 @@ describe('/sa/users (e2e)', () => {
 
     it('Try delete not exist user', async () => {
       const { userId } = expect.getState();
-      const randomId = randomUUID();
+      const randomId = getRandomId();
 
       const status = await users.deleteUser(preparedSuperUser.valid, randomId);
       expect(status).toBe(HttpStatus.NOT_FOUND);

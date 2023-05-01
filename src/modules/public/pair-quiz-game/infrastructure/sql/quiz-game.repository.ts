@@ -189,7 +189,6 @@ export class QuizGameRepository implements IQuizGameRepository {
         [Number(settings.gameRules.questionsCount), currentTime],
       );
       if (!games.length) return;
-
       const setAnswersPromises = [];
       const updateGameStatusPromises = [];
       const setExtraScorePromises = [];
@@ -220,9 +219,9 @@ export class QuizGameRepository implements IQuizGameRepository {
             .execute(),
         );
 
-        const extraScore = 1;
+        const extraPoint = 1;
         if (game.firstAnsweredPlayerScore !== 0) {
-          const newScore = game.firstAnsweredPlayerScore + extraScore;
+          const newScore = game.firstAnsweredPlayerScore + extraPoint;
           setExtraScorePromises.push(
             await manager
               .createQueryBuilder()
@@ -362,7 +361,7 @@ export class QuizGameRepository implements IQuizGameRepository {
              (SELECT COUNT(*)
                 FROM sql_user_answer 
                WHERE "gameId" = g.id AND "userId" = sgp."userId") AS "secondPlayerAnswerProgress",
-             (SELECT score FROM sql_game_progress WHERE "userId" = fua."userId") AS "firstAnsweredPlayerScore",  
+             (SELECT score FROM sql_game_progress WHERE "gameId" = g.id AND "userId" = fua."userId") AS "firstAnsweredPlayerScore",  
              (SELECT JSON_AGG("questionId")
                 FROM sql_game_questions gq
                WHERE "gameId" = g.id) AS questions  

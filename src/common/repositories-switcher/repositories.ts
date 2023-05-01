@@ -21,7 +21,7 @@ import { MJwtRepository } from '../../modules/public/auth/infrastructure/mongoos
 import { MQuizGameRepository } from '../../modules/public/pair-quiz-game/infrastructure/mongo/m-quiz-game.repository';
 import { MQuizGameQueryRepository } from '../../modules/public/pair-quiz-game/infrastructure/mongo/m-quiz-game-query.repository';
 import { MSecurityRepository } from '../../modules/public/security/infrastructure/mongo/m-security.repository';
-import { MSecurityQueryRepository } from '../../modules/public/security/infrastructure/mongo/schema/m-security-query.repository';
+import { MSecurityQueryRepository } from '../../modules/public/security/infrastructure/mongo/m-security-query.repository';
 
 export const repositories = {
   sql: {

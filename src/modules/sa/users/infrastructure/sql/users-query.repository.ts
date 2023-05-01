@@ -47,15 +47,16 @@ export class UsersQueryRepository implements IUsersQueryRepository {
     });
   }
 
-  async getUserByLoginOrEmail(loginOrEmail: string): Promise<SqlUsers | null> {
-    const builder = this.dataSource
-      .createQueryBuilder()
-      .select('u')
-      .from(SqlUsers, 'u')
-      .where([{ login: loginOrEmail }, { email: loginOrEmail }]);
-    const result = await builder.getOne();
+  async getUserByLoginOrEmail(loginOrEmail: string): Promise<string | null> {
+    const query = `
+      SELECT id FROM sql_users WHERE login = $1 OR email = $1;
+    `;
+    const [result] = await this.dataSource.query(query, [loginOrEmail]);
 
-    return result;
+    if (!result) {
+      return null;
+    }
+    return result.id;
   }
 
   async getUserById(userId: string): Promise<SqlUsers | null> {

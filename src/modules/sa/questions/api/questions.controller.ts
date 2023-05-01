@@ -67,7 +67,6 @@ export class QuestionsController {
     @Param('id') questionId: string,
     @Body() dto: UpdateQuestionDto,
   ) {
-    console.log(questionId);
     const isUpdated = await this.questionsService.updateQuestion(
       questionId,
       dto,

@@ -26,6 +26,7 @@ export class EmailConfirmationRepository
   }
 
   async checkConfirmation(userId: string): Promise<boolean | null> {
+    console.log(userId);
     const builder = this.dataSource
       .createQueryBuilder()
       .select('ec.isConfirmed', 'isConfirmed')

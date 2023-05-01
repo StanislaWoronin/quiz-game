@@ -28,8 +28,7 @@ export class QuestionsService {
     const isExists = await this.questionsQueryRepository.questionExists(
       questionId,
     );
-    console.log(isExists);
-    if (isExists === false) return null;
+    if (isExists === null) return null;
     if (isExists && !dto.correctAnswers.length) return false; // if question "published" and correctAnswers = [] return false
 
     return await this.questionsRepository.updateQuestion(questionId, dto);
@@ -42,7 +41,7 @@ export class QuestionsService {
     const isHasAnswer = await this.questionsQueryRepository.questionHasAnswer(
       questionId,
     );
-    console.log(isHasAnswer);
+
     if (isHasAnswer === null) return null;
     if (!isHasAnswer.length) {
       return false;

@@ -8,7 +8,6 @@ import { IQuestionsQueryRepository } from '../../../sa/questions/infrastructure/
 import { SendAnswerDto } from './dto/send-answer.dto';
 import { settings } from '../../../../settings';
 import { EventBus } from '@nestjs/cqrs';
-import { SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class PairQuizGameService {
@@ -20,7 +19,6 @@ export class PairQuizGameService {
     protected queryGameRepository: IQuizGameQueryRepository,
     @Inject(IQuestionsQueryRepository)
     protected questionsQueryRepository: IQuestionsQueryRepository,
-    private schedulerRegistry: SchedulerRegistry,
   ) {}
 
   async joinGame(userId: string): Promise<ViewGame | null> {
@@ -28,6 +26,7 @@ export class PairQuizGameService {
     if (!existsOpenGame) {
       return this.gameRepository.createGame(userId);
     }
+
     return await this.gameRepository.joinGame(userId, existsOpenGame);
   }
 
@@ -63,25 +62,6 @@ export class PairQuizGameService {
     // // TimeOut
     // if (isLastQuestions) {
     //   this.eventBus.publish(new DelayedForceGameOverEvent(userId, gameId));
-    // }
-
-    // // Cron 2.0
-    // if (isLastQuestions) {
-    //   console.log('It last question');
-    //   logger(settings.gameRules.timeLimit);
-    //   const timeStart = Date.now();
-    //   const job = new CronJob(
-    //     `${settings.gameRules.timeLimit} * * * * *`,
-    //     async () => {
-    //       console.log('inside job');
-    //       //await this.gameRepository.forceGameOverSchedule();
-    //     },
-    //   );
-    //   await this.schedulerRegistry.addCronJob('new job', job);
-    //   await job.start();
-    //   //job.stop();
-    //   const timeEnd = Date.now();
-    //   console.log(timeEnd - timeStart);
     // }
 
     return await this.gameRepository.sendAnswer(sendAnswerDto);

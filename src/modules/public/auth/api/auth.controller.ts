@@ -110,10 +110,10 @@ export class AuthController {
   // @UseGuards(ThrottlerGuard)
   async registrationEmailResending(
     @Body() email: ResendingDto,
-    @UserId() userId: string,
+    @Req() req: Request,
   ) {
     const newConfirmationCode = await this.authService.updateConfirmationCode(
-      userId,
+      req.userId,
     );
 
     return await this.emailManager.sendConfirmationEmail(
@@ -137,12 +137,12 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiPasswordRecovery()
   async passwordRecovery(@Body() dto: PasswordRecoveryDto) {
-    const user = await this.queryUsersRepository.getUserByLoginOrEmail(
+    const userId = await this.queryUsersRepository.getUserByLoginOrEmail(
       dto.email,
     );
 
-    if (user) {
-      await this.authService.sendPasswordRecovery(user.id, dto.email);
+    if (userId) {
+      await this.authService.sendPasswordRecovery(userId, dto.email);
     }
 
     return;

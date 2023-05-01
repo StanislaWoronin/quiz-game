@@ -6,6 +6,7 @@ import {
 } from 'class-validator';
 import { IEmailConfirmationRepository } from '../../modules/sa/users/infrastructure/i-email-confirmation.repository';
 import { IUsersQueryRepository } from '../../modules/sa/users/infrastructure/i-users-query.repository';
+import { request } from 'express';
 
 @ValidatorConstraint({ name: 'EmailResendingValidator', async: true })
 @Injectable()
@@ -18,20 +19,20 @@ export class EmailResendingValidator implements ValidatorConstraintInterface {
   ) {}
 
   async validate(email) {
-    const user = await this.usersQueryRepository.getUserByLoginOrEmail(email);
+    const userId = await this.usersQueryRepository.getUserByLoginOrEmail(email);
 
-    if (!user) {
+    if (!userId) {
       return false;
     }
 
     const isConfirmed =
-      await this.emailConfirmationRepository.checkConfirmation(user.id);
+      await this.emailConfirmationRepository.checkConfirmation(userId);
 
     if (isConfirmed) {
       return false;
     }
 
-    //request.userId = user.id;
+    request.userId = userId;
     //request.email = user.email;
     return true;
   }

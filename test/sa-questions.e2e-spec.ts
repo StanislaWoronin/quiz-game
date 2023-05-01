@@ -7,15 +7,15 @@ import { Testing } from './helpers/request/testing';
 import { Questions } from './helpers/request/questions';
 import { preparedSuperUser } from './helpers/prepeared-data/prepared-super-user';
 import { expectCreatedQuestion } from './helpers/expect-data/expect-questions';
-import { randomUUID } from 'crypto';
 import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
 import { preparedQuestions } from './helpers/prepeared-data/prepared-questions';
-import { getErrorMessage } from './helpers/routing/errors-messages';
 import { getErrorsMessage } from './helpers/expect-data/expect-errors-messages';
 import { PublishedStatus } from '../src/modules/sa/questions/api/dto/query/published-status';
 import { SortByQuestionsField } from '../src/modules/sa/questions/api/dto/query/quesions-sort-field';
 import { expectPagination } from './helpers/expect-data/expect-pagination';
 import { CreatedQuestions } from '../src/modules/sa/questions/api/view/created-questions';
+import { getErrorMessage } from './helpers/routing/errors-messages';
+import { getRandomId } from './helpers/helpers';
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
@@ -111,7 +111,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Shouldn`t update status if id from uri param not found', async () => {
-      const randomId = randomUUID();
+      const randomId = getRandomId();
 
       const response = await questions.updateQuestionStatus(
         preparedSuperUser.valid,
@@ -165,7 +165,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       expect(question.body.items[1].published).toBe(true);
       expect(question.body.items[1].updatedAt).not.toBeNull();
     });
-    // *********************
+
     it('Should update "published" status. Set status "false"', async () => {
       const { questionId } = expect.getState();
 
@@ -200,7 +200,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     });
 
     it('Try update not exist question', async () => {
-      const randomId = randomUUID();
+      const randomId = getRandomId();
 
       const response = await questions.updateQuestion(
         preparedSuperUser.valid,
@@ -405,7 +405,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
     it('Try delete not exist question', async () => {
       const { questionId } = expect.getState();
-      const randomId = randomUUID();
+      const randomId = getRandomId();
 
       const status = await questions.deleteQuestion(
         preparedSuperUser.valid,

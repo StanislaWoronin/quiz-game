@@ -18,9 +18,10 @@ export class MJwtRepository implements IJwtRepository {
     const result = await this.tokenBlackListModel.exists({
       token: refreshToken,
     });
-    console.log(result, 'checkTokenInBlackList');
-    // @ts-ignore
-    return result;
+    if (!result) {
+      return false;
+    }
+    return true;
   }
 
   async addTokenInBlackList(refreshToken: string): Promise<boolean> {

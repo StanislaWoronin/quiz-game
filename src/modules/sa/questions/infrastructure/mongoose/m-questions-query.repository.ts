@@ -8,6 +8,7 @@ import { isValidObjectId, Model } from 'mongoose';
 import { QuestionsQueryDto } from '../../api/dto/query/questions-query.dto';
 import { IQuestionsQueryRepository } from '../i-questions-query.repository';
 import { ObjectId } from 'mongodb';
+import { CreatedQuestions } from '../../api/view/created-questions';
 
 @Injectable()
 export class MQuestionsQueryRepository implements IQuestionsQueryRepository {
@@ -28,7 +29,9 @@ export class MQuestionsQueryRepository implements IQuestionsQueryRepository {
       { $limit: query.pageSize },
       { $project: { __v: false } },
     ]);
-    const items = questions.map((q) => new ViewQuestion(q));
+
+    const items = questions.map((q) => new CreatedQuestions(q));
+
     const totalCount = await this.questionsRepository.countDocuments({
       $and: filter,
     });
@@ -64,23 +67,19 @@ export class MQuestionsQueryRepository implements IQuestionsQueryRepository {
   }
 
   async questionHasAnswer(questionId: string): Promise<string[] | null> {
-    try {
-      if (!isValidObjectId(questionId)) {
-        return null;
-      }
-      const result = await this.questionsRepository
-        .findOne({
-          _id: new ObjectId(questionId),
-        })
-        .select({ _id: 0, correctAnswers: 1 });
-
-      if (!result) {
-        return null;
-      }
-      return result.correctAnswers;
-    } catch (e) {
-      console.log(e);
+    if (!isValidObjectId(questionId)) {
+      return null;
     }
+    const result = await this.questionsRepository
+      .findOne({
+        _id: new ObjectId(questionId),
+      })
+      .select({ _id: 0, correctAnswers: 1 });
+
+    if (!result) {
+      return null;
+    }
+    return result.correctAnswers;
   }
 
   private getFilter(query: QuestionsQueryDto) {
@@ -91,7 +90,7 @@ export class MQuestionsQueryRepository implements IQuestionsQueryRepository {
       filter.push(this.getPublishedFilter(publishedStatus));
     }
 
-    filter.push({ body: { $regex: bodySearchTerm ?? '', $optional: 'i' } });
+    filter.push({ body: { $regex: bodySearchTerm ?? '', $options: 'i' } });
 
     return filter;
   }

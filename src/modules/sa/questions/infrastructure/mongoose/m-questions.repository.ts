@@ -21,6 +21,7 @@ export class MQuestionsRepository implements IQuestionsRepository {
     try {
       const question = new MongoQuestion(dto, dto.correctAnswers);
       const createdQuestion = await this.questionModel.create(question);
+
       return new CreatedQuestions(createdQuestion);
     } catch (e) {
       console.log(e);
@@ -50,16 +51,11 @@ export class MQuestionsRepository implements IQuestionsRepository {
     questionId: string,
     published: boolean,
   ): Promise<boolean> {
-    try {
-      const result = await this.questionModel.updateOne(
-        { _id: new ObjectId(questionId) },
-        { $set: { published: published } },
-      );
-      console.log(result);
-      return result.matchedCount === 1;
-    } catch (e) {
-      console.log(e);
-    }
+    const result = await this.questionModel.updateOne(
+      { _id: new ObjectId(questionId) },
+      { $set: { published: published, updatedAt: new Date().toISOString() } },
+    );
+    return result.matchedCount === 1;
   }
 
   async deleteQuestion(questionId: string): Promise<boolean> {

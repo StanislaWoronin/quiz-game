@@ -21,7 +21,6 @@ import {
   MongoQuestion,
   QuestionsDocument,
 } from '../../../../sa/questions/infrastructure/mongoose/schema/question.schema';
-import { Questions } from '../../shared/questions';
 
 @Injectable()
 export class MQuizGameRepository implements IQuizGameRepository {

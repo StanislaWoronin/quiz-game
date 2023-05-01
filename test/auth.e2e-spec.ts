@@ -13,12 +13,12 @@ import {
 import { getErrorsMessage } from './helpers/expect-data/expect-errors-messages';
 import { Users } from './helpers/request/users';
 import { preparedSuperUser } from './helpers/prepeared-data/prepared-super-user';
+import { faker } from '@faker-js/faker';
 import { preparedSecurity } from './helpers/prepeared-data/prepared-security';
 import { getErrorMessage } from './helpers/routing/errors-messages';
-import { randomUUID } from 'crypto';
+import { getRandomId } from './helpers/helpers';
 import { preparedPassword } from './helpers/prepeared-data/prepared-password';
 import { ViewAboutMe } from '../src/modules/public/auth/api/view/view-about-me';
-import { faker } from '@faker-js/faker';
 
 describe('/auth', () => {
   const second = 1000;
@@ -118,11 +118,12 @@ describe('/auth', () => {
     it('Should resending confirmation code', async () => {
       const { user } = expect.getState();
 
-      const oldConfirmationCode = testing.getConfirmationCode(user.id);
+      const oldConfirmationCode = await testing.getConfirmationCode(user.id);
 
       const response = await auth.resendingConfirmationCode({
         email: user.email,
       });
+
       expect(response.status).toBe(HttpStatus.NO_CONTENT);
 
       const newConfirmationCode = await testing.getConfirmationCode(user.id);
@@ -136,15 +137,14 @@ describe('/auth', () => {
     const errorsMessages = getErrorsMessage(['code']);
     it('Shouldn`t confirmed if the confirmation code is incorrect', async () => {
       const { confirmationCode } = expect.getState();
+
       const response = await auth.confirmRegistration(`${confirmationCode}-1`);
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
     });
 
     it('Shouldn`t confirmed if the confirmation code is expired', async () => {
-      const { user } = expect.getState();
-
+      const { user, confirmationCode } = expect.getState();
       await testing.makeExpired(user.id);
-      const confirmationCode = await testing.getConfirmationCode(user.id);
 
       const response = await auth.confirmRegistration(confirmationCode);
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
@@ -209,7 +209,7 @@ describe('/auth', () => {
   describe('POST -> "/auth/new-password"', () => {
     it('Shouldn`t confirm password recovery if incorrect input dat', async () => {
       const errorsMessages = getErrorMessage(['newPassword', 'recoveryCode']);
-      const randomCode = randomUUID();
+      const randomCode = getRandomId();
 
       const response = await auth.newPassword(
         preparedPassword.long.password,
@@ -297,7 +297,6 @@ describe('/auth', () => {
 
         const second = 1000;
         jest.setTimeout(second);
-        // schedule('1,*,*,*,*,*', () => {})
 
         const response = await auth.generateToken(expiredToken);
         expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
@@ -320,10 +319,10 @@ describe('/auth', () => {
   });
 
   describe('POST -> "/auth/me"', () => {
-    // it('Shouldn`t return info about user if unauthorized', async () => {
-    //     const response = await auth.getInfoAboutMe()
-    //     expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
-    // })
+    it('Shouldn`t return info about user if unauthorized', async () => {
+      const response = await auth.getInfoAboutMe();
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
 
     it('Return info about user', async () => {
       const { user, refreshToken } = expect.getState();
@@ -354,7 +353,6 @@ describe('/auth', () => {
 
       const second = 1000;
       jest.setTimeout(second);
-      //schedule('1,*,*,*,*,*', () => {})
 
       const response = await auth.logout(expiredToken);
       expect(response).toBe(HttpStatus.UNAUTHORIZED);

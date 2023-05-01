@@ -6,13 +6,17 @@ import { SqlUsers } from './sql/entity/users.entity';
 
 export interface IUsersQueryRepository {
   getUsers(query: UsersQueryDto): Promise<ViewPage<ViewUser>>;
+
   checkUserExists(userId: string): Promise<boolean>;
 
   isLoginOrEmailExist(loginOrEmail: string): Promise<boolean>;
+
   getCredentialByLoginOrEmail(
     loginOrEmail: string,
   ): Promise<SqlCredentials | null>;
-  getUserByLoginOrEmail(loginOrEmail: string): Promise<SqlUsers | null>;
+
+  getUserByLoginOrEmail(loginOrEmail: string): Promise<string | null>;
+
   getUserById(userId: string): Promise<SqlUsers | null>;
 }
 

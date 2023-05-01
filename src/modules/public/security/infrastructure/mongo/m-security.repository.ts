@@ -13,9 +13,14 @@ export class MSecurityRepository implements ISecurityRepository {
   ) {}
 
   async createUserDevice(newDevice: SqlSecurity): Promise<boolean> {
-    const result = await this.securityModel.create(newDevice);
-    console.log(result, 'createUserDevice');
-    return true;
+    try {
+      const device = new MongoSecurity(newDevice);
+      await this.securityModel.create(device);
+
+      return true;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async updateCurrentActiveSessions(

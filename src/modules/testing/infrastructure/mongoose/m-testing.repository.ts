@@ -6,6 +6,7 @@ import {
   MongoUsers,
   UsersDocument,
 } from '../../../sa/users/infrastructure/mongoose/schema/user.schema';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class MTestingRepository implements ITestingRepository {
@@ -21,7 +22,7 @@ export class MTestingRepository implements ITestingRepository {
 
       return true;
     } catch (e) {
-      console.log(e)
+      console.log(e);
       return false;
     }
   }
@@ -35,13 +36,13 @@ export class MTestingRepository implements ITestingRepository {
       const count = await this.connection.db.collection(name).countDocuments();
       totalCount += count;
     }
-    console.log(totalCount, 'm--testing')
+    console.log(totalCount, 'm--testing');
     return totalCount;
   }
 
   async getUserPassword(userId: string): Promise<string> {
     const result = await this.userModel.findById(userId).select('password');
-    console.log(result, 'getUserPassword');
+
     return result.password;
   }
 
@@ -49,23 +50,26 @@ export class MTestingRepository implements ITestingRepository {
     const result = await this.userModel
       .findById(userId)
       .select('emailConfirmation.confirmationCode');
-    console.log(result, 'getConfirmationCode');
-    return '';
+
+    return result.emailConfirmation.confirmationCode;
   }
 
   async checkUserConfirmed(userId: string) {
     const result = await this.userModel
       .findById(userId)
       .select('emailConfirmation.isConfirmed');
-    console.log(result, 'checkUserConfirmed');
+
     return result;
   }
 
   async makeExpired(userId: string, expirationDate: string): Promise<boolean> {
-    const result = await this.userModel.findByIdAndUpdate(userId, {
-      expirationDate,
-    });
-    console.log(result, 'makeExpired');
+    const result = await this.userModel.updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $set: { 'emailConfirmation.expirationDate': expirationDate },
+      },
+    );
+
     return true;
   }
 }

@@ -62,4 +62,13 @@ export class SqlUsers {
     this.email = email;
     this.createdAt = new Date().toISOString();
   }
+
+  // static userWithObjectId(user: Partial<WithId<MongoUsers>>) {
+  //   return {
+  //     id: user._id.toString(),
+  //     login: user.login,
+  //     email: user.email,
+  //     createdAt: user.createdAt,
+  //   };
+  // }
 }

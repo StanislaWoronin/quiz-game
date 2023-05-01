@@ -14,6 +14,6 @@ export class TaskService {
 
   @Cron(CronExpression.EVERY_SECOND)
   async forceGameOver() {
-    //this.quizGameRepository.forceGameOverSchedule();
+    this.quizGameRepository.forceGameOverSchedule();
   }
 }

@@ -19,9 +19,9 @@ export class MBanInfoRepository implements IUserBanInfoRepository {
       })
       .select({
         'banInfo.isBanned': 1,
+        _id: 0,
       });
-    console.log(result, 'checkBanStatus');
-    // @ts-ignore
-    return result.isBanned;
+
+    return result.banInfo.isBanned;
   }
 }

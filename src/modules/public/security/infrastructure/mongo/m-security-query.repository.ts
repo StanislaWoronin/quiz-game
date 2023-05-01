@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ISecurityQueryRepository } from '../../i-security-query.repository';
+import { ISecurityQueryRepository } from '../i-security-query.repository';
 import { InjectModel } from '@nestjs/mongoose';
-import { MongoSecurity, SecurityDocument } from './security.schema';
+import { MongoSecurity, SecurityDocument } from './schema/security.schema';
 import { Model } from 'mongoose';
-import { ViewSecurity } from '../../../api/view/view-security';
-import { SqlSecurity } from '../../sql/entity/security';
+import { ViewSecurity } from '../../api/view/view-security';
+import { SqlSecurity } from '../sql/entity/security';
 
 @Injectable()
 export class MSecurityQueryRepository implements ISecurityQueryRepository {

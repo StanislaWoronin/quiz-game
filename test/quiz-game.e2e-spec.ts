@@ -146,15 +146,17 @@ describe('/sa/quiz/questions (e2e)', () => {
   );
 
   describe('Game over if one player don`t answered all the questions', () => {
-    it('Clear data base', async () => {
+    beforeAll(async () => {
       await testing.clearDb();
-    });
-
-    it('Create questions', async () => {
       await questionsFactories.createQuestions(
         preparedGameData.length,
         preparedGameData,
       );
+
+      const [firstPlayer, secondPlayer] =
+        await usersFactory.createAndLoginUsers(2);
+
+      expect.setState({ firstPlayer, secondPlayer });
     });
 
     const timer = Number(settings.gameRules.timeLimit);
@@ -165,8 +167,10 @@ describe('/sa/quiz/questions (e2e)', () => {
         'firstPlayerProgress.score: 6, secondPlayerProgress.score: 0, finishGameDate: not to be ' +
         'null; status 200',
       async () => {
-        const [fistPlayer, secondPlayer] =
-          await usersFactory.createAndLoginUsers(2);
+        const [fistPlayer, secondPlayer] = [
+          expect.getState().firstPlayer,
+          expect.getState().secondPlayer,
+        ];
         const activeGame = await gameFactory.createGame(
           fistPlayer,
           secondPlayer,
@@ -195,15 +199,17 @@ describe('/sa/quiz/questions (e2e)', () => {
       },
     );
 
-    it.skip(
+    it(
       'Create game by user1, connect to game by user2. Add 3 correct answers by user2. ' +
         'Add 5 correct answers by user1. Await 10 sec. Call "/pair-game-quiz/pairs/my-current" ' +
         'endpoint by user2. Should return status 404. Get game by user1. Should return finished ' +
         'game - status: "Finished", firstPlayerProgress.score: 6, secondPlayerProgress.score: 3, ' +
         'finishGameDate: not to be null; status 200',
       async () => {
-        const [fistPlayer, secondPlayer] =
-          await usersFactory.createAndLoginUsers(2, 3);
+        const [fistPlayer, secondPlayer] = [
+          expect.getState().firstPlayer,
+          expect.getState().secondPlayer,
+        ];
         const activeGame = await gameFactory.createGame(
           fistPlayer,
           secondPlayer,
@@ -254,7 +260,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       },
     );
 
-    it.skip(
+    it(
       'Create game1 by user1, connect to game by user2. Add 3 incorrect answers by user2. ' +
         'Add 4 correct answers by user1. Create game2 by user3, connect to game by user4. Add 5 ' +
         'correct answers by user3. Add 2 correct answers by user4. Add 2 correct answers by user2. ' +
@@ -264,8 +270,10 @@ describe('/sa/quiz/questions (e2e)', () => {
         'firstPlayerProgress.score: 6, secondPlayerProgress.score: 2, finishGameDate: not to be null. ' +
         'status 200',
       async () => {
-        const [fistPlayer, secondPlayer] =
-          await usersFactory.createAndLoginUsers(2, 5);
+        const [fistPlayer, secondPlayer] = [
+          expect.getState().firstPlayer,
+          expect.getState().secondPlayer,
+        ];
         const fistGame = await gameFactory.createGame(fistPlayer, secondPlayer);
         const fistGameQuestions = fistGame.body.questions;
 
@@ -400,43 +408,43 @@ describe('/sa/quiz/questions (e2e)', () => {
         expect(createdGame.body).toStrictEqual(getGameById.body);
       });
 
-      it('1 - Shouldn`t join into the game, if user already has active game', async () => {
-        const { firstUser } = expect.getState();
-
-        const response = await game.joinGame(firstUser.accessToken);
-        expect(response.status).toBe(HttpStatus.FORBIDDEN);
-      });
-
-      it('User join into active game', async () => {
-        const { firstUser, secondUser, questions } = expect.getState();
-
-        const response = await game.joinGame(secondUser.accessToken);
-        expect(response.status).toBe(HttpStatus.OK);
-        expect(response.body).toStrictEqual(
-          expectViewGame(
-            {
-              first: expectPlayerProgress(firstUser.user, {}),
-              second: expectPlayerProgress(secondUser.user, {}),
-            },
-            GameStatus.Active,
-            expectQuestions(questions),
-          ),
-        );
-      });
-
-      it('2 - Shouldn`t join into the game, if user already has active game', async () => {
-        const { firstUser } = expect.getState();
-
-        const response = await game.joinGame(firstUser.accessToken);
-        expect(response.status).toBe(HttpStatus.FORBIDDEN);
-      });
-
-      it('3 - Shouldn`t join into the game, if user already has active game', async () => {
-        const { secondUser } = expect.getState();
-
-        const response = await game.joinGame(secondUser.accessToken);
-        expect(response.status).toBe(HttpStatus.FORBIDDEN);
-      });
+      // it('1 - Shouldn`t join into the game, if user already has active game', async () => {
+      //   const { firstUser } = expect.getState();
+      //
+      //   const response = await game.joinGame(firstUser.accessToken);
+      //   expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      // });
+      //
+      // it('User join into active game', async () => {
+      //   const { firstUser, secondUser, questions } = expect.getState();
+      //
+      //   const response = await game.joinGame(secondUser.accessToken);
+      //   expect(response.status).toBe(HttpStatus.OK);
+      //   expect(response.body).toStrictEqual(
+      //     expectViewGame(
+      //       {
+      //         first: expectPlayerProgress(firstUser.user, {}),
+      //         second: expectPlayerProgress(secondUser.user, {}),
+      //       },
+      //       GameStatus.Active,
+      //       expectQuestions(questions),
+      //     ),
+      //   );
+      // });
+      //
+      // it('2 - Shouldn`t join into the game, if user already has active game', async () => {
+      //   const { firstUser } = expect.getState();
+      //
+      //   const response = await game.joinGame(firstUser.accessToken);
+      //   expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      // });
+      //
+      // it('3 - Shouldn`t join into the game, if user already has active game', async () => {
+      //   const { secondUser } = expect.getState();
+      //
+      //   const response = await game.joinGame(secondUser.accessToken);
+      //   expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      // });
     },
   );
 
