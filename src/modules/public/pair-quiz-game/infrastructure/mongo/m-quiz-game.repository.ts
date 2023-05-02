@@ -21,6 +21,7 @@ import {
   MongoQuestion,
   QuestionsDocument,
 } from '../../../../sa/questions/infrastructure/mongoose/schema/question.schema';
+import {Questions} from "../../shared/questions";
 
 @Injectable()
 export class MQuizGameRepository implements IQuizGameRepository {
@@ -36,89 +37,95 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
   async createGame(userId: string): Promise<ViewGame> {
     const session: ClientSession = await this.connection.startSession();
+    let result: ViewGame = null
 
     try {
       await session.withTransaction(async () => {
         const questions = await this.questionModel
-          .aggregate([{ $sample: { size: 5 } }], { session })
-          .project({ _id: 1, body: 1 });
+            .aggregate([{$sample: {size: 5}}])
+            .project({_id: 1, body: 1})
+            .session(session);
+        const mappedQuestions = questions.map(q => new Questions(q._id.toString(), q.body))
 
         const fistPlayerLogin = await this.userModel
-          .findOne({ _id: new ObjectId(userId) }, { session })
-          .select({ login: 1 });
-        console.log(fistPlayerLogin, 'login from createGame');
-        // @ts-ignore
+            .findOne({_id: new ObjectId(userId)})
+            .select({login: 1})
+            .session(session);
+
         const fistPlayerProgress = new ViewGameProgress(
-          userId,
-          // @ts-ignore
-          fistPlayerLogin,
+            userId,
+            fistPlayerLogin.login,
         );
-        // @ts-ignore
-        const game = new MongoQuizGame(fistPlayerProgress, questions);
-        const createdGame = await this.quizGameModel.create([game], {
+
+        const game = new MongoQuizGame(fistPlayerProgress, mappedQuestions);
+        const [createdGame] = await this.quizGameModel.create([game], {
           session,
         });
-        console.log(createdGame, 'createGame');
-        // @ts-ignore
-        return MongoQuizGame.gameWithId(createdGame);
+        result = MongoQuizGame.gameWithId(createdGame)
+        return
       });
+    } catch (e) {
+      return null
     } finally {
       await session.endSession();
-      return null;
+      return result;
     }
   }
 
   async joinGame(userId: string, gameId: string): Promise<ViewGame> {
     const session: ClientSession = await this.connection.startSession();
+    let result: ViewGame = null
 
     try {
       await session.withTransaction(async () => {
         const secondPlayerLogin = await this.userModel
-          .findOne({ _id: new ObjectId(userId) }, null, { session })
-          .select({ login: 1 });
-        console.log(secondPlayerLogin, 'login from createGame');
-        // @ts-ignore
+            .findOne({_id: new ObjectId(userId)})
+            .select({login: 1})
+            .session(session);
+
         const secondPlayerGameProgress = new ViewGameProgress(
-          userId,
-          // @ts-ignore
-          secondPlayerLogin,
+            userId,
+            secondPlayerLogin.login,
         );
 
         const startedGame = await this.quizGameModel.findOneAndUpdate(
-          { _id: new ObjectId(gameId) },
-          {
-            $set: {
-              secondPlayerProgress: secondPlayerGameProgress,
-              status: GameStatus.Active,
-              startGameDate: new Date().toISOString(),
+            {_id: new ObjectId(gameId)},
+            {
+              $set: {
+                secondPlayerProgress: secondPlayerGameProgress,
+                status: GameStatus.Active,
+                startGameDate: new Date().toISOString(),
+              },
             },
-          },
-          { new: true, session },
+            {new: true, session},
         );
-        console.log(startedGame, 'joinGame');
-        // @ts-ignore
-        return MongoQuizGame.gameWithId(startedGame);
+
+        result = MongoQuizGame.gameWithId(startedGame)
+        return
       });
+    } catch (e) {
+      return null
     } finally {
       await session.endSession();
-      return null;
+      return result;
     }
   }
 
   async sendAnswer(dto: SendAnswerDto): Promise<ViewAnswer> {
     const session: ClientSession = await this.connection.startSession();
+    let result: ViewAnswer = null
 
     try {
       await session.withTransaction(async () => {
         const game = await this.quizGameModel.findOne(
-          { _id: new ObjectId(dto.gameId) },
-          null,
-          { session },
+            {_id: new ObjectId(dto.gameId)},
+            null,
+            {session},
         );
         const answer = new ViewAnswer(
-          dto.questionsId,
-          dto.answerStatus,
-          new Date().toISOString(),
+            dto.questionsId,
+            dto.answerStatus,
+            new Date().toISOString(),
         );
 
         const fistPlayer = game.firstPlayerProgress;
@@ -126,15 +133,15 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
         const score = dto.answerStatus === AnswerStatus.Correct ? 1 : 0;
         const playerProgress =
-          fistPlayer.player.id === dto.userId ? fistPlayer : secondPlayer;
+            fistPlayer.player.id === dto.userId ? fistPlayer : secondPlayer;
         playerProgress.answers.push(answer);
         playerProgress.score += score;
 
         if (
-          dto.isLastQuestions &&
-          fistPlayer.answers.length ===
+            dto.isLastQuestions &&
+            fistPlayer.answers.length ===
             Number(settings.gameRules.questionsCount) &&
-          secondPlayer.answers.length ===
+            secondPlayer.answers.length ===
             Number(settings.gameRules.questionsCount)
         ) {
           game.status = GameStatus.Finished;
@@ -142,9 +149,9 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
           const extraScore = 1;
           const fistAnsweredPlayerScore =
-            fistPlayer.player.id !== dto.userId
-              ? secondPlayer.score
-              : fistPlayer.score;
+              fistPlayer.player.id !== dto.userId
+                  ? secondPlayer.score
+                  : fistPlayer.score;
           if (fistAnsweredPlayerScore != 0) {
             game.firstPlayerProgress.score += extraScore;
           }
@@ -162,53 +169,55 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
           if (itDraw) {
             await this.userModel.updateOne(
-              {
-                _id: {
-                  $in: [
-                    new ObjectId(winner.player.id),
-                    new ObjectId(loser.player.id),
+                {
+                  _id: {
+                    $in: [
+                      new ObjectId(winner.player.id),
+                      new ObjectId(loser.player.id),
+                    ],
+                  },
+                },
+                {
+                  $inc: [
+                    {'statistic.drawsCount': 1},
+                    {'statistic.gamesCount': 1},
+                    {'statistic.sumScore': winner.score},
                   ],
                 },
-              },
-              {
-                $inc: [
-                  { 'statistic.drawsCount': 1 },
-                  { 'statistic.gamesCount': 1 },
-                  { 'statistic.sumScore': winner.score },
-                ],
-              },
             );
           } else {
             await this.userModel.updateOne(
-              { _id: new ObjectId(winner.player.id) },
-              {
-                $inc: [
-                  { 'statistic.winsCount': 1 },
-                  { 'statistic.gamesCount': 1 },
-                  { 'statistic.sumScore': winner.score },
-                ],
-              },
+                {_id: new ObjectId(winner.player.id)},
+                {
+                  $inc: [
+                    {'statistic.winsCount': 1},
+                    {'statistic.gamesCount': 1},
+                    {'statistic.sumScore': winner.score},
+                  ],
+                },
             );
             await this.userModel.updateOne(
-              { _id: new ObjectId(loser.player.id) },
-              {
-                $inc: [
-                  { 'statistic.lossesCount': 1 },
-                  { 'statistic.gamesCount': 1 },
-                  { 'statistic.sumScore': loser.score },
-                ],
-              },
+                {_id: new ObjectId(loser.player.id)},
+                {
+                  $inc: [
+                    {'statistic.lossesCount': 1},
+                    {'statistic.gamesCount': 1},
+                    {'statistic.sumScore': loser.score},
+                  ],
+                },
             );
           }
         }
 
-        await game.save({ session });
-
-        return answer;
+        await game.save({session});
+        result = answer
+        return
       });
+    } catch (e) {
+      return null
     } finally {
       await session.endSession();
-      return null;
+      return result;
     }
   }
 

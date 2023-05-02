@@ -1,10 +1,10 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { GameStatus } from '../../../shared/game-status';
-import { ViewGameProgress } from '../../../api/view/view-game-progress';
-import { Questions } from '../../../shared/questions';
-import { HydratedDocument } from 'mongoose';
-import { WithId } from 'mongodb';
-import { ViewGame } from '../../../api/view/view-game';
+import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
+import {GameStatus} from '../../../shared/game-status';
+import {ViewGameProgress} from '../../../api/view/view-game-progress';
+import {Questions} from '../../../shared/questions';
+import {HydratedDocument} from 'mongoose';
+import {WithId} from 'mongodb';
+import {ViewGame} from '../../../api/view/view-game';
 
 @Schema({ versionKey: false })
 export class MongoQuizGame {
@@ -31,7 +31,7 @@ export class MongoQuizGame {
 
   constructor(
     fistPlayerProgress: ViewGameProgress,
-    questions: [Questions],
+    questions: Questions[],
     secondPlayerProgress?: ViewGameProgress,
   ) {
     this.firstPlayerProgress = fistPlayerProgress;
@@ -40,14 +40,11 @@ export class MongoQuizGame {
   }
 
   static gameWithId(game: WithId<MongoQuizGame>): ViewGame {
-    const questions = game.questions.map((q) => {
-      return { id: q.id.toString(), body: q.body };
-    });
     return {
       id: game._id.toString(),
       firstPlayerProgress: game.firstPlayerProgress,
       secondPlayerProgress: game.secondPlayerProgress,
-      questions,
+      questions: game.status === GameStatus.PendingSecondPlayer ? null : game.questions,
       status: game.status,
       pairCreatedDate: game.pairCreatedDate,
       startGameDate: game.startGameDate,

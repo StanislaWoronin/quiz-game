@@ -21,6 +21,7 @@ import {
   MongoUsers,
   UsersDocument,
 } from '../../../../sa/users/infrastructure/mongoose/schema/user.schema';
+import {logger} from "../../../../../../test/helpers/helpers";
 
 @Injectable()
 export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
@@ -43,9 +44,9 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
       .find(myGameFilter)
       .skip(queryDto.skip)
       .limit(queryDto.pageSize);
-    const totalCount = await this.quizGameModel.countDocuments(myGameFilter);
-    // @ts-ignore
+
     const items = games.map((g) => MongoQuizGame.gameWithId(g));
+    const totalCount = await this.quizGameModel.countDocuments(myGameFilter);
 
     return new ViewPage<ViewGame>({
       items,
@@ -63,75 +64,68 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
             { 'secondPlayerProgress.player.id': userId },
           ],
         },
-        { status: { $ne: GameStatus.PendingSecondPlayer } },
+        { status: { $ne: GameStatus.Finished } },
       ],
     });
-    console.log(currentGame, 'getMyCurrentGame');
+
     if (!currentGame) return null;
-    // @ts-ignore
-    return MongoQuizGame.gameWithId(currentGame);
+    return ViewGame.withId(currentGame);
   }
 
   async getGameById(userId: string, gameId: string): Promise<ViewGame | null> {
     const game = await this.quizGameModel.findOne({
       _id: new ObjectId(gameId),
     });
+
     if (!game) return null;
-    console.log(game, 'game');
-    // @ts-ignore
-    return MongoQuizGame.gameWithId(game);
+    return ViewGame.withId(game);
   }
 
   async getPlayerByGameId(gameId: string): Promise<PlayerIdDb[]> {
     const game = await this.quizGameModel.findOne({
       _id: new ObjectId(gameId),
+    }).select({
+      _id: 0,
+      'firstPlayerProgress.player.id': 1,
+      'secondPlayerProgress.player.id': 1
     });
-    // @ts-ignore
-    return PlayerIdDb.returnPlayers(game);
+
+    const result = [new PlayerIdDb(game.firstPlayerProgress.player.id)]
+    if (game.secondPlayerProgress) result.push(new PlayerIdDb(game.secondPlayerProgress.player.id))
+
+    return result;
   }
 
   async getCorrectAnswers(
     gameId: string,
     lastQuestionNumber: number,
   ): Promise<GetCorrectAnswerDb> {
-    const game = await this.quizGameModel.findOne({
-      _id: new ObjectId(gameId),
-    });
-    const [currentQuestionId] = game.questions.slice(
-      lastQuestionNumber,
-      lastQuestionNumber + 1,
-    );
-    const currentQuestion = await this.questionModel.findOne({
-      _id: new ObjectId(currentQuestionId.id),
-    });
-
-    const result = await this.quizGameModel.aggregate([
+    const [result] = await this.quizGameModel.aggregate([
       { $match: { _id: new ObjectId(gameId) } },
-      {
-        $project: {
-          currentQuestionId: {
-            $arrayElemAt: ['$questions', lastQuestionNumber],
-          },
-        },
+      { $project:
+            { question:
+                  { $arrayElemAt: ['$questions', lastQuestionNumber] }
+            }
       },
-      {
-        $lookup: {
-          from: 'MongoQuestion',
-          localField: 'currentQuestionId.id',
-          foreignField: '_id',
-          as: 'currentQuestion',
-        },
+      { $lookup: {
+          from: 'mongoquestions',
+          let: { questionId: { $toObjectId: '$question.id' } },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$_id', '$$questionId'] } } },
+            { $project: { correctAnswers: 1 } }
+          ],
+          as: 'questionData'
+        }
       },
-      { $unwind: '$currentQuestion' },
-      { $limit: 1 },
+      { $project: {
+        _id: 1,
+        correctAnswers: { $arrayElemAt: ['$questionData.correctAnswers', 0]}
+      } }
     ]);
-    console.log(result, 'testing lookUp');
 
     return {
-      // @ts-ignore
-      questionId: currentQuestion.id,
-      // @ts-ignore
-      correctAnswers: correctAnswers.correctAnswers,
+      questionId: result._id.toString(),
+      correctAnswers: result.correctAnswers,
     };
   }
 
@@ -146,16 +140,6 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
   async getTopPlayers(
     query: TopPlayersQueryDto,
   ): Promise<ViewPage<ViewTopPlayers>> {
-    // const statistic = await this.quizGameModel.aggregate([
-    //     {
-    //         $project: {
-    //             firstPlayerId: "$firstPlayerProgress.player.id",
-    //             secondPlayerId: "$secondPlayerProgress.player.id",
-    //             firstPlayerScore: "$firstPlayerProgress.score",
-    //             secondPlayerScore: "$secondPlayerProgress.score",
-    //         },
-    //     }
-    // ]) // TODO
     const sortFilter = this.getSortFilter(query.sort);
     const topPlayers = await this.userModel.aggregate([
       { $sort: sortFilter },
@@ -171,46 +155,50 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
     userId: string,
     status?: GameStatus,
   ): Promise<string | null> {
-    let filter = {};
+    let filter: any = {status: {$ne: GameStatus.Finished}};
     if (status) {
-      filter = { status: status };
+      filter = {status: status};
     }
-    const game = await this.quizGameModel.findOne({
-      $and: [
-        {
-          $or: [
-            { 'firstPlayerProgress.player.id': userId },
-            { 'secondPlayerProgress.player.id': userId },
-          ],
-        },
-        filter,
-      ],
+
+    const game = await this.quizGameModel.exists({
+      $and: [{
+        $or: [
+          {'firstPlayerProgress.player.id': userId},
+          {'secondPlayerProgress.player.id': userId},
+        ]},
+        filter
+      ]
     });
-    console.log(game, 'checkUserCurrentGame');
-    // @ts-ignore
-    return game;
+
+    if (!game) return null
+    return game._id.toString();
   }
 
   async checkOpenGame(): Promise<string | null> {
     const openGame = await this.quizGameModel.findOne({
       status: GameStatus.PendingSecondPlayer,
     });
-    console.log(openGame, 'checkOpenGame');
-    // @ts-ignore
-    return openGame;
+
+    if (!openGame) return null
+    return openGame._id.toString();
   }
 
   async currentGameAnswerProgress(
     userId: string,
     gameId: string,
   ): Promise<number> {
-    const result = await this.quizGameModel
-      .findOne({ _id: new ObjectId(gameId) })
-      .select({ firstPlayerProgress: 1, secondPlayerProgress: 1 });
-    if (result.firstPlayerProgress.player.id === userId) {
-      return result.firstPlayerProgress.answers.length;
+    try {
+      const result = await this.quizGameModel
+          .findOne({_id: new ObjectId(gameId)})
+          .select({firstPlayerProgress: 1, secondPlayerProgress: 1});
+      if (result.firstPlayerProgress.player.id === userId) {
+        return result.firstPlayerProgress.answers.length;
+      }
+
+      return result.secondPlayerProgress.answers.length;
+    } catch (e) {
+      console.log(e)
     }
-    return result.secondPlayerProgress.answers.length;
   }
 
   private getSortFilter(sortBy: string | string[]) {

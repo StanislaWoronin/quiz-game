@@ -1,8 +1,10 @@
-import { Questions } from '../../shared/questions';
-import { GameStatus } from '../../shared/game-status';
-import { ViewGameProgress } from './view-game-progress';
-import { SqlGame } from '../../infrastructure/sql/entity/sql-game.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import {Questions} from '../../shared/questions';
+import {GameStatus} from '../../shared/game-status';
+import {ViewGameProgress} from './view-game-progress';
+import {SqlGame} from '../../infrastructure/sql/entity/sql-game.entity';
+import {ApiProperty} from '@nestjs/swagger';
+import {WithId} from "mongodb";
+import {MongoQuizGame} from "../../infrastructure/mongo/schema/quiz-game.schema";
 
 export class ViewGame {
   @ApiProperty()
@@ -49,5 +51,18 @@ export class ViewGame {
     this.pairCreatedDate = game.pairCreatedDate;
     this.startGameDate = game.startGameDate ?? null;
     this.finishGameDate = game.finishGameDate ?? null;
+  }
+
+  static withId(game: WithId<MongoQuizGame>) {
+    return {
+      id: game._id.toString(),
+      firstPlayerProgress: game.firstPlayerProgress,
+      secondPlayerProgress: game.secondPlayerProgress,
+      questions: game.status === GameStatus.PendingSecondPlayer ? null : game.questions,
+      status: game.status,
+      pairCreatedDate: game.pairCreatedDate,
+      startGameDate: game.startGameDate,
+      finishGameDate: game.finishGameDate,
+    }
   }
 }

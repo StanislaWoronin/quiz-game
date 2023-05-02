@@ -24,7 +24,7 @@ export class PairQuizGameService {
   async joinGame(userId: string): Promise<ViewGame | null> {
     const existsOpenGame = await this.queryGameRepository.checkOpenGame();
     if (!existsOpenGame) {
-      return this.gameRepository.createGame(userId);
+      return await this.gameRepository.createGame(userId);
     }
 
     return await this.gameRepository.joinGame(userId, existsOpenGame);
