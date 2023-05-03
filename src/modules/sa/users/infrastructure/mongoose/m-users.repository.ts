@@ -25,6 +25,7 @@ export class MUsersRepository implements IUsersRepository {
     try {
       const user = new MongoUsers(userDto, hash, emailConfirmationDto);
       const createdUser = await this.userModel.create(user);
+
       return CreatedUser.userWithObjectId(createdUser);
     } catch (e) {
       console.log(e);

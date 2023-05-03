@@ -38,6 +38,7 @@ export class PairQuizGameService {
     const questionsCount = Number(settings.gameRules.questionsCount);
     const currentUserAnswerProgress =
       await this.queryGameRepository.currentGameAnswerProgress(userId, gameId);
+    //console.log(currentUserAnswerProgress, 'how many questions answered');
     if (currentUserAnswerProgress == questionsCount) {
       return null;
     }

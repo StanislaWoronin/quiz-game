@@ -12,18 +12,18 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {ViewGame} from './view/view-game';
-import {AnswerDto} from './dto/answer.dto';
-import {ViewAnswer} from './view/view-answer';
-import {PairQuizGameService} from '../applications/pair-quiz-game.service';
-import {UserId} from '../../../../common/decorators/user.decorator';
-import {AuthBearerGuard} from '../../auth/guards/auth-bearer.guard';
-import {IQuizGameQueryRepository} from '../infrastructure/i-quiz-game-query.repository';
-import {ParamsId} from '../../../../common/dto/params-id';
-import {GameStatus} from '../shared/game-status';
-import {ViewPage} from '../../../../common/pagination/view-page';
-import {GameQueryDto} from './dto/query/game-query.dto';
-import {ApiTags} from '@nestjs/swagger';
+import { ViewGame } from './view/view-game';
+import { AnswerDto } from './dto/answer.dto';
+import { ViewAnswer } from './view/view-answer';
+import { PairQuizGameService } from '../applications/pair-quiz-game.service';
+import { UserId } from '../../../../common/decorators/user.decorator';
+import { AuthBearerGuard } from '../../auth/guards/auth-bearer.guard';
+import { IQuizGameQueryRepository } from '../infrastructure/i-quiz-game-query.repository';
+import { ParamsId } from '../../../../common/dto/params-id';
+import { GameStatus } from '../shared/game-status';
+import { ViewPage } from '../../../../common/pagination/view-page';
+import { GameQueryDto } from './dto/query/game-query.dto';
+import { ApiTags } from '@nestjs/swagger';
 import {
   ApiGetGameById,
   ApiGetUserCurrentGame,

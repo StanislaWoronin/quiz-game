@@ -7,7 +7,7 @@ export class Questions {
   body: string;
 
   constructor(id: string, body: string) {
-    this.id = id
-    this.body = body
+    this.id = id;
+    this.body = body;
   }
 }
