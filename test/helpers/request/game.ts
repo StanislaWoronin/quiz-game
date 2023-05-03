@@ -12,7 +12,7 @@ import { getUrlWithQuery } from '../routing/get-url/url-with-query';
 import { ViewUserStatistic } from '../../../src/modules/public/pair-quiz-game/api/view/view-user-statistic';
 import { ViewTopPlayers } from '../../../src/modules/public/pair-quiz-game/api/view/view-top-players';
 import { TopPlayersSortField } from '../../../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field';
-import {sleep} from "../helpers";
+import { sleep } from '../helpers';
 
 export class Game {
   constructor(private readonly server: any) {}

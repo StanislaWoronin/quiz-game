@@ -1,17 +1,20 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { GameStatus } from '../../../shared/game-status';
-import { ViewGameProgress } from '../../../api/view/view-game-progress';
+import {
+  ViewGameProgress,
+  ViewGameProgressSchema,
+} from '../../../api/view/view-game-progress';
 import { Questions } from '../../../shared/questions';
 import { HydratedDocument } from 'mongoose';
 import { WithId } from 'mongodb';
 import { ViewGame } from '../../../api/view/view-game';
 
-@Schema()
+@Schema({ versionKey: false })
 export class MongoQuizGame {
-  @Prop({ type: ViewGameProgress })
+  @Prop({ type: ViewGameProgressSchema })
   firstPlayerProgress: ViewGameProgress;
 
-  @Prop({ type: ViewGameProgress })
+  @Prop({ type: ViewGameProgressSchema })
   secondPlayerProgress: ViewGameProgress | null;
 
   @Prop({ array: true })
@@ -60,10 +63,9 @@ export type QuizGameDocument = HydratedDocument<MongoQuizGame>;
 
 QuizGameSchema.pre('save', function (next) {
   if (this.isNew) {
-    this.__v = 1
+    this.__v = 1;
+  } else {
+    this.__v++;
   }
-  else {
-    this.__v++
-  }
-  next()
-})
+  next();
+});

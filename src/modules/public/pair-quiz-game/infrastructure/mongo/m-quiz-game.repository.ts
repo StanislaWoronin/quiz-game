@@ -12,7 +12,6 @@ import { ViewGameProgress } from '../../api/view/view-game-progress';
 import { GameStatus } from '../../shared/game-status';
 import { SendAnswerDto } from '../../applications/dto/send-answer.dto';
 import { ViewAnswer } from '../../api/view/view-answer';
-import { AnswerStatus } from '../../shared/answer-status';
 import { settings } from '../../../../../settings';
 import { DelayedForceGameOverEvent } from '../../applications/dto/delayed-force-game-over.event';
 import { SqlUserAnswer } from '../sql/entity/sql-user-answer.entity';
@@ -22,6 +21,7 @@ import {
   QuestionsDocument,
 } from '../../../../sa/questions/infrastructure/mongoose/schema/question.schema';
 import { Questions } from '../../shared/questions';
+import { AnswerStatus } from '../../shared/answer-status';
 
 @Injectable()
 export class MQuizGameRepository implements IQuizGameRepository {
@@ -116,12 +116,13 @@ export class MQuizGameRepository implements IQuizGameRepository {
   async sendAnswer(dto: SendAnswerDto): Promise<ViewAnswer> {
     const session: ClientSession = await this.connection.startSession();
     let result: ViewAnswer = null;
-    let game1 = null
+
     try {
       await session.withTransaction(async () => {
         const game = await this.quizGameModel
           .findOne({ _id: new ObjectId(dto.gameId) })
           .session(session);
+
         const answer = new ViewAnswer(
           dto.questionsId,
           dto.answerStatus,
@@ -219,14 +220,12 @@ export class MQuizGameRepository implements IQuizGameRepository {
           }
         }
 
-        const savedGame = await game.save({ session });
-        console.log(savedGame)
+        await game.save({ session });
         result = answer;
-        game1 = game
         return;
       });
     } catch (e) {
-      console.log(e)
+      console.log(e);
       return null;
     } finally {
       await session.endSession();

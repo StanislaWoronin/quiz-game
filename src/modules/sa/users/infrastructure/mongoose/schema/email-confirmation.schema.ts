@@ -13,9 +13,9 @@ export class MongoEmailConfirmation {
   isConfirmed: boolean;
 }
 
-// export const EmailConfirmationSchema = SchemaFactory.createForClass(
-//   MongoEmailConfirmation,
-// );
-//
-// export type EmailConfirmationDocument =
-//   HydratedDocument<MongoEmailConfirmation>;
+export const EmailConfirmationSchema = SchemaFactory.createForClass(
+  MongoEmailConfirmation,
+);
+
+export type EmailConfirmationDocument =
+  HydratedDocument<MongoEmailConfirmation>;
