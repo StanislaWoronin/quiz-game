@@ -6,8 +6,14 @@ import { ObjectId } from 'mongodb';
 
 export class ParamsId {
   @Transform(({ value }) => {
-    if (isUUID(value) || isValidObjectId(new ObjectId(value))) return value;
-    throw new BadRequestException();
+    try {
+      if (isUUID(value) || isValidObjectId(new ObjectId(value))) {
+        return value
+      };
+      throw new BadRequestException();
+    } catch (e) {
+      throw new BadRequestException();
+    }
   })
   id: string;
 }

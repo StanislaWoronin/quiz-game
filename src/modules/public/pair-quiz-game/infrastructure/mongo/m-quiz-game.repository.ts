@@ -154,7 +154,7 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
           const extraScore = 1;
           const fistAnsweredPlayerScore =
-            fistPlayer.player.id !== dto.userId
+            fistPlayer.player.id === dto.userId
               ? secondPlayer.score
               : fistPlayer.score;
           if (fistAnsweredPlayerScore != 0) {

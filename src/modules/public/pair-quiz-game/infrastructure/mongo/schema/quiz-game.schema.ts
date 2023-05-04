@@ -61,11 +61,11 @@ export const QuizGameSchema = SchemaFactory.createForClass(MongoQuizGame);
 
 export type QuizGameDocument = HydratedDocument<MongoQuizGame>;
 
-QuizGameSchema.pre('save', function (next) {
-  if (this.isNew) {
-    this.__v = 1;
-  } else {
-    this.__v++;
-  }
-  next();
-});
+// QuizGameSchema.pre('save', function (next) {
+//   if (this.isNew) {
+//     this.__v = 1;
+//   } else {
+//     this.__v++;
+//   }
+//   next();
+// });

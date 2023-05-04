@@ -82,21 +82,26 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
   }
 
   async getPlayerByGameId(gameId: string): Promise<PlayerIdDb[]> {
-    const game = await this.quizGameModel
-      .findOne({
-        _id: new ObjectId(gameId),
-      })
-      .select({
-        _id: 0,
-        'firstPlayerProgress.player.id': 1,
-        'secondPlayerProgress.player.id': 1,
-      });
+    try {
+      const game = await this.quizGameModel
+          .findOne({
+            _id: new ObjectId(gameId),
+          })
+          .select({
+            _id: 0,
+            'firstPlayerProgress.player.id': 1,
+            'secondPlayerProgress.player.id': 1,
+          });
 
-    const result = [new PlayerIdDb(game.firstPlayerProgress.player.id)];
-    if (game.secondPlayerProgress)
-      result.push(new PlayerIdDb(game.secondPlayerProgress.player.id));
+      if (!game) return []
+      const result = [new PlayerIdDb(game.firstPlayerProgress.player.id)];
+      if (game.secondPlayerProgress)
+        result.push(new PlayerIdDb(game.secondPlayerProgress.player.id));
 
-    return result;
+      return result;
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   async getCorrectAnswers(
@@ -199,8 +204,7 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
       const result = await this.quizGameModel
         .findOne({ _id: new ObjectId(gameId) })
         .select({ firstPlayerProgress: 1, secondPlayerProgress: 1 });
-      // console.log(userId)
-      // console.log(result)
+
       if (result.firstPlayerProgress.player.id === userId) {
         return result.firstPlayerProgress.answers.length;
       }

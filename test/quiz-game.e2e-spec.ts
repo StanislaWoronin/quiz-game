@@ -25,7 +25,7 @@ import { expectPagination } from './helpers/expect-data/expect-pagination';
 import { SortByGameField } from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
 import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
 import { TopPlayersSortField } from '../src/modules/public/pair-quiz-game/api/dto/query/top-players-sort-field';
-import { sleep } from './helpers/helpers';
+import {getRandomId, sleep} from './helpers/helpers';
 import { preparedAnswer } from './helpers/prepeared-data/prepared-answer';
 import { settings } from '../src/settings';
 
@@ -235,221 +235,6 @@ describe('/sa/quiz/questions (e2e)', () => {
     },
   );
 
-  describe('Game over if one player don`t answered all the questions', () => {
-    beforeAll(async () => {
-      await testing.clearDb();
-      await questionsFactories.createQuestions(
-        preparedGameData.length,
-        preparedGameData,
-      );
-
-      const [firstPlayer, secondPlayer] =
-        await usersFactory.createAndLoginUsers(2);
-
-      expect.setState({ firstPlayer, secondPlayer });
-    });
-
-    const timer = Number(settings.gameRules.timeLimit);
-
-    it(
-      'Create game by user1, connect to game by user2. Add 5 correct answers by user1. ' +
-        'Await 10 sec. Get game by user1. Should return finished game - status: "Finished", ' +
-        'firstPlayerProgress.score: 6, secondPlayerProgress.score: 0, finishGameDate: not to be ' +
-        'null; status 200',
-      async () => {
-        const [fistPlayer, secondPlayer] = [
-          expect.getState().firstPlayer,
-          expect.getState().secondPlayer,
-        ];
-        const activeGame = await gameFactory.createGame(
-          fistPlayer,
-          secondPlayer,
-        );
-        const questions = activeGame.body.questions;
-
-        await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
-          1: AnswerStatus.Correct,
-          2: AnswerStatus.Correct,
-          3: AnswerStatus.Correct,
-          4: AnswerStatus.Correct,
-          5: AnswerStatus.Correct,
-        });
-
-        await sleep(timer);
-
-        const finishedGame = await game.getGameById(
-          activeGame.body.id,
-          fistPlayer.accessToken,
-        );
-        expect(finishedGame.status).toBe(HttpStatus.OK);
-        expect(finishedGame.body.status).toBe(GameStatus.Finished);
-        expect(finishedGame.body.finishGameDate).toBeDefined();
-        expect(finishedGame.body.firstPlayerProgress.score).toBe(6);
-        expect(finishedGame.body.secondPlayerProgress.score).toBe(0);
-      },
-    );
-
-    it(
-      'Create game by user1, connect to game by user2. Add 3 correct answers by user2. ' +
-        'Add 5 correct answers by user1. Await 10 sec. Call "/pair-game-quiz/pairs/my-current" ' +
-        'endpoint by user2. Should return status 404. Get game by user1. Should return finished ' +
-        'game - status: "Finished", firstPlayerProgress.score: 6, secondPlayerProgress.score: 3, ' +
-        'finishGameDate: not to be null; status 200',
-      async () => {
-        const [fistPlayer, secondPlayer] = [
-          expect.getState().firstPlayer,
-          expect.getState().secondPlayer,
-        ];
-        const activeGame = await gameFactory.createGame(
-          fistPlayer,
-          secondPlayer,
-        );
-        const questions = activeGame.body.questions;
-
-        await gameFactory.sendManyAnswer(secondPlayer.accessToken, questions, {
-          1: AnswerStatus.Correct,
-          2: AnswerStatus.Correct,
-          3: AnswerStatus.Correct,
-        });
-        await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
-          1: AnswerStatus.Correct,
-          2: AnswerStatus.Correct,
-          3: AnswerStatus.Correct,
-          4: AnswerStatus.Correct,
-          5: AnswerStatus.Correct,
-        });
-
-        const currentGame = await game.getMyCurrentGame(
-          secondPlayer.accessToken,
-        );
-        expect(currentGame.body).toBeDefined();
-
-        await sleep(timer);
-
-        const myCurrentGame = await game.getMyCurrentGame(
-          secondPlayer.accessToken,
-        );
-        expect(myCurrentGame.status).toBe(HttpStatus.NOT_FOUND);
-
-        const finishedGame = await game.getGameById(
-          activeGame.body.id,
-          fistPlayer.accessToken,
-        );
-        expect(finishedGame.status).toBe(HttpStatus.OK);
-        expect(finishedGame.body.status).toBe(GameStatus.Finished);
-        expect(finishedGame.body.finishGameDate).toBeDefined();
-        expect(finishedGame.body.firstPlayerProgress.score).toBe(6);
-        expect(finishedGame.body.secondPlayerProgress.score).toBe(3);
-        expect(finishedGame.body.secondPlayerProgress.answers).toEqual([
-          expectAnswer(AnswerStatus.Correct),
-          expectAnswer(AnswerStatus.Correct),
-          expectAnswer(AnswerStatus.Correct),
-          expectAnswer(AnswerStatus.Incorrect, false),
-          expectAnswer(AnswerStatus.Incorrect, false),
-        ]);
-      },
-    );
-
-    it(
-      'Create game1 by user1, connect to game by user2. Add 3 incorrect answers by user2. ' +
-        'Add 4 correct answers by user1. Create game2 by user3, connect to game by user4. Add 5 ' +
-        'correct answers by user3. Add 2 correct answers by user4. Add 2 correct answers by user2. ' +
-        'Await 10 sec. Get game1 by user2. Should return finished game - status: "Finished", ' +
-        'firstPlayerProgress.score: 4, secondPlayerProgress.score: 3, finishGameDate: not to be null. ' +
-        'Get game2 by user3. Should return finished game - status: "Finished", ' +
-        'firstPlayerProgress.score: 6, secondPlayerProgress.score: 2, finishGameDate: not to be null. ' +
-        'status 200',
-      async () => {
-        const [fistPlayer, secondPlayer] = [
-          expect.getState().firstPlayer,
-          expect.getState().secondPlayer,
-        ];
-        const fistGame = await gameFactory.createGame(fistPlayer, secondPlayer);
-        const fistGameQuestions = fistGame.body.questions;
-
-        await gameFactory.sendManyAnswer(
-          secondPlayer.accessToken,
-          fistGameQuestions,
-          {
-            1: AnswerStatus.Incorrect,
-            2: AnswerStatus.Incorrect,
-            3: AnswerStatus.Incorrect,
-          },
-        );
-        await gameFactory.sendManyAnswer(
-          fistPlayer.accessToken,
-          fistGameQuestions,
-          {
-            1: AnswerStatus.Correct,
-            2: AnswerStatus.Correct,
-            3: AnswerStatus.Correct,
-            4: AnswerStatus.Correct,
-          },
-        );
-
-        const [thirdPlayer, fourthPlayer] =
-          await usersFactory.createAndLoginUsers(2, 7);
-        const secondGame = await gameFactory.createGame(
-          thirdPlayer,
-          fourthPlayer,
-        );
-        const secondGameQuestions = secondGame.body.questions;
-
-        await gameFactory.sendManyAnswer(
-          fourthPlayer.accessToken,
-          secondGameQuestions,
-          {
-            1: AnswerStatus.Correct,
-            2: AnswerStatus.Correct,
-          },
-        );
-
-        await gameFactory.sendManyAnswer(
-          thirdPlayer.accessToken,
-          secondGameQuestions,
-          {
-            1: AnswerStatus.Correct,
-            2: AnswerStatus.Correct,
-            3: AnswerStatus.Correct,
-            4: AnswerStatus.Correct,
-            5: AnswerStatus.Correct,
-          },
-        );
-
-        await gameFactory.sendManyAnswer(
-          secondPlayer.accessToken,
-          fistGameQuestions,
-          {
-            4: AnswerStatus.Correct,
-            5: AnswerStatus.Correct,
-          },
-        );
-
-        await sleep(timer);
-
-        const finishedFistGame = await game.getGameById(
-          fistGame.body.id,
-          secondPlayer.accessToken,
-        );
-        expect(finishedFistGame.status).toBe(HttpStatus.OK);
-        expect(finishedFistGame.body.status).toBe(GameStatus.Finished);
-        expect(finishedFistGame.body.finishGameDate).toBeDefined();
-        expect(finishedFistGame.body.firstPlayerProgress.score).toBe(4);
-        expect(finishedFistGame.body.secondPlayerProgress.score).toBe(3);
-
-        const finishedSecondGame = await game.getGameById(
-          secondGame.body.id,
-          thirdPlayer.accessToken,
-        );
-        expect(finishedSecondGame.status).toBe(HttpStatus.OK);
-        expect(finishedSecondGame.body.status).toBe(GameStatus.Finished);
-        expect(finishedSecondGame.body.finishGameDate).toBeDefined();
-        expect(finishedSecondGame.body.firstPlayerProgress.score).toBe(6);
-        expect(finishedSecondGame.body.secondPlayerProgress.score).toBe(2);
-      },
-    );
-  });
-
   describe('GET -> "pair-game-quiz/pair/:gameId"', () => {
     it('Clear data base', async () => {
       await testing.clearDb();
@@ -477,7 +262,7 @@ describe('/sa/quiz/questions (e2e)', () => {
 
     it('Shouldn`t return game if specifical id not found', async () => {
       const { firstUser } = expect.getState();
-      const randomId = randomUUID();
+      const randomId = getRandomId();
 
       const response = await game.getGameById(randomId, firstUser.accessToken);
       expect(response.status).toBe(HttpStatus.NOT_FOUND);
@@ -1055,7 +840,7 @@ describe('/sa/quiz/questions (e2e)', () => {
     );
 
     describe(
-      'The first player went faster, but gave zero correct answers. The second' +
+      'The first player went faster, but give zero correct answers. The second' +
         'player gave one correct answer. Second player wins',
       () => {
         it('Clear data base', async () => {
@@ -1111,6 +896,7 @@ describe('/sa/quiz/questions (e2e)', () => {
             gameId,
             firstUser.accessToken,
           );
+
           expect(response.body).toStrictEqual(
             expectViewGame(
               {
@@ -2292,4 +2078,219 @@ describe('/sa/quiz/questions (e2e)', () => {
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
     });
   });
+
+  describe('Game over if one player don`t answered all the questions', () => {
+        beforeAll(async () => {
+            await testing.clearDb();
+            await questionsFactories.createQuestions(
+                preparedGameData.length,
+                preparedGameData,
+            );
+
+            const [firstPlayer, secondPlayer] =
+                await usersFactory.createAndLoginUsers(2);
+
+            expect.setState({ firstPlayer, secondPlayer });
+        });
+
+        const timer = Number(settings.gameRules.timeLimit);
+
+        it(
+            'Create game by user1, connect to game by user2. Add 5 correct answers by user1. ' +
+            'Await 10 sec. Get game by user1. Should return finished game - status: "Finished", ' +
+            'firstPlayerProgress.score: 6, secondPlayerProgress.score: 0, finishGameDate: not to be ' +
+            'null; status 200',
+            async () => {
+                const [fistPlayer, secondPlayer] = [
+                    expect.getState().firstPlayer,
+                    expect.getState().secondPlayer,
+                ];
+                const activeGame = await gameFactory.createGame(
+                    fistPlayer,
+                    secondPlayer,
+                );
+                const questions = activeGame.body.questions;
+
+                await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
+                    1: AnswerStatus.Correct,
+                    2: AnswerStatus.Correct,
+                    3: AnswerStatus.Correct,
+                    4: AnswerStatus.Correct,
+                    5: AnswerStatus.Correct,
+                });
+
+                await sleep(timer);
+
+                const finishedGame = await game.getGameById(
+                    activeGame.body.id,
+                    fistPlayer.accessToken,
+                );
+                expect(finishedGame.status).toBe(HttpStatus.OK);
+                expect(finishedGame.body.status).toBe(GameStatus.Finished);
+                expect(finishedGame.body.finishGameDate).toBeDefined();
+                expect(finishedGame.body.firstPlayerProgress.score).toBe(6);
+                expect(finishedGame.body.secondPlayerProgress.score).toBe(0);
+            },
+        );
+
+        it(
+            'Create game by user1, connect to game by user2. Add 3 correct answers by user2. ' +
+            'Add 5 correct answers by user1. Await 10 sec. Call "/pair-game-quiz/pairs/my-current" ' +
+            'endpoint by user2. Should return status 404. Get game by user1. Should return finished ' +
+            'game - status: "Finished", firstPlayerProgress.score: 6, secondPlayerProgress.score: 3, ' +
+            'finishGameDate: not to be null; status 200',
+            async () => {
+                const [fistPlayer, secondPlayer] = [
+                    expect.getState().firstPlayer,
+                    expect.getState().secondPlayer,
+                ];
+                const activeGame = await gameFactory.createGame(
+                    fistPlayer,
+                    secondPlayer,
+                );
+                const questions = activeGame.body.questions;
+
+                await gameFactory.sendManyAnswer(secondPlayer.accessToken, questions, {
+                    1: AnswerStatus.Correct,
+                    2: AnswerStatus.Correct,
+                    3: AnswerStatus.Correct,
+                });
+                await gameFactory.sendManyAnswer(fistPlayer.accessToken, questions, {
+                    1: AnswerStatus.Correct,
+                    2: AnswerStatus.Correct,
+                    3: AnswerStatus.Correct,
+                    4: AnswerStatus.Correct,
+                    5: AnswerStatus.Correct,
+                });
+
+                const currentGame = await game.getMyCurrentGame(
+                    secondPlayer.accessToken,
+                );
+                expect(currentGame.body).toBeDefined();
+
+                await sleep(timer);
+
+                const myCurrentGame = await game.getMyCurrentGame(
+                    secondPlayer.accessToken,
+                );
+                expect(myCurrentGame.status).toBe(HttpStatus.NOT_FOUND);
+
+                const finishedGame = await game.getGameById(
+                    activeGame.body.id,
+                    fistPlayer.accessToken,
+                );
+                expect(finishedGame.status).toBe(HttpStatus.OK);
+                expect(finishedGame.body.status).toBe(GameStatus.Finished);
+                expect(finishedGame.body.finishGameDate).toBeDefined();
+                expect(finishedGame.body.firstPlayerProgress.score).toBe(6);
+                expect(finishedGame.body.secondPlayerProgress.score).toBe(3);
+                expect(finishedGame.body.secondPlayerProgress.answers).toEqual([
+                    expectAnswer(AnswerStatus.Correct),
+                    expectAnswer(AnswerStatus.Correct),
+                    expectAnswer(AnswerStatus.Correct),
+                    expectAnswer(AnswerStatus.Incorrect, false),
+                    expectAnswer(AnswerStatus.Incorrect, false),
+                ]);
+            },
+        );
+
+        it(
+            'Create game1 by user1, connect to game by user2. Add 3 incorrect answers by user2. ' +
+            'Add 4 correct answers by user1. Create game2 by user3, connect to game by user4. Add 5 ' +
+            'correct answers by user3. Add 2 correct answers by user4. Add 2 correct answers by user2. ' +
+            'Await 10 sec. Get game1 by user2. Should return finished game - status: "Finished", ' +
+            'firstPlayerProgress.score: 4, secondPlayerProgress.score: 3, finishGameDate: not to be null. ' +
+            'Get game2 by user3. Should return finished game - status: "Finished", ' +
+            'firstPlayerProgress.score: 6, secondPlayerProgress.score: 2, finishGameDate: not to be null. ' +
+            'status 200',
+            async () => {
+                const [fistPlayer, secondPlayer] = [
+                    expect.getState().firstPlayer,
+                    expect.getState().secondPlayer,
+                ];
+                const fistGame = await gameFactory.createGame(fistPlayer, secondPlayer);
+                const fistGameQuestions = fistGame.body.questions;
+
+                await gameFactory.sendManyAnswer(
+                    secondPlayer.accessToken,
+                    fistGameQuestions,
+                    {
+                        1: AnswerStatus.Incorrect,
+                        2: AnswerStatus.Incorrect,
+                        3: AnswerStatus.Incorrect,
+                    },
+                );
+                await gameFactory.sendManyAnswer(
+                    fistPlayer.accessToken,
+                    fistGameQuestions,
+                    {
+                        1: AnswerStatus.Correct,
+                        2: AnswerStatus.Correct,
+                        3: AnswerStatus.Correct,
+                        4: AnswerStatus.Correct,
+                    },
+                );
+
+                const [thirdPlayer, fourthPlayer] =
+                    await usersFactory.createAndLoginUsers(2, 7);
+                const secondGame = await gameFactory.createGame(
+                    thirdPlayer,
+                    fourthPlayer,
+                );
+                const secondGameQuestions = secondGame.body.questions;
+
+                await gameFactory.sendManyAnswer(
+                    fourthPlayer.accessToken,
+                    secondGameQuestions,
+                    {
+                        1: AnswerStatus.Correct,
+                        2: AnswerStatus.Correct,
+                    },
+                );
+
+                await gameFactory.sendManyAnswer(
+                    thirdPlayer.accessToken,
+                    secondGameQuestions,
+                    {
+                        1: AnswerStatus.Correct,
+                        2: AnswerStatus.Correct,
+                        3: AnswerStatus.Correct,
+                        4: AnswerStatus.Correct,
+                        5: AnswerStatus.Correct,
+                    },
+                );
+
+                await gameFactory.sendManyAnswer(
+                    secondPlayer.accessToken,
+                    fistGameQuestions,
+                    {
+                        4: AnswerStatus.Correct,
+                        5: AnswerStatus.Correct,
+                    },
+                );
+
+                await sleep(timer);
+
+                const finishedFistGame = await game.getGameById(
+                    fistGame.body.id,
+                    secondPlayer.accessToken,
+                );
+                expect(finishedFistGame.status).toBe(HttpStatus.OK);
+                expect(finishedFistGame.body.status).toBe(GameStatus.Finished);
+                expect(finishedFistGame.body.finishGameDate).toBeDefined();
+                expect(finishedFistGame.body.firstPlayerProgress.score).toBe(4);
+                expect(finishedFistGame.body.secondPlayerProgress.score).toBe(3);
+
+                const finishedSecondGame = await game.getGameById(
+                    secondGame.body.id,
+                    thirdPlayer.accessToken,
+                );
+                expect(finishedSecondGame.status).toBe(HttpStatus.OK);
+                expect(finishedSecondGame.body.status).toBe(GameStatus.Finished);
+                expect(finishedSecondGame.body.finishGameDate).toBeDefined();
+                expect(finishedSecondGame.body.firstPlayerProgress.score).toBe(6);
+                expect(finishedSecondGame.body.secondPlayerProgress.score).toBe(2);
+            },
+        );
+    });
 });
