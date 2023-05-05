@@ -8,8 +8,8 @@ export class ParamsId {
   @Transform(({ value }) => {
     try {
       if (isUUID(value) || isValidObjectId(new ObjectId(value))) {
-        return value
-      };
+        return value;
+      }
       throw new BadRequestException();
     } catch (e) {
       throw new BadRequestException();

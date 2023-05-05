@@ -84,23 +84,23 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
   async getPlayerByGameId(gameId: string): Promise<PlayerIdDb[]> {
     try {
       const game = await this.quizGameModel
-          .findOne({
-            _id: new ObjectId(gameId),
-          })
-          .select({
-            _id: 0,
-            'firstPlayerProgress.player.id': 1,
-            'secondPlayerProgress.player.id': 1,
-          });
+        .findOne({
+          _id: new ObjectId(gameId),
+        })
+        .select({
+          _id: 0,
+          'firstPlayerProgress.player.id': 1,
+          'secondPlayerProgress.player.id': 1,
+        });
 
-      if (!game) return []
+      if (!game) return [];
       const result = [new PlayerIdDb(game.firstPlayerProgress.player.id)];
       if (game.secondPlayerProgress)
         result.push(new PlayerIdDb(game.secondPlayerProgress.player.id));
 
       return result;
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
 
