@@ -19,7 +19,6 @@ import { GameStatus } from '../src/modules/public/pair-quiz-game/shared/game-sta
 import { AnswerStatus } from '../src/modules/public/pair-quiz-game/shared/answer-status';
 import { preparedGameData } from './helpers/prepeared-data/prepared-game-data';
 import { GameFactory } from './helpers/factories/game-factory';
-import { randomUUID } from 'crypto';
 import { faker } from '@faker-js/faker';
 import { expectPagination } from './helpers/expect-data/expect-pagination';
 import { SortByGameField } from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
