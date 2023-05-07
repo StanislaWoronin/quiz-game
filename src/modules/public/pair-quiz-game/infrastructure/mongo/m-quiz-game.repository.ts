@@ -152,13 +152,11 @@ export class MQuizGameRepository implements IQuizGameRepository {
           game.status = GameStatus.Finished;
           game.finishGameDate = new Date().toISOString();
 
-          const extraScore = 1;
-          const fistAnsweredPlayerScore =
-            fistPlayer.player.id === dto.userId
-              ? secondPlayer.score
-              : fistPlayer.score;
-          if (fistAnsweredPlayerScore != 0) {
-            game.firstPlayerProgress.score += extraScore;
+          const extraPoint = 1;
+          if (fistPlayer.player.id === dto.userId) {
+            secondPlayer.score += extraPoint;
+          } else {
+            fistPlayer.score += extraPoint;
           }
 
           let winner = fistPlayer;
@@ -174,7 +172,7 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
           if (itDraw) {
             await this.userModel
-              .updateOne(
+              .updateMany(
                 {
                   _id: {
                     $in: [
@@ -184,11 +182,11 @@ export class MQuizGameRepository implements IQuizGameRepository {
                   },
                 },
                 {
-                  $inc: [
-                    { 'statistic.drawsCount': 1 },
-                    { 'statistic.gamesCount': 1 },
-                    { 'statistic.sumScore': winner.score },
-                  ],
+                  $inc: {
+                    'statistic.drawsCount': 1,
+                    'statistic.gamesCount': 1,
+                    'statistic.sumScore': winner.score,
+                  },
                 },
               )
               .session(session);
@@ -197,11 +195,11 @@ export class MQuizGameRepository implements IQuizGameRepository {
               .updateOne(
                 { _id: new ObjectId(winner.player.id) },
                 {
-                  $inc: [
-                    { 'statistic.winsCount': 1 },
-                    { 'statistic.gamesCount': 1 },
-                    { 'statistic.sumScore': winner.score },
-                  ],
+                  $inc: {
+                    'statistic.winsCount': 1,
+                    'statistic.gamesCount': 1,
+                    'statistic.sumScore': winner.score,
+                  },
                 },
               )
               .session(session);

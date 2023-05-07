@@ -3,11 +3,10 @@ import { IQuizGameQueryRepository } from '../i-quiz-game-query.repository';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
 import { MongoQuizGame, QuizGameDocument } from './schema/quiz-game.schema';
-import { GameQueryDto } from '../../api/dto/query/game-query.dto';
 import { ViewPage } from '../../../../../common/pagination/view-page';
 import { ViewGame } from '../../api/view/view-game';
 import { GameStatus } from '../../shared/game-status';
-import { ObjectId, WithId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import { PlayerIdDb } from '../sql/pojo/player-id.db';
 import { GetCorrectAnswerDb } from '../sql/pojo/get-correct-answer.db';
 import {
@@ -21,7 +20,7 @@ import {
   MongoUsers,
   UsersDocument,
 } from '../../../../sa/users/infrastructure/mongoose/schema/user.schema';
-import { logger } from '../../../../../../test/helpers/helpers';
+import { GameQueryDto } from '../../api/dto/query/game-query.dto';
 
 @Injectable()
 export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
@@ -39,14 +38,17 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
     userId: string,
     queryDto: GameQueryDto,
   ): Promise<ViewPage<ViewGame>> {
-    const myGameFilter = { status: { $ne: GameStatus.PendingSecondPlayer } };
+    const filter = this.getFilter(userId, GameStatus.PendingSecondPlayer);
+
     const games = await this.quizGameModel
-      .find(myGameFilter)
+      .find(filter)
+      .sort([[queryDto.sortBy, queryDto.sortDirection]])
+      //.sort({ [queryDto.sortBy]: queryDto.sortDirection === 'asc' ? 1 : -1 })
       .skip(queryDto.skip)
       .limit(queryDto.pageSize);
 
     const items = games.map((g) => MongoQuizGame.gameWithId(g));
-    const totalCount = await this.quizGameModel.countDocuments(myGameFilter);
+    const totalCount = await this.quizGameModel.countDocuments(filter);
 
     return new ViewPage<ViewGame>({
       items,
@@ -56,17 +58,8 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
   }
 
   async getMyCurrentGame(userId: string): Promise<ViewGame | null> {
-    const currentGame = await this.quizGameModel.findOne({
-      $and: [
-        {
-          $or: [
-            { 'firstPlayerProgress.player.id': userId },
-            { 'secondPlayerProgress.player.id': userId },
-          ],
-        },
-        { status: { $ne: GameStatus.Finished } },
-      ],
-    });
+    const filter = this.getFilter(userId, GameStatus.Finished);
+    const currentGame = await this.quizGameModel.findOne(filter);
 
     if (!currentGame) return null;
     return ViewGame.withId(currentGame);
@@ -143,9 +136,9 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
   async getUserStatistic(userId: string): Promise<ViewUserStatistic> {
     const statistic = await this.userModel
       .findOne({ _id: new ObjectId(userId) })
-      .select({ statistic: 1 });
-    // @ts-ignore
-    return statistic;
+      .select({ _id: 0, statistic: 1 });
+
+    return ViewUserStatistic.mongoStatistic(statistic.statistic);
   }
 
   async getTopPlayers(
@@ -156,6 +149,7 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
       { $sort: sortFilter },
       { $skip: query.skip },
       { $limit: query.pageSize },
+      { $project },
     ]);
     console.log(topPlayers, 'getTopPlayers');
     // @ts-ignore
@@ -166,21 +160,14 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
     userId: string,
     status?: GameStatus,
   ): Promise<string | null> {
-    let filter: any = { status: { $ne: GameStatus.Finished } };
+    let gameStatusFilter: any = { status: { $ne: GameStatus.Finished } };
     if (status) {
-      filter = { status: status };
+      gameStatusFilter = { status: status };
     }
+    const userIdFilter = this.getFilterByUserId(userId);
 
     const game = await this.quizGameModel.exists({
-      $and: [
-        {
-          $or: [
-            { 'firstPlayerProgress.player.id': userId },
-            { 'secondPlayerProgress.player.id': userId },
-          ],
-        },
-        filter,
-      ],
+      $and: [userIdFilter, gameStatusFilter],
     });
 
     if (!game) return null;
@@ -230,5 +217,23 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
     }
 
     return result;
+  }
+
+  private getFilterByUserId(userId: string) {
+    return {
+      $or: [
+        { 'firstPlayerProgress.player.id': userId },
+        { 'secondPlayerProgress.player.id': userId },
+      ],
+    };
+  }
+
+  private getFilter(userId: string, status?: GameStatus) {
+    const gameStatusFilter = { status: { $ne: status } };
+
+    const filterByUserId = this.getFilterByUserId(userId);
+    return {
+      $and: [filterByUserId, gameStatusFilter],
+    };
   }
 }

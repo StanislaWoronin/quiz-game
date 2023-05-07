@@ -4,7 +4,7 @@ import { MongoUserBanInfo } from './user-ban-info.schema';
 import { MongoEmailConfirmation } from './email-confirmation.schema';
 import { CreateUserDto } from '../../../api/dto/create-user.dto';
 import { EmailConfirmationDto } from '../../../applications/dto/email-confirmation.dto';
-import { Statistic } from './statistic.type';
+import { Statistic, StatisticSchema } from './statistic.type';
 import { WithId } from 'mongodb';
 
 @Schema({ versionKey: false })
@@ -44,7 +44,7 @@ export class MongoUsers {
   emailConfirmation: MongoEmailConfirmation;
 
   @Prop({
-    type: Statistic,
+    type: StatisticSchema,
     default: new Statistic(),
   })
   statistic: Statistic;
