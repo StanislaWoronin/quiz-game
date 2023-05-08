@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Statistic } from '../../../../sa/users/infrastructure/mongoose/schema/statistic.type';
 
 export class ViewUserStatistic {
   @ApiProperty()
@@ -22,13 +23,7 @@ export class ViewUserStatistic {
     return avg;
   }
 
-  static mongoStatistic(stat: {
-    sumScore: number;
-    gamesCount: number;
-    winsCount: number;
-    lossesCount: number;
-    drawsCount: number;
-  }): ViewUserStatistic {
+  static mongoStatistic(stat: Statistic): ViewUserStatistic {
     return {
       sumScore: stat.sumScore,
       avgScores: this.avg(stat.sumScore, stat.gamesCount) ?? 0,

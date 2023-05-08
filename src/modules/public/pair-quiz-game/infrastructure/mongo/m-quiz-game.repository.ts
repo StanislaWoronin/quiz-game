@@ -236,53 +236,62 @@ export class MQuizGameRepository implements IQuizGameRepository {
 
     try {
       await session.withTransaction(async () => {
-        const tenSecondsAgo = new Date(Date.now() - 10 * 1000);
-
         const games = await this.quizGameModel.aggregate([
           {
             $match: {
               $or: [
                 {
-                  'firstPlayerProgress.answers.addedAt': { $lt: tenSecondsAgo },
                   'firstPlayerProgress.answers': { $size: 5 },
+                  status: GameStatus.Active,
                 },
                 {
-                  'secondPlayerProgress.answers.addedAt': {
-                    $lt: tenSecondsAgo,
-                  },
                   'secondPlayerProgress.answers': { $size: 5 },
+                  status: GameStatus.Active,
                 },
               ],
             },
           },
         ]);
 
-        if (!games.length) return;
+        if (!games.length) return [];
 
         for (const game of games) {
           const playerAnswerProgress =
-            game.firstPlayerProgress.answers.length !==
+            game.firstPlayerProgress.answers.length <
             Number(settings.gameRules.questionsCount)
               ? game.firstPlayerProgress
               : game.secondPlayerProgress;
           const opponent =
             game.firstPlayerProgress.answers.length ===
-            settings.gameRules.questionsCount
+            Number(settings.gameRules.questionsCount)
               ? game.firstPlayerProgress
               : game.secondPlayerProgress;
-          const unansweredQuestions = game.questions.slice(
-            playerAnswerProgress.answers.length - 1,
-          );
+
+          const timeLastOpponentAnswer =
+            opponent.answers[Number(settings.gameRules.questionsCount) - 1]
+              .addedAt;
+
+          if (
+            new Date().getTime() - new Date(timeLastOpponentAnswer).getTime() <
+            (Number(settings.gameRules.timeLimit) - 1) * 1000
+          ) {
+            return;
+          }
+
+          const answeredQuestions = playerAnswerProgress.answers.length;
+          const unansweredQuestions = game.questions.slice(answeredQuestions);
           const answers = unansweredQuestions.map(
-            (q) =>
-              new SqlUserAnswer(
-                game.secondAnsweredPlayerId,
-                game.gameId,
-                q.id,
-                null,
-              ),
+            (q) => new ViewAnswer(q.id, AnswerStatus.Incorrect, null),
           );
-          playerAnswerProgress.answers.concat(answers);
+
+          if (
+            playerAnswerProgress.player.id ===
+            game.firstPlayerProgress.player.id
+          ) {
+            game.firstPlayerProgress.answers.push(...answers);
+          } else {
+            game.secondPlayerProgress.answers.push(...answers);
+          }
           game.status = GameStatus.Finished;
           game.finishGameDate = new Date().toISOString();
 
@@ -290,10 +299,13 @@ export class MQuizGameRepository implements IQuizGameRepository {
           if (opponent.score !== 0) {
             opponent.score += extraScore;
           }
-          await game.save({ session });
+
+          await this.quizGameModel.updateOne({ _id: game._id }, { $set: game });
         }
         return;
       });
+    } catch (e) {
+      console.log(e);
     } finally {
       await session.endSession();
       return null;

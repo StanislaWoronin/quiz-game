@@ -149,11 +149,14 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
       { $sort: sortFilter },
       { $skip: query.skip },
       { $limit: query.pageSize },
-      { $project },
+      { $project: { _id: 1, login: 1, statistic: 1 } },
     ]);
-    console.log(topPlayers, 'getTopPlayers');
-    // @ts-ignore
-    return topPlayers;
+    const items = topPlayers.map((t) => ViewTopPlayers.mongoTopPlayer(t));
+    const totalCount = await this.userModel
+      .find({ 'statistic.gamesCount': { $ne: 0 } })
+      .countDocuments();
+
+    return new ViewPage({ items, query, totalCount });
   }
 
   async checkUserCurrentGame(
@@ -213,7 +216,7 @@ export class MQuizGameQueryRepository implements IQuizGameQueryRepository {
     const result = {};
     for (const parametr of parametrs) {
       const [field, direction] = parametr.split(' ');
-      result[field] = direction === 'asc' ? 1 : -1;
+      result[`statistic.${field}`] = direction === 'asc' ? 1 : -1;
     }
 
     return result;

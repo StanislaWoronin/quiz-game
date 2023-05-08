@@ -1963,7 +1963,7 @@ describe('/sa/quiz/questions (e2e)', () => {
       });
     },
   );
-  // TODO
+
   describe('GET -> Top players', () => {
     it('Clear data base', async () => {
       await testing.clearDb();
@@ -1982,6 +1982,14 @@ describe('/sa/quiz/questions (e2e)', () => {
     it('Return statistic without pagination', async () => {
       const { gamesStat } = expect.getState();
 
+      console.log(
+        gamesStat.map((s) => {
+          return {
+            avgScores: s.avgScores,
+            sumScore: s.sumScore,
+          };
+        }),
+      );
       const expectStats = gameFactory.sortStats(gamesStat, [
         TopPlayersSortField.AvgScoresDESC,
         TopPlayersSortField.SumScoreDESC,
@@ -2010,7 +2018,14 @@ describe('/sa/quiz/questions (e2e)', () => {
         pageNumber: 2,
         pageSize: 3,
       });
-
+      console.log(
+        response.body.items.map((s) => {
+          return {
+            lossesCount: s.lossesCount,
+            gamesCount: s.gamesCount,
+          };
+        }),
+      );
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toEqual(
         expectPagination([expectStats[3], expectStats[4]], {
@@ -2031,7 +2046,13 @@ describe('/sa/quiz/questions (e2e)', () => {
       const response = await game.getTopPlayers({
         sort: [TopPlayersSortField.AvgScoresDESC],
       });
-
+      console.log(
+        response.body.items.map((s) => {
+          return {
+            avgScores: s.avgScores,
+          };
+        }),
+      );
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toEqual(
         expectPagination(expectStats, { totalCount: 5 }),
@@ -2054,7 +2075,14 @@ describe('/sa/quiz/questions (e2e)', () => {
         pageNumber: 2,
         pageSize: 3,
       });
-
+      console.log(
+        response.body.items.map((s) => {
+          return {
+            lossesCount: s.lossesCount,
+            gamesCount: s.gamesCount,
+          };
+        }),
+      );
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toEqual(
         expectPagination([expectStats[3], expectStats[4]], {
