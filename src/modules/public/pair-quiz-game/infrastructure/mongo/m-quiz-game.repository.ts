@@ -312,6 +312,7 @@ export class MQuizGameRepository implements IQuizGameRepository {
     }
   }
 
+  // not realise
   async forceGameOverTimeOut(event: DelayedForceGameOverEvent) {
     const session: ClientSession = await this.connection.startSession();
 
