@@ -16,11 +16,13 @@ import { expectPagination } from './helpers/expect-data/expect-pagination';
 import { CreatedQuestions } from '../src/modules/sa/questions/api/view/created-questions';
 import { getErrorMessage } from './helpers/routing/errors-messages';
 import { getRandomId } from './helpers/helpers';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
   jest.setTimeout(5 * second);
 
+  let mms: MongoMemoryServer;
   let app: INestApplication;
   let server;
   let questionsFactories: QuestionsFactory;
@@ -28,6 +30,12 @@ describe('/sa/quiz/questions (e2e)', () => {
   let testing: Testing;
 
   beforeAll(async () => {
+    // if (settings.currentRepository === 'mongo') {
+    //   mms = await MongoMemoryServer.create();
+    //   const mongoUrl = mms.getUri();
+    //   process.env['mongoURI'] = mongoUrl;
+    // }
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();

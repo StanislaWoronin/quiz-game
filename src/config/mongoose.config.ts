@@ -22,6 +22,7 @@ export class MongooseConfig implements MongooseOptionsFactory {
   }
 
   createMongooseOptions(): MongooseModuleOptions {
+    console.log(this.getUrl());
     return {
       uri: this.getUrl(),
     };

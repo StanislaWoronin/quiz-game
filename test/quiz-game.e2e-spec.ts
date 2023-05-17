@@ -27,11 +27,13 @@ import { preparedAnswer } from './helpers/prepeared-data/prepared-answer';
 import { settings } from '../src/settings';
 import { SortByGameField } from '../src/modules/public/pair-quiz-game/api/dto/query/games-sort-field';
 import { SortDirection } from '../src/common/pagination/query-parameters/sort-direction';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('/sa/quiz/questions (e2e)', () => {
   const second = 1000;
   jest.setTimeout(200 * second);
 
+  let mms: MongoMemoryServer;
   let app: INestApplication;
   let server;
   let auth: Auth;
@@ -44,6 +46,12 @@ describe('/sa/quiz/questions (e2e)', () => {
   let usersFactory: UsersFactory;
 
   beforeAll(async () => {
+    if (settings.currentRepository === 'mongo') {
+      mms = await MongoMemoryServer.create();
+      const mongoUrl = mms.getUri();
+      process.env['MONGO_URI'] = mongoUrl;
+      process.env['MONGO_LOCAL_URI'] = mongoUrl;
+    }
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -1883,7 +1891,7 @@ describe('/sa/quiz/questions (e2e)', () => {
         },
       );
 
-      it.skip('Start new game by fist player and return games with pagination', async () => {
+      it('Start new game by fist player and return games with pagination', async () => {
         const {
           firstPlayer,
           thirdPlayer,
